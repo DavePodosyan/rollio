@@ -33,6 +33,15 @@
           "backgroundColor": "#ffffff"
         }
       ]
+      // [
+      //   "expo-font",
+      //   {
+      //     "fonts": [
+      //       "./assets/fonts/Lufga-Regular.ttf",
+      //       "./assets/fonts/Lufga-Medium.ttf"
+      //     ]
+      //   }
+      // ]
     ],
     "experiments": {
       "typedRoutes": true
