@@ -25,32 +25,21 @@ export default function RootLayout() {
 
   return (
 
-    <View style={{ flex: 1, backgroundColor: "#09090B" }}>
-      <ImageBackground
-        source={require("../assets/images/background.png")}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
-        <Stack
+    <>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: {
+            backgroundColor: "#09090B",
+          }
+        }}>
+        <Stack.Screen name="home" />
+        <Stack.Screen name="film" />
+        <Stack.Screen name="add_film" options={{ presentation: 'modal' }} />
+      </Stack>
 
-          screenOptions={{
-            headerShown: false,
-            contentStyle: {
-              backgroundColor: "transparent",
-            }
-          }}>
-          <Stack.Screen name="home" />
-          <Stack.Screen
-            name="add_film"
-            options={{
-              presentation: 'modal',
-            }}
-          />
-        </Stack>
-
-        <StatusBar style="light" />
-      </ImageBackground>
-    </View>
+      <StatusBar style="light" />
+    </>
 
   );
 }

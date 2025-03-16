@@ -1,31 +1,32 @@
-import { View, Text, ImageBackground, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { RectButton, GestureHandlerRootView } from "react-native-gesture-handler";
 import { Svg, Path } from "react-native-svg";
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, {
     SharedValue,
+    useSharedValue,
     useAnimatedStyle,
+    withSpring
 } from 'react-native-reanimated';
+import { Link } from 'expo-router';
 
 export default function FilmCard({ item }: any) {
     function RightAction(prog: SharedValue<number>, drag: SharedValue<number>) {
         const styleAnimation = useAnimatedStyle(() => {
             return {
-                transform: [{ translateX: drag.value + 50 }],
+                transform: [{ translateX: drag.value + 80 }],
             };
         });
 
         return (
             <Reanimated.View style={styleAnimation}>
-                <View style={{ flex: 1, width: 50, alignItems: 'center', justifyContent: 'center' }}>
+                <View style={{ flex: 1, width: 80, alignItems: 'center', justifyContent: 'center' }}>
                     <RectButton
                         style={{
-                            // backgroundColor: "white",
                             justifyContent: "center",
-                            // alignItems: "center",
                             height: "100%",
-                            width: '100%'
-                            // marginLeft: -12,
+                            width: '100%',
+                            marginLeft: 12,
                         }}
                         onPress={() => console.log('Delete')}
                     >
@@ -41,37 +42,65 @@ export default function FilmCard({ item }: any) {
     const height = 38;
     const maxShots = item.shots > 36 ? item.shots : 36;
     const highlightColor = item.status === 'in-camera' ? '#B3F5C3' : item.status === 'developing' ? '#FEF08A' : '#BDBDBD';
+    const scale = useSharedValue(1); // ✅ Shared value for press animation
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }]
+    }));
+
+    function handlePressIn() {
+        scale.value = withSpring(0.95); // ✅ Slightly increase size on press
+    }
+
+    function handlePressOut() {
+        scale.value = withSpring(1);
+    }
 
     return (
         <GestureHandlerRootView>
-            <ReanimatedSwipeable renderRightActions={RightAction}>
-                <View style={{ backgroundColor: '#FFFFFF0D', borderRadius: 32, padding: 24, marginBottom: 12, marginLeft: 12, marginRight: 12 }}>
-                    <Text style={{ backgroundColor: highlightColor, color: '#18181B', fontFamily: 'Lufga-Regular', fontSize: 12, lineHeight: 20, paddingBlock: 6, paddingInline: 8, borderRadius: 24, position: 'absolute', right: 10, top: 10 }}>{item.status}</Text>
-                    <Text style={{ color: '#FFFFFF99', fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, marginBottom: 4 }}>{item.camera} - {item.date}</Text>
-                    <Text style={{ color: '#FAFAFA', fontFamily: 'Lufga-Medium', fontSize: 32, lineHeight: 40, marginBottom: 32 }}>{item.film}</Text>
-
-                    <View
-                        style={{
-                            width: "100%",
-                            height: height,
-                            backgroundColor: '#ffffff0D',
-                            borderRadius: height / 2,
-                            overflow: "hidden",
-                        }}
-                    >
-                        <View
-                            style={{
-                                width: `${(item.shots / maxShots) * 100}%`,
-                                minWidth: '20%',
-                                height: "100%",
-                                backgroundColor: highlightColor,
-                                borderRadius: height / 2,
-                            }}
+            <ReanimatedSwipeable
+                renderRightActions={RightAction}
+                rightThreshold={30}
+                overshootFriction={4}
+                dragOffsetFromRightEdge={25}
+            >
+                <Reanimated.View style={[animatedStyle, { paddingLeft: 12, paddingRight: 12, paddingTop: 6, paddingBottom: 6 }]}>
+                    <Link href="/film" asChild>
+                        <Pressable
+                            onPressIn={handlePressIn}
+                            onPressOut={handlePressOut}
                         >
-                            <Text style={{ color: '#18181B', fontFamily: 'Lufga-Medium', fontSize: 18, lineHeight: 26, position: 'absolute', left: 10, top: (height - 26) / 2 }}>{item.shots}/{maxShots}</Text>
-                        </View>
-                    </View>
-                </View >
+
+                            <View style={{ backgroundColor: '#FFFFFF0D', borderRadius: 32, padding: 24 }}>
+                                <Text style={{ backgroundColor: highlightColor, color: '#18181B', fontFamily: 'Lufga-Regular', fontSize: 12, lineHeight: 20, paddingBlock: 6, paddingInline: 8, borderRadius: 24, position: 'absolute', right: 10, top: 10 }}>{item.status}</Text>
+                                <Text style={{ color: '#FFFFFF99', fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, marginBottom: 4 }}>{item.camera} - {item.date}</Text>
+                                <Text style={{ color: '#FAFAFA', fontFamily: 'Lufga-Medium', fontSize: 32, lineHeight: 40, marginBottom: 32 }}>{item.film}</Text>
+
+                                <View
+                                    style={{
+                                        width: "100%",
+                                        height: height,
+                                        backgroundColor: '#ffffff0D',
+                                        borderRadius: height / 2,
+                                        overflow: "hidden",
+                                    }}
+                                >
+                                    <View
+                                        style={{
+                                            width: `${(item.shots / maxShots) * 100}%`,
+                                            minWidth: '20%',
+                                            height: "100%",
+                                            backgroundColor: highlightColor,
+                                            borderRadius: height / 2,
+                                        }}
+                                    >
+                                        <Text style={{ color: '#18181B', fontFamily: 'Lufga-Medium', fontSize: 18, lineHeight: 26, position: 'absolute', left: 10, top: (height - 26) / 2 }}>{item.shots}/{maxShots}</Text>
+                                    </View>
+                                </View>
+                            </View >
+                        </Pressable>
+                    </Link>
+                </Reanimated.View>
             </ReanimatedSwipeable>
         </GestureHandlerRootView>
     )
