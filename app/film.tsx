@@ -2,6 +2,7 @@ import { View, Text, ImageBackground } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BackButton from "@/components/BackButton";
 import AddButton from "@/components/AddButton";
+import FilmOptionsButton from "@/components/FilmOptionsButton";
 export default function Film() {
 
     const insets = useSafeAreaInsets();
@@ -18,7 +19,7 @@ export default function Film() {
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <AddButton />
                         <View style={{ width: 8 }} />
-                        <AddButton />
+                        <FilmOptionsButton />
                     </View>
                 </View>
 
