@@ -40,7 +40,8 @@
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
     "react-native-svg": "15.8.0",
-    "expo-linear-gradient": "~14.0.2"
+    "expo-linear-gradient": "~14.0.2",
+    "expo-sqlite": "~15.1.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

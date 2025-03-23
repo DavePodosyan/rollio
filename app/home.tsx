@@ -104,7 +104,7 @@ export default function Home() {
             camera: 'Canon A-1',
             date: '28 May 2021',
             film: 'Kodak Gold 200',
-            shots: 36,
+            shots: 45,
 
         },
     ];
