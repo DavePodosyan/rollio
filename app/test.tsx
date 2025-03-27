@@ -1,205 +1,65 @@
-import React, { useRef } from 'react';
-import { Text, Animated, StyleSheet, View } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import ScrollTickBar from '@/components/ScrollTickBar';
 
-import {
-    Swipeable,
-    GestureHandlerRootView,
-    Pressable,
-} from 'react-native-gesture-handler';
-import ReanimatedSwipeable, {
-    SwipeableMethods,
-} from 'react-native-gesture-handler/ReanimatedSwipeable';
-import Reanimated, {
-    SharedValue,
-    useAnimatedStyle,
-} from 'react-native-reanimated';
-
-function LeftAction(prog: SharedValue<number>, drag: SharedValue<number>) {
-    const styleAnimation = useAnimatedStyle(() => {
-        console.log('[R] showLeftProgress:', prog.value);
-        console.log('[R] appliedTranslation:', drag.value);
-
-        return {
-            transform: [{ translateX: drag.value - 50 }],
-        };
-    });
+export default function App() {
+    const apertureValues = ['1.4', '2', '2.5', '2.8', '4', '5.6', '8', '11', '16'];
+    const [apertureIndex, setApertureIndex] = useState(2); // f/2.5
 
     return (
-        <Reanimated.View style={styleAnimation}>
-            <Text style={styles.leftAction}>Text</Text>
-        </Reanimated.View>
-    );
-}
-
-function RightAction(prog: SharedValue<number>, drag: SharedValue<number>) {
-    const styleAnimation = useAnimatedStyle(() => {
-        console.log('[R] showRightProgress:', prog.value);
-        console.log('[R] appliedTranslation:', drag.value);
-
-        return {
-            transform: [{ translateX: drag.value + 50 }],
-        };
-    });
-
-    return (
-        <Reanimated.View style={styleAnimation}>
-            <Text style={styles.rightAction}>Text</Text>
-        </Reanimated.View>
-    );
-}
-
-function LegacyLeftAction(prog: any, drag: any) {
-    prog.addListener((value: any) => {
-        console.log('[L] showLeftProgress:', value.value);
-    });
-    drag.addListener((value: any) => {
-        console.log('[L] appliedTranslation:', value.value);
-    });
-
-    const trans = Animated.subtract(drag, 50);
-
-    return (
-        <Animated.Text
-            style={[
-                styles.leftAction,
-                {
-                    transform: [{ translateX: trans }],
-                },
-            ]}>
-            Text
-        </Animated.Text>
-    );
-}
-
-function LegacyRightAction(prog: any, drag: any) {
-    prog.addListener((value: any) => {
-        console.log('[L] showRightProgress:', value.value);
-    });
-    drag.addListener((value: any) => {
-        console.log('[L] appliedTranslation:', value.value);
-    });
-
-    const trans = Animated.add(drag, 50);
-
-    return (
-        <Animated.Text
-            style={[
-                styles.rightAction,
-                {
-                    transform: [{ translateX: trans }],
-                },
-            ]}>
-            Text
-        </Animated.Text>
-    );
-}
-
-export default function Example() {
-    const reanimatedRef = useRef<SwipeableMethods>(null);
-    const legacyRef = useRef<Swipeable>(null);
-
-    return (
-        <GestureHandlerRootView>
-            <View style={styles.separator} />
-
-            <View style={styles.controlPanelWrapper}>
-                <Text>Programatical controls</Text>
-                <View style={styles.controlPanel}>
-                    <Pressable
-                        style={styles.control}
-                        onPress={() => {
-                            reanimatedRef.current!.openLeft();
-                            legacyRef.current?.openLeft();
-                        }}>
-                        <Text>open left</Text>
-                    </Pressable>
-                    <Pressable
-                        style={styles.control}
-                        onPress={() => {
-                            reanimatedRef.current!.close();
-                            legacyRef.current!.close();
-                        }}>
-                        <Text>close</Text>
-                    </Pressable>
-                    <Pressable
-                        style={styles.control}
-                        onPress={() => {
-                            reanimatedRef.current!.reset();
-                            legacyRef.current!.reset();
-                        }}>
-                        <Text>reset</Text>
-                    </Pressable>
-                    <Pressable
-                        style={styles.control}
-                        onPress={() => {
-                            reanimatedRef.current!.openRight();
-                            legacyRef.current!.openRight();
-                        }}>
-                        <Text>open right</Text>
-                    </Pressable>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.block}>
+                <View style={styles.row}>
+                    <View style={styles.iconLabel}>
+                        <Text style={styles.label}>Aperture</Text>
+                    </View>
+                    <Text style={styles.value}>f/{apertureValues[apertureIndex]}</Text>
                 </View>
+
+                <ScrollTickBar
+                    values={apertureValues}
+                    selectedIndex={apertureIndex}
+                    onValueChange={setApertureIndex}
+                />
             </View>
-
-            <View style={styles.separator} />
-
-            <ReanimatedSwipeable
-                ref={reanimatedRef}
-                containerStyle={styles.swipeable}
-                friction={2}
-                leftThreshold={80}
-                enableTrackpadTwoFingerGesture
-                rightThreshold={40}
-                renderLeftActions={LeftAction}
-                renderRightActions={RightAction}>
-                <Text>[Reanimated] Swipe me!</Text>
-            </ReanimatedSwipeable>
-
-            <View style={styles.separator} />
-
-            <Swipeable
-                ref={legacyRef}
-                containerStyle={styles.swipeable}
-                friction={2}
-                leftThreshold={80}
-                enableTrackpadTwoFingerGesture
-                rightThreshold={40}
-                renderLeftActions={LegacyLeftAction}
-                renderRightActions={LegacyRightAction}>
-                <Text>[Legacy] Swipe me!</Text>
-            </Swipeable>
-
-            <View style={styles.separator} />
-        </GestureHandlerRootView>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    leftAction: { width: 50, height: 50, backgroundColor: 'crimson' },
-    rightAction: { width: 50, height: 50, backgroundColor: 'purple' },
-    separator: {
-        width: '100%',
-        borderTopWidth: 1,
-        marginTop: 100
-    },
-    swipeable: {
-        height: 50,
-        backgroundColor: 'papayawhip',
-        alignItems: 'center',
-    },
-    controlPanelWrapper: {
-        backgroundColor: 'papayawhip',
-        alignItems: 'center',
-    },
-    controlPanel: {
-        backgroundColor: 'papayawhip',
-        alignItems: 'center',
-        flexDirection: 'row',
-    },
-    control: {
+    container: {
         flex: 1,
-        height: 40,
-        borderWidth: StyleSheet.hairlineWidth,
-        alignItems: 'center',
+        backgroundColor: '#0D021B',
         justifyContent: 'center',
+        padding: 20,
+    },
+    block: {
+        marginBottom: 60,
+    },
+    labelRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    iconLabel: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    label: {
+        color: '#FFF',
+        fontSize: 16,
+    },
+    value: {
+        color: '#A78BFA',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });

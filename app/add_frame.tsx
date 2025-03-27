@@ -4,13 +4,16 @@ import CloseButton from "../components/CloseButton";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSQLiteContext } from 'expo-sqlite';
 import { router } from 'expo-router';
+import { type FilmRoll } from '@/types/FilmRoll';
+import { useLocalSearchParams } from "expo-router";
 
-export default function Add_Film() {
+export default function Add_Frame() {
+    const film = useLocalSearchParams() as unknown as FilmRoll;
 
     const [form, setForm] = React.useState({
-        title: '',
-        camera: '',
-        iso: '',
+        aperture: '5.6',
+        shutter_speed: '1/125',
+        note: 'Test',
     });
 
     const onChange = (key: string, value: string | number) => {
@@ -19,9 +22,9 @@ export default function Add_Film() {
 
     const database = useSQLiteContext();
 
-    const saveFilmToDb = () => {
+    const saveFrameToDb = () => {
 
-        if (!form.title.trim() || !form.camera.trim() || !form.iso.trim()) {
+        if (!form.aperture.trim() || !form.shutter_speed.trim() || !form.note.trim()) {
             console.log('Please fill in all fields before saving.');
             alert('Please fill in all fields before saving.');
             return;
@@ -29,21 +32,26 @@ export default function Add_Film() {
 
         console.log('Saving to database...');
         database.runAsync(`
-            INSERT INTO films (
-                title, 
-                camera, 
-                iso, 
-                status, 
-                frame_count, 
+            INSERT INTO frames (
+                film_id, 
+                aperture, 
+                shutter_speed, 
+                frame_no, 
+                note, 
                 created_at
             ) VALUES (?, ?, ?, ?, ?, ?)`, [
-            form.title,
-            form.camera,
-            form.iso,
-            'in-camera',
-            0,
+            film.id,
+            form.aperture,
+            form.shutter_speed,
+            Number(film.frame_count) + 1,
+            form.note,
             new Date().toISOString()
         ]).then(() => {
+            //update film frame count
+            database.runAsync(`UPDATE films SET frame_count = ? WHERE id = ?`, [
+                Number(film.frame_count) + 1,
+                film.id
+            ]);
             router.back()
         }).catch((error) => {
             console.log('Error saving to database:', error);
@@ -56,7 +64,7 @@ export default function Add_Film() {
             <View style={{ flex: 1, backgroundColor: '#09090B', paddingTop: 12, paddingLeft: 12, paddingRight: 12 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 24 }}>
                     <CloseButton />
-                    <Text style={{ color: '#fff', fontFamily: 'Lufga-Medium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}>Add Film Roll</Text>
+                    <Text style={{ color: '#fff', fontFamily: 'Lufga-Medium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}>Create New Frame</Text>
                 </View>
                 <View style={{ backgroundColor: 'transparent', position: 'relative' }}>
                     <View>
@@ -68,10 +76,10 @@ export default function Add_Film() {
                             clearTextOnFocus={true}
                             enablesReturnKeyAutomatically={true}
                             enterKeyHint='done'
-                            placeholder="Film name"
+                            placeholder="Aperture"
                             placeholderTextColor={'#FFFFFF99'}
-                            onChangeText={(text) => onChange('title', text)}
-                            value={form.title}
+                            onChangeText={(text) => onChange('aperture', text)}
+                            value={form.aperture}
                         />
                         <TextInput
                             style={styles.input}
@@ -81,12 +89,14 @@ export default function Add_Film() {
                             clearTextOnFocus={true}
                             enablesReturnKeyAutomatically={true}
                             enterKeyHint='done'
-                            placeholder="Camera name"
+                            placeholder="Shutter Speed"
                             placeholderTextColor={'#FFFFFF99'}
-                            onChangeText={(text) => onChange('camera', text)}
-                            value={form.camera}
+                            onChangeText={(text) => onChange('shutter_speed', text)}
+                            value={form.shutter_speed}
                         />
                         <TextInput
+                            multiline
+                            numberOfLines={5}
                             style={styles.input}
                             autoComplete='off'
                             autoCorrect={false}
@@ -94,15 +104,14 @@ export default function Add_Film() {
                             clearTextOnFocus={true}
                             enablesReturnKeyAutomatically={true}
                             enterKeyHint='done'
-                            placeholder="ISO"
-                            keyboardType='number-pad'
+                            placeholder="Note"
                             placeholderTextColor={'#FFFFFF99'}
-                            onChangeText={(text) => onChange('iso', text)}
-                            value={form.iso}
+                            onChangeText={(text) => onChange('note', text)}
+                            value={form.note}
                         />
                     </View>
                     <TouchableOpacity
-                        onPress={saveFilmToDb}
+                        onPress={saveFrameToDb}
                         style={{
                             width: '100%',
                             height: 52,

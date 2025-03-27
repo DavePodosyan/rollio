@@ -1,22 +1,39 @@
+import { useEffect } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { Svg, Path, Defs, Rect, G, ClipPath } from "react-native-svg";
 import Reanimated, {
     useSharedValue,
     useAnimatedStyle,
-    withSpring
+    withSpring,
+    withTiming,
+    withDelay
 } from 'react-native-reanimated';
 import { Link } from 'expo-router';
 
-export default function FrameCard({ item }: any) {
 
-    const scale = useSharedValue(1); // ✅ Shared value for press animation
+interface FrameCardProps {
+    item: any;
+    index: number;
+}
+
+export default function FrameCard({ item, index }: FrameCardProps) {
+
+    const scale = useSharedValue(1);
+    const translateY = useSharedValue(50);
+    const opacity = useSharedValue(0);
 
     const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }]
+        transform: [{ scale: scale.value }, { translateY: translateY.value }],
+        opacity: opacity.value
     }));
 
+    useEffect(() => {
+        translateY.value = withDelay(index * 120, withSpring(0, { damping: 12, stiffness: 90 }));
+        opacity.value = withDelay(index * 120, withTiming(1, { duration: 500 }));
+    }, []);
+
     function handlePressIn() {
-        scale.value = withSpring(0.95); // ✅ Slightly increase size on press
+        scale.value = withSpring(0.95);
     }
 
     function handlePressOut() {
@@ -26,7 +43,10 @@ export default function FrameCard({ item }: any) {
     return (
 
         <Reanimated.View style={[animatedStyle, { paddingLeft: 12, paddingRight: 12, paddingBottom: 4 }]}>
-            <Link href="/add_film" asChild>
+            <Link href={{
+                pathname: '#',
+                params: item,
+            }} asChild>
                 <Pressable
                     onPressIn={handlePressIn}
                     onPressOut={handlePressOut}

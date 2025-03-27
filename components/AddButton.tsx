@@ -2,16 +2,17 @@
 import { TouchableOpacity, Image } from "react-native";
 import { ViewStyle, Text } from "react-native";
 import { Svg, Path } from "react-native-svg";
-import { Link, router } from 'expo-router';
+import { Link, router, type Href } from 'expo-router';
 
 interface AddButtonProps {
+    href: Href;
     style?: ViewStyle;
 }
 
-export default function AddButton({ style }: AddButtonProps) {
+export default function AddButton({ style, href }: AddButtonProps) {
 
     const onPress = () => {
-        router.push("/add_film");
+        router.push(href);
     };
 
     return (

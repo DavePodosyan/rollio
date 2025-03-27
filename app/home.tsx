@@ -4,110 +4,39 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AddButton from "@/components/AddButton";
 import FilmCard from '@/components/FilmCard';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useFocusEffect } from 'expo-router';
+import { type FilmRoll } from '@/types/FilmRoll';
+
 export default function Home() {
+    const database = useSQLiteContext();
+    const [data, setData] = React.useState<FilmRoll[]>([]);
     const [refreshing, setRefreshing] = React.useState(false);
+
+    const loadData = async () => {
+        const results = await database.getAllAsync<FilmRoll>('SELECT * FROM films ORDER BY created_at DESC');
+        setData(results);
+    }
+
+    useFocusEffect(React.useCallback(() => {
+        loadData();
+    }, []));
 
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
         setTimeout(() => {
+            loadData();
             setRefreshing(false);
-        }, 1000);
+        }, 850);
     }, []);
 
     const insets = useSafeAreaInsets();
 
-    const data = [
-        {
-            id: '1',
-            status: 'in-camera',
-            camera: 'Canon AE-1',
-            date: '28 May 2024',
-            film: 'Kodak Portra 400',
-            shots: 15,
-
-        },
-        {
-            id: '2',
-            status: 'developing',
-            camera: 'Canon AE-1',
-            date: '28 May 2024',
-            film: 'Kodak Portra 400',
-            shots: 26,
-
-        },
-        {
-            id: '3',
-            status: 'developing',
-            camera: 'Canon AE-1',
-            date: '28 May 2024',
-            film: 'Kodak Portra 800',
-            shots: 38,
-
-        },
-        {
-            id: '4',
-            status: 'archived',
-            camera: 'Canon A-1',
-            date: '28 May 2021',
-            film: 'Kodak Gold 200',
-            shots: 36,
-
-        },
-        {
-            id: '5',
-            status: 'archived',
-            camera: 'Canon A-1',
-            date: '28 May 2021',
-            film: 'Kodak Gold 200',
-            shots: 36,
-
-        },
-        {
-            id: '6',
-            status: 'archived',
-            camera: 'Canon A-1',
-            date: '28 May 2021',
-            film: 'Kodak Gold 200',
-            shots: 36,
-
-        },
-        {
-            id: '7',
-            status: 'archived',
-            camera: 'Canon A-1',
-            date: '28 May 2021',
-            film: 'Kodak Gold 200',
-            shots: 36,
-
-        },
-        {
-            id: '8',
-            status: 'archived',
-            camera: 'Canon A-1',
-            date: '28 May 2021',
-            film: 'Kodak Gold 200',
-            shots: 36,
-
-        },
-        {
-            id: '9',
-            status: 'archived',
-            camera: 'Canon A-1',
-            date: '28 May 2021',
-            film: 'Kodak Gold 200',
-            shots: 36,
-
-        },
-        {
-            id: '10',
-            status: 'archived',
-            camera: 'Canon A-1',
-            date: '28 May 2021',
-            film: 'Kodak Gold 200',
-            shots: 45,
-
-        },
-    ];
+    const deleteItem = (id: number) => {
+        database.runAsync(`DELETE FROM films WHERE id = ?`, [id]).then(() => {
+            loadData();
+        });
+    }
 
     return (
         <ImageBackground
@@ -118,18 +47,31 @@ export default function Home() {
             <View style={{ flex: 1, paddingTop: insets.top, paddingBottom: 0 }}>
                 <View style={{ paddingLeft: 12, paddingRight: 12, paddingTop: 8, paddingBottom: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Text style={{ color: '#FAFAFA', fontFamily: 'Lufga-Medium', fontSize: 48, lineHeight: 56 }}>Film Rolls</Text>
-                    <AddButton />
+                    <AddButton href='/add_film' />
                 </View>
 
                 <View style={{ flex: 1, paddingTop: 4 }}>
-                    <FlatList
-                        data={data}
-                        disableIntervalMomentum={true}
-                        renderItem={({ item }) => <FilmCard item={item} />}
-                        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FFFFFF99" />}
-                        keyExtractor={item => item.id}
-                        contentContainerStyle={{ paddingBottom: 50 }}
-                    />
+                    {data.length === 0 ? (
+                        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                            <Text style={{ color: "#fff", textAlign: "center", marginTop: 20 }}>
+                                You don't have any film rolls yet.
+                            </Text>
+                            <Text style={{ color: "#fff", textAlign: "center", marginTop: 20 }}>
+                                Please click the + button to add one.
+                            </Text>
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={data}
+                            keyExtractor={(item) => item.id.toString()}
+                            disableIntervalMomentum={true}
+                            renderItem={({ item, index }) => <FilmCard item={item} index={index} onDelete={() => deleteItem(item.id)} />}
+                            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FFFFFF99" />}
+                            contentContainerStyle={{ paddingBottom: 50 }}
+                        />
+                    )}
+
+
                 </View>
 
             </View>
