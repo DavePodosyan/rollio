@@ -4,86 +4,37 @@ import BackButton from "@/components/BackButton";
 import AddButton from "@/components/AddButton";
 import FilmOptionsButton from "@/components/FilmOptionsButton";
 import FrameCard from '@/components/FrameCard';
-import { useLocalSearchParams } from "expo-router";
-import { type FilmRoll } from '@/types/FilmRoll';
-
+import { useLocalSearchParams, useFocusEffect } from "expo-router";
+import { type FilmRoll, type Frame } from '@/utils/types';
+import React from 'react';
+import { useSQLiteContext } from 'expo-sqlite';
 
 export default function Film() {
-    const film = useLocalSearchParams() as unknown as FilmRoll;
+    const database = useSQLiteContext();
+    const [film, setFilm] = React.useState<FilmRoll>(useLocalSearchParams() as unknown as FilmRoll);
+    const [frames, setFrames] = React.useState<Frame[]>([]);
+
+    const loadFilm = async () => {
+        const result = await database.getFirstAsync<FilmRoll>('SELECT * FROM films WHERE id = ?', [film.id]);
+
+        if (result) {
+            setFilm(result);
+        }
+    }
+
+    const loadFrames = async () => {
+        const results = await database.getAllAsync<Frame>('SELECT * FROM frames WHERE film_id = ?', [film.id]);
+        setFrames(results);
+
+    }
+
+    useFocusEffect(React.useCallback(() => {
+        loadFilm();
+        loadFrames();
+    }, []));
+
     const backgroundImage = require("@/assets/images/background.png");
     const insets = useSafeAreaInsets();
-    
-    const data = [
-        {
-            id: '1',
-            description: 'Evening shot at part, cloudy weather',
-            aperture: '2.8',
-            shutter: '1/125s',
-        },
-        {
-            id: '2',
-            description: 'Bridge silhouette against sunset',
-            aperture: '2.8',
-            shutter: '1/125s',
-
-        },
-        {
-            id: '3',
-            description: 'Street portrait natural light from shop windows',
-            aperture: '2.8',
-            shutter: '1/125s',
-
-        },
-        {
-            id: '4',
-            description: 'Coffee shop interior, tungsten lighting',
-            aperture: '2.8',
-            shutter: '1/125s',
-
-        },
-        {
-            id: '5',
-            description: 'archived',
-            aperture: '2.8',
-            shutter: '1/125s',
-
-        },
-        {
-            id: '6',
-            description: 'archived',
-            aperture: '2.8',
-            shutter: '1/125s',
-
-        },
-        {
-            id: '7',
-            description: 'archived',
-            aperture: '16',
-            shutter: '3s',
-
-        },
-        {
-            id: '8',
-            description: 'archived',
-            aperture: '2.8',
-            shutter: '1/500s',
-
-        },
-        {
-            id: '9',
-            description: 'archived',
-            aperture: '5.6',
-            shutter: '1/500s',
-
-        },
-        {
-            id: '10',
-            description: 'archived',
-            aperture: '1.4',
-            shutter: '1/1000s',
-
-        },
-    ];
 
     const height = 38;
     const maxShots = film.frame_count > 36 ? film.frame_count : 36;
@@ -144,7 +95,7 @@ export default function Film() {
 
                 <View style={{ flex: 1, paddingTop: 16 }}>
                     <FlatList
-                        data={data}
+                        data={frames}
                         disableIntervalMomentum={true}
                         renderItem={({ item, index }) => <FrameCard item={item} index={index} />}
                         keyExtractor={item => item.id.toString()}

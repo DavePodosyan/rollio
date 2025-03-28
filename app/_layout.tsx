@@ -29,13 +29,14 @@ export default function RootLayout() {
     console.log('Creating database if not exists');
     console.log(FileSystem.documentDirectory)
     //drop table film if exists
-    await db.execAsync(`
-      DROP TABLE IF EXISTS frames;
-    `);
+    // await db.execAsync(`
+    //   DROP TABLE IF EXISTS films;
+    //   DROP TABLE IF EXISTS frames;
+    // `);
     await db.execAsync(`
       PRAGMA journal_mode = 'wal';
       CREATE TABLE IF NOT EXISTS films (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         title TEXT NOT NULL,
         iso INTEGER NOT NULL,
         camera TEXT,
@@ -45,10 +46,10 @@ export default function RootLayout() {
         completed_at DATETIME
       );
       CREATE TABLE IF NOT EXISTS frames (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         film_id INTEGER NOT NULL,
-        aperture TEXT,
-        shutter_speed TEXT,
+        aperture TEXT NOT NULL,
+        shutter_speed TEXT NOT NULL,
         frame_no INTEGER NOT NULL,
         note TEXT,
         created_at DATETIME NOT NULL,

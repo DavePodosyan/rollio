@@ -6,7 +6,7 @@ import FilmCard from '@/components/FilmCard';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect } from 'expo-router';
-import { type FilmRoll } from '@/types/FilmRoll';
+import { type FilmRoll } from '@/utils/types';
 
 export default function Home() {
     const database = useSQLiteContext();
@@ -19,6 +19,8 @@ export default function Home() {
     }
 
     useFocusEffect(React.useCallback(() => {
+        console.log('Loading data...');
+        
         loadData();
     }, []));
 

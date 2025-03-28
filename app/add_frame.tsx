@@ -4,7 +4,7 @@ import CloseButton from "../components/CloseButton";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSQLiteContext } from 'expo-sqlite';
 import { router } from 'expo-router';
-import { type FilmRoll } from '@/types/FilmRoll';
+import { type FilmRoll } from '@/utils/types';
 import { useLocalSearchParams } from "expo-router";
 
 export default function Add_Frame() {

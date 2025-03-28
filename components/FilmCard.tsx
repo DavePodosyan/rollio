@@ -14,7 +14,7 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import { Link } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { type FilmRoll } from '@/types/FilmRoll';
+import { type FilmRoll } from '@/utils/types';
 
 interface FilmCardProps {
     item: FilmRoll;
