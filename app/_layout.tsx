@@ -35,6 +35,7 @@ export default function RootLayout() {
     // `);
     await db.execAsync(`
       PRAGMA journal_mode = 'wal';
+      PRAGMA foreign_keys = ON;
       CREATE TABLE IF NOT EXISTS films (
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         title TEXT NOT NULL,

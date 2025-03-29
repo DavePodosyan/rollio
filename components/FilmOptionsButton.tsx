@@ -5,14 +5,11 @@ import { Svg, Path, G, ClipPath, Rect, Defs } from "react-native-svg";
 import { router } from 'expo-router';
 
 interface AddButtonProps {
+    onPress?: () => void;
     style?: ViewStyle;
 }
 
-export default function FilmOptionsButton({ style }: AddButtonProps) {
-
-    const onPress = () => {
-        router.back();
-    };
+export default function FilmOptionsButton({ style, onPress }: AddButtonProps) {
 
     return (
 

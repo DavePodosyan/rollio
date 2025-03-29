@@ -29,8 +29,8 @@ export default function FrameCard({ item, index }: FrameCardProps) {
     }));
 
     useEffect(() => {
-        translateY.value = withDelay(index * 120, withSpring(0, { damping: 12, stiffness: 90 }));
-        opacity.value = withDelay(index * 120, withTiming(1, { duration: 500 }));
+        translateY.value = withDelay(index * 60, withSpring(0, { damping: 12, stiffness: 90 }));
+        opacity.value = withDelay(index * 60, withTiming(1, { duration: 500 }));
     }, []);
 
     function handlePressIn() {
