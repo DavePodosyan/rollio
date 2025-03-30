@@ -71,7 +71,7 @@ export default function Add_Film() {
                             autoComplete='off'
                             autoCorrect={false}
                             clearButtonMode='always'
-                            clearTextOnFocus={true}
+                            clearTextOnFocus={false}
                             enablesReturnKeyAutomatically={true}
                             enterKeyHint='done'
                             placeholder="Film name"
@@ -85,7 +85,7 @@ export default function Add_Film() {
                             autoComplete='off'
                             autoCorrect={false}
                             clearButtonMode='always'
-                            clearTextOnFocus={true}
+                            clearTextOnFocus={false}
                             enablesReturnKeyAutomatically={true}
                             enterKeyHint='done'
                             placeholder="Camera (optional)"
