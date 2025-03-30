@@ -115,11 +115,16 @@ export default function FilmCard({ item, onDelete, index }: FilmCardProps) {
 
                             <View style={{ backgroundColor: '#FFFFFF0D', borderRadius: 32, padding: 24 }}>
                                 <Text style={{ backgroundColor: highlightColor, color: '#18181B', fontFamily: 'Lufga-Regular', fontSize: 12, lineHeight: 20, paddingBlock: 6, paddingInline: 8, borderRadius: 24, position: 'absolute', right: 10, top: 10 }}>{item.status}</Text>
-                                <Text style={{ color: '#FFFFFF99', fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, marginBottom: 4 }}>{item.camera} - {new Date(item.created_at).toLocaleDateString('en-GB', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                    year: 'numeric',
-                                })}</Text>
+                                <Text style={{ color: '#FFFFFF99', fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, marginBottom: 4, }}>
+                                    {item.camera
+                                        ? `${item.camera} - `
+                                        : ''}
+                                    {new Date(item.created_at).toLocaleDateString('en-GB', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric',
+                                    })}
+                                </Text>
                                 <Text style={{ color: '#FAFAFA', fontFamily: 'Lufga-Medium', fontSize: 32, lineHeight: 40, marginBottom: 32 }}>{item.title}</Text>
 
                                 <View

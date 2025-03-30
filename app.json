@@ -10,13 +10,15 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.davitpodosyan.rollio"
+      "bundleIdentifier": "com.davitpodosyan.rollio",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
@@ -40,12 +42,10 @@
           "enableFTS": true,
           "useSQLCipher": true,
           "android": {
-            // Override the shared configuration for Android
             "enableFTS": false,
             "useSQLCipher": false
           },
           "ios": {
-            // You can also override the shared configurations for iOS
             "customBuildFlags": [
               "-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"
             ]
@@ -55,6 +55,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "2c427b5f-0d47-41fe-8dce-7581f147ce28"
+      }
+    },
+    "owner": "davepodosyan"
   }
 }

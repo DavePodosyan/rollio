@@ -13,6 +13,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { BlurView } from 'expo-blur';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
+import * as Haptics from "expo-haptics";
 
 export default function Film() {
     const database = useSQLiteContext();
@@ -68,10 +69,11 @@ export default function Film() {
     }
 
     const handleSheetChanges = useCallback((index: number) => {
-        console.log("handleSheetChanges", index);
+
     }, []);
 
     const handleSheetAnimate = useCallback((fromIndex: number, toIndex: number) => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         if (toIndex === -1) {
             setScreenBlur(false);
         } else {

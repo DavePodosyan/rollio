@@ -7,6 +7,7 @@ import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeab
 import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect } from 'expo-router';
 import { type FilmRoll } from '@/utils/types';
+import * as Haptics from "expo-haptics";
 
 export default function Home() {
     const database = useSQLiteContext();
@@ -26,6 +27,7 @@ export default function Home() {
 
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         setTimeout(() => {
             loadData();
             setRefreshing(false);
@@ -36,6 +38,7 @@ export default function Home() {
 
     const deleteItem = (id: number) => {
         database.runAsync(`DELETE FROM films WHERE id = ?`, [id]).then(() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             loadData();
         });
     }

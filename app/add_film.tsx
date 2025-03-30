@@ -4,13 +4,16 @@ import CloseButton from "../components/CloseButton";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSQLiteContext } from 'expo-sqlite';
 import { router } from 'expo-router';
+import HorizontalPicker from '@/components/AperturePicker';
+import IsoPicker from '@/components/IsoPicker';
+import * as Haptics from "expo-haptics";
 
 export default function Add_Film() {
 
     const [form, setForm] = React.useState({
         title: '',
         camera: '',
-        iso: '',
+        iso: 400,
     });
 
     const onChange = (key: string, value: string | number) => {
@@ -20,8 +23,9 @@ export default function Add_Film() {
     const database = useSQLiteContext();
 
     const saveFilmToDb = () => {
+        console.log(form.iso);
 
-        if (!form.title.trim() || !form.camera.trim() || !form.iso.trim()) {
+        if (!form.title.trim() || !form.iso) {
             console.log('Please fill in all fields before saving.');
             alert('Please fill in all fields before saving.');
             return;
@@ -44,6 +48,7 @@ export default function Add_Film() {
             0,
             new Date().toISOString()
         ]).then(() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             router.back()
         }).catch((error) => {
             console.log('Error saving to database:', error);
@@ -54,13 +59,14 @@ export default function Add_Film() {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={{ flex: 1, backgroundColor: '#09090B', paddingTop: 12, paddingLeft: 12, paddingRight: 12 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 24 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 48 }}>
                     <CloseButton />
                     <Text style={{ color: '#fff', fontFamily: 'Lufga-Medium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}>Add Film Roll</Text>
                 </View>
                 <View style={{ backgroundColor: 'transparent', position: 'relative' }}>
                     <View>
                         <TextInput
+                            maxLength={35}
                             style={styles.input}
                             autoComplete='off'
                             autoCorrect={false}
@@ -74,6 +80,7 @@ export default function Add_Film() {
                             value={form.title}
                         />
                         <TextInput
+                            maxLength={20}
                             style={styles.input}
                             autoComplete='off'
                             autoCorrect={false}
@@ -81,26 +88,17 @@ export default function Add_Film() {
                             clearTextOnFocus={true}
                             enablesReturnKeyAutomatically={true}
                             enterKeyHint='done'
-                            placeholder="Camera name"
+                            placeholder="Camera (optional)"
                             placeholderTextColor={'#FFFFFF99'}
                             onChangeText={(text) => onChange('camera', text)}
                             value={form.camera}
                         />
-                        <TextInput
-                            style={styles.input}
-                            autoComplete='off'
-                            autoCorrect={false}
-                            clearButtonMode='always'
-                            clearTextOnFocus={true}
-                            enablesReturnKeyAutomatically={true}
-                            enterKeyHint='done'
-                            placeholder="ISO"
-                            keyboardType='number-pad'
-                            placeholderTextColor={'#FFFFFF99'}
-                            onChangeText={(text) => onChange('iso', text)}
-                            value={form.iso}
-                        />
                     </View>
+
+                    <View style={{ paddingBlock: 12 }}>
+                        <IsoPicker onValueChange={(iso) => onChange('iso', iso)} />
+                    </View>
+
                     <TouchableOpacity
                         onPress={saveFilmToDb}
                         style={{
@@ -138,13 +136,13 @@ const styles = StyleSheet.create({
         height: 52,
         marginBottom: 24,
         borderWidth: 1,
-        paddingInline: 20,
+        paddingInline: 16,
         backgroundColor: '#000',
         borderRadius: 20,
-        borderColor: '#fff',
+        borderColor: '#FFFFFF99',
         color: '#fff',
         fontFamily: 'Lufga-Regular',
-        fontSize: 16,
-        lineHeight: 22
+        fontSize: 14,
+        lineHeight: 20
     },
 });
