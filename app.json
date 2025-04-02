@@ -4,11 +4,16 @@
     "slug": "Rollio",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/icon-light.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "icon": {
+        "dark": "./assets/images/icon-light.png",
+        "light": "./assets/images/icon-light.png",
+        "tinted": "./assets/images/icon-tinted.png"
+      },
       "supportsTablet": true,
       "bundleIdentifier": "com.davitpodosyan.rollio",
       "buildNumber": "1"
