@@ -16,7 +16,6 @@
       },
       "supportsTablet": true,
       "bundleIdentifier": "com.davitpodosyan.rollio",
-      "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
