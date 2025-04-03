@@ -41,8 +41,16 @@ export default function Film() {
 
     const onFilmDelete = () => {
         database.runAsync(`DELETE FROM films WHERE id = ?`, [film.id]).then(() => {
-            bottomSheetRef.current?.close()
+            bottomSheetRef.current?.close();
             router.back()
+        });
+    }
+
+    const onFilmEdit = () => {
+        bottomSheetRef.current?.close();
+        router.push({
+            pathname: '/edit_film',
+            params: film,
         });
     }
 
@@ -50,7 +58,7 @@ export default function Film() {
         const completed_at = status === 'archived' ? new Date().toISOString() : null;
         database.runAsync(`UPDATE films SET status = ?, completed_at = ? WHERE id = ?`, [status, completed_at, film.id]).then(() => {
             loadFilm();
-            bottomSheetRef.current?.close()
+            bottomSheetRef.current?.close();
         });
     }
 
@@ -197,7 +205,11 @@ export default function Film() {
                         paddingInline: 20,
                         paddingBlock: 16,
                     }}>
-                        <TouchableOpacity><Text style={styles.options}>Edit</Text></TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={onFilmEdit}>
+                            <Text style={styles.options}>Edit</Text>
+                        </TouchableOpacity>
 
                         {film.status !== 'archived' && (
                             <TouchableOpacity

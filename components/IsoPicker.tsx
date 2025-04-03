@@ -9,15 +9,17 @@ const { width } = Dimensions.get("window");
 const ITEM_WIDTH = 20;
 const CENTER_OFFSET = (width - ITEM_WIDTH) / 2;
 
-const DEFAULT_ISO_INDEX = isoValues.findIndex(
-    (item) => item.value === 400
-);
 
 interface IsoPickerProps {
+    defaultValue?: number,
     onValueChange?: (value: number) => void;
 }
 
-export default function IsoPicker({ onValueChange }: IsoPickerProps) {
+export default function IsoPicker({ onValueChange, defaultValue = 400 }: IsoPickerProps) {
+
+    const DEFAULT_ISO_INDEX = isoValues.findIndex(
+        (item) => item.value === defaultValue
+    );
     const [iso, setiso] = React.useState(isoValues[DEFAULT_ISO_INDEX].value);
     const flatListRef = React.useRef<FlatList>(null);
     const scrollPosition = React.useRef(0);

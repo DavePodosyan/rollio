@@ -76,6 +76,7 @@ export default function RootLayout() {
           <Stack.Screen name="home" />
           <Stack.Screen name="film" />
           <Stack.Screen name="add_film" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="edit_film" options={{ presentation: 'modal' }} />
           <Stack.Screen name="add_frame" options={{ presentation: 'modal' }} />
         </Stack>
         <StatusBar style="light" />
