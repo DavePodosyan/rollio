@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, SafeAreaView, Text, TextInput, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import CloseButton from "../components/CloseButton";
+import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSQLiteContext } from 'expo-sqlite';
 import { router } from 'expo-router';
@@ -9,7 +10,8 @@ import IsoPicker from '@/components/IsoPicker';
 import * as Haptics from "expo-haptics";
 
 export default function Add_Film() {
-
+    const insets = useSafeAreaInsets();
+    
     const [form, setForm] = React.useState({
         title: '',
         camera: '',
@@ -58,8 +60,8 @@ export default function Add_Film() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={{ flex: 1, backgroundColor: '#09090B', paddingTop: 12, paddingLeft: 12, paddingRight: 12 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 48 }}>
+            <View style={{flex: 1, maxWidth: 550, backgroundColor: '#09090B', paddingTop: 12, paddingLeft: 12, paddingRight: 12 }}>
+                <View style={{paddingTop: Platform.OS === 'android' ? insets.top : 0, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 48 }}>
                     <CloseButton />
                     <Text style={{ color: '#fff', fontFamily: 'Lufga-Medium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}>Add Film Roll</Text>
                 </View>
@@ -136,7 +138,8 @@ const styles = StyleSheet.create({
         height: 52,
         marginBottom: 24,
         borderWidth: 1,
-        paddingInline: 16,
+        paddingLeft: 16,
+        paddingRight: 16,
         backgroundColor: '#000',
         borderRadius: 20,
         borderColor: '#FFFFFF99',

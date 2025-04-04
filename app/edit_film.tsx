@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { View, SafeAreaView, Text, TextInput, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Touchable } from 'react-native';
 import CloseButton from "../components/CloseButton";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +11,7 @@ import { type FilmRoll } from '@/utils/types';
 
 
 export default function Edit_Film() {
+    const insets = useSafeAreaInsets();
 
     const film = useLocalSearchParams() as unknown as FilmRoll;
 
@@ -59,7 +61,7 @@ export default function Edit_Film() {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={{ flex: 1, backgroundColor: '#09090B', paddingTop: 12, paddingLeft: 12, paddingRight: 12 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 48 }}>
+                <View style={{paddingTop: Platform.OS === 'android' ? insets.top : 0, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 48 }}>
                     <CloseButton />
                     <Text style={{ color: '#fff', fontFamily: 'Lufga-Medium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}>Edit Film Roll</Text>
                 </View>
