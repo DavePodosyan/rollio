@@ -34,3 +34,9 @@ All notable changes to this project will be documented in this file.
 ---
 
 *This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.*
+
+
+
+export ANDROID_HOME=$HOME/Library/Android/sdk                             ─╯
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools

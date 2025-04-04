@@ -1,56 +1,68 @@
-# Welcome to your Expo app 👋
+# 🎞️ Rollio – Analog Photography Log
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Rollio** is a simple and elegant app for analog photographers to track their film rolls and individual frames.
 
-## Get started
+No logins. No cloud. Just you, your camera, and the notes that matter.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## ✨ Features
 
-2. Start the app
+- 📷 Create film rolls with film stock, ISO, and camera used
+- 📝 Log individual frames with notes and exposure settings
+- 🗂 Organize and archive your film photography sessions
+- 🔒 100% offline – all data is stored locally on your device
+- 🧘 Minimal UI designed for focus and speed
 
-   ```bash
-    npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 📱 Platforms
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- **iOS:** Available on the [App Store](https://apps.apple.com/app/rollio-analog-photography-log/id6744120369) (Currently pending EU availability via DSA compliance)
+- **Android:** Coming soon to the Play Store   
+  
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 📸 Screenshots
 
-When you're ready, run:
+![Roll List](./assets/screenshots/home.png)
+![Add Roll](./assets/screenshots/film.png)
+![Log Frame](./assets/screenshots/add_frame.png)
 
-```bash
-npm run reset-project
-```
+---
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🚧 Roadmap
 
-## Learn more
+You can find the full roadmap and upcoming features in the [changelog](./CHANGELOG.md), including:
 
-To learn more about developing your project with Expo, look at the following resources:
+- Frame editing
+- Push/pull settings
+- Photo attachments
+- Export to PDF
+- Light meter (planned)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## 🛠 Built With
 
-Join our community of developers creating universal apps.
+- [Expo](https://expo.dev/)
+- [React Native](https://reactnative.dev/)
+- [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
 
+## 📄 License
 
+MIT License — see [LICENSE](./LICENSE) for details.
 
-export ANDROID_HOME=$HOME/Library/Android/sdk                             ─╯
-export PATH=$PATH:$ANDROID_HOME/emulator
-export PATH=$PATH:$ANDROID_HOME/platform-tools
+---
+
+## ❤️ Acknowledgments
+
+Thanks to the awesome [analog photography community on Reddit](https://www.reddit.com/r/AnalogCommunit) for the feedback, support, and feature suggestions!
+
+---
+
+*Film is not dead 🎞*
+
