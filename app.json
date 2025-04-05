@@ -25,7 +25,6 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "versionCode": 1,
       "package": "com.davitpodosyan.rollio"
     },
     "web": {
