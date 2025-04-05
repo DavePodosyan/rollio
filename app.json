@@ -58,6 +58,14 @@
             ]
           }
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true
+          }
+        }
       ]
     ],
     "experiments": {
