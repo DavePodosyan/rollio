@@ -66,7 +66,7 @@ export default function FilmCard({ item, onDelete, index }: FilmCardProps) {
     }
 
     const height = 38;
-    const maxShots = item.frame_count > 36 ? item.frame_count : 36;
+    const maxShots = item.frame_count > item.expected_shots ? item.frame_count : item.expected_shots;
     const highlightColor = item.status === 'in-camera' ? '#B3F5C3' : item.status === 'developing' ? '#FEF08A' : '#BDBDBD';
     const scale = useSharedValue(1); // ✅ Shared value for press animation
 

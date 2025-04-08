@@ -4,6 +4,8 @@ export type FilmRoll = {
     iso: number;
     camera: string | null;
     status: string;
+    expected_shots: number;
+    push_pull: number;
     frame_count: number;
     created_at: string;
     completed_at?: string | null;

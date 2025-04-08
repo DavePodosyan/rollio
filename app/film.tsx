@@ -49,7 +49,7 @@ export default function Film() {
     const onFilmEdit = () => {
         bottomSheetRef.current?.close();
         router.push({
-            pathname: '/edit_film',
+            pathname: '/(modal)/film',
             params: film,
         });
     }
@@ -66,7 +66,7 @@ export default function Film() {
     const insets = useSafeAreaInsets();
 
     const height = 38;
-    const maxShots = film.frame_count > 36 ? film.frame_count : 36;
+    const maxShots = film.frame_count > film.expected_shots ? film.frame_count : film.expected_shots;
     const highlightColor = film.status === 'in-camera' ? '#B3F5C3' : film.status === 'developing' ? '#FEF08A' : '#BDBDBD';
 
     const [screenBlur, setScreenBlur] = React.useState(false);
@@ -133,6 +133,9 @@ export default function Film() {
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBlock: 12 }}>
                             <Text style={{ backgroundColor: '#ffffff0D', color: highlightColor, fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, paddingBlock: 4, paddingInline: 8, borderRadius: 24, marginRight: 8 }}>{film.status}</Text>
                             <Text style={{ backgroundColor: '#ffffff0D', color: '#ffffff', fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, paddingBlock: 4, paddingInline: 8, borderRadius: 24 }}>ISO: {film.iso}</Text>
+                            {film.push_pull !== 0 && (
+                                <Text style={{ backgroundColor: '#ffffff0D', color: '#ffffff', fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, paddingBlock: 4, paddingInline: 8, borderRadius: 24 }}>{film.push_pull < 0 ? 'Pull ' : 'Push +'}{film.push_pull}</Text>
+                            )}
                         </View>
                         <View
                             style={{
@@ -145,8 +148,9 @@ export default function Film() {
                         >
                             <View
                                 style={{
-                                    width: `${(film.frame_count / 36) * 100}%`,
+                                    width: `${(film.frame_count / film.expected_shots) * 100}%`,
                                     minWidth: '20%',
+                                    maxWidth: '100%',
                                     height: "100%",
                                     backgroundColor: highlightColor,
                                     borderRadius: height / 2,

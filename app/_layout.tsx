@@ -57,11 +57,34 @@ export default function RootLayout() {
         FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE CASCADE
     );
     `);
-    // await db.execAsync(`
-    //   PRAGMA journal_mode = 'wal';
-    //   CREATE TABLE films (id INTEGER PRIMARY KEY NOT NULL, value TEXT NOT NULL, intValue INTEGER);
-    //   `);
+
+    addMissingColumns(db);
   }
+
+  const addMissingColumns = async (db: SQLiteDatabase) => {
+    const columnsToAdd = [
+      { table: 'films', column: 'expected_shots', type: 'INTEGER', defaultValue: '36' },
+      // { table: 'films', column: 'format', type: 'TEXT', defaultValue: "'full'" },
+      { table: 'films', column: 'push_pull', type: 'INTEGER', defaultValue: '0' }
+    ];
+
+    for (const { table, column, type, defaultValue } of columnsToAdd) {
+      console.log(column);
+
+      const result = await db.getAllAsync<{ name: string }>(
+        `PRAGMA table_info(${table});`
+      );
+
+      const columnExists = result.some((col) => col.name === column);
+
+      if (!columnExists) {
+        await db.execAsync(
+          `ALTER TABLE ${table} ADD COLUMN ${column} ${type} DEFAULT ${defaultValue};`
+        );
+        console.log(`Added column ${column} to ${table}`);
+      }
+    }
+  };
 
   return (
     <SafeAreaProvider>
@@ -75,8 +98,7 @@ export default function RootLayout() {
           }}>
           <Stack.Screen name="home" />
           <Stack.Screen name="film" />
-          <Stack.Screen name="add_film" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="edit_film" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="(modal)/film" options={{ presentation: 'modal', gestureEnabled: false }} />
           <Stack.Screen name="add_frame" options={{ presentation: 'modal' }} />
         </Stack>
         <StatusBar style="light" />

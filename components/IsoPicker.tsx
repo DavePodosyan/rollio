@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, Dimensions } from '
 import * as Haptics from "expo-haptics";
 import { Svg, Path, Defs, Rect, G, ClipPath } from "react-native-svg";
 
-import { isoValues } from '@/utils/values';
+import { isoValues } from '@/utils/constants';
 
 const { width } = Dimensions.get("window");
 const ITEM_WIDTH = 20;
