@@ -19,4 +19,5 @@ export type Frame = {
     frame_no: number;
     note: string | null;
     created_at: string;
+    lens: string | null;
 };

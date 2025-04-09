@@ -64,8 +64,8 @@ export default function RootLayout() {
   const addMissingColumns = async (db: SQLiteDatabase) => {
     const columnsToAdd = [
       { table: 'films', column: 'expected_shots', type: 'INTEGER', defaultValue: '36' },
-      // { table: 'films', column: 'format', type: 'TEXT', defaultValue: "'full'" },
-      { table: 'films', column: 'push_pull', type: 'INTEGER', defaultValue: '0' }
+      { table: 'films', column: 'push_pull', type: 'INTEGER', defaultValue: '0' },
+      { table: 'frames', column: 'lens', type: 'TEXT', defaultValue: '""' }
     ];
 
     for (const { table, column, type, defaultValue } of columnsToAdd) {
@@ -99,7 +99,7 @@ export default function RootLayout() {
           <Stack.Screen name="home" />
           <Stack.Screen name="film" />
           <Stack.Screen name="(modal)/film" options={{ presentation: 'modal', gestureEnabled: false }} />
-          <Stack.Screen name="add_frame" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="(modal)/frame" options={{ presentation: 'modal', gestureEnabled: false }} />
         </Stack>
         <StatusBar style="light" />
       </SQLiteProvider>

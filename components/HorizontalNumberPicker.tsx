@@ -4,12 +4,12 @@ import * as Haptics from "expo-haptics";
 import { SvgProps } from "react-native-svg";
 
 interface HorizontalNumberPickerProps {
-    values: { value: number; major: boolean }[];
-    defaultValue: number,
+    values: { value: number | string; major: boolean }[];
+    defaultValue: number | string,
     label: string,
     icon?: React.FC<SvgProps>,
-    formatValue?: (value: number) => string | number,
-    onValueChange?: (value: number) => void,
+    formatValue?: (value: number | string) => string | number,
+    onValueChange?: (value: number | string) => void,
 }
 
 const ITEM_WIDTH = 20;

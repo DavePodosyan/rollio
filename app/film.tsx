@@ -115,8 +115,12 @@ export default function Film() {
                         <BackButton />
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             {film.status === 'in-camera' && <AddButton href={{
-                                pathname: '/add_frame',
-                                params: film,
+                                pathname: '/(modal)/frame',
+                                params: {
+                                    film_id: film.id,
+                                    frame_no: film.frame_count,
+                                    frame_id: null
+                                },
                             }} />}
                             <View style={{ width: 8 }} />
                             <FilmOptionsButton onPress={openBottomSheet} />
@@ -166,7 +170,7 @@ export default function Film() {
                         <FlatList
                             data={frames}
                             disableIntervalMomentum={true}
-                            renderItem={({ item, index }) => <FrameCard item={item} index={index} />}
+                            renderItem={({ item, index }) => <FrameCard item={item} index={index} film_id={film.id} disabled={film.status === 'in-camera' ? false : true} />}
                             keyExtractor={item => item.id.toString()}
                             contentContainerStyle={{ paddingTop: 16, paddingBottom: 50 }}
                             showsVerticalScrollIndicator={false}

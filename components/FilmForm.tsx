@@ -7,7 +7,6 @@ import { filmStatuses } from '@/utils/constants';
 
 
 import { isoValues, expectedShotsValues, pushPullValues } from '@/utils/constants';
-import ApertureIcon from '@/assets/icons/Aperture.svg';
 import HorizontalNumberPicker from './HorizontalNumberPicker';
 
 interface FilmFormProps {
@@ -30,7 +29,7 @@ export function FilmForm({ form, setForm, isEdit = false, filmSuggestions = [], 
         camera: false,
     });
 
-    const handleScroll = (field: string) => (
+    const handleSuggestionScroll = (field: string) => (
         event: NativeSyntheticEvent<NativeScrollEvent>
     ) => {
         const { contentOffset } = event.nativeEvent;
@@ -97,7 +96,7 @@ export function FilmForm({ form, setForm, isEdit = false, filmSuggestions = [], 
                         <View style={styles.scrollContainer}>
                             <ScrollView
                                 horizontal
-                                onScroll={handleScroll('film')}
+                                onScroll={handleSuggestionScroll('film')}
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerStyle={styles.suggestionsContent}
                                 contentInsetAdjustmentBehavior="always"
@@ -159,7 +158,7 @@ export function FilmForm({ form, setForm, isEdit = false, filmSuggestions = [], 
                         <View style={styles.scrollContainer}>
                             <ScrollView
                                 horizontal
-                                onScroll={handleScroll('camera')}
+                                onScroll={handleSuggestionScroll('camera')}
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerStyle={styles.suggestionsContent}
                             >
@@ -214,7 +213,7 @@ export function FilmForm({ form, setForm, isEdit = false, filmSuggestions = [], 
                     label="Push/Pull"
                     formatValue={(val) => {
                         if (val === 0) return "Box Speed";
-                        if (val > 0) return `Push +${val}`;
+                        if (Number(val) > 0) return `Push +${val}`;
                         return `Pull ${val}`;
                     }}
                     onValueChange={(push_pull) => onChange('push_pull', push_pull)}

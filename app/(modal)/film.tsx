@@ -70,10 +70,6 @@ export default function Film_Details() {
         loadSuggestions();
     }, []);
 
-    const onChange = (key: string, value: string | number) => {
-        setForm({ ...form, [key]: value });
-    };
-
     const database = useSQLiteContext();
 
     const saveFilmToDb = async () => {

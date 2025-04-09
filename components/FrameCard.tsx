@@ -8,16 +8,18 @@ import Reanimated, {
     withTiming,
     withDelay
 } from 'react-native-reanimated';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { type Frame } from '@/utils/types';
 
 
 interface FrameCardProps {
     item: Frame;
     index: number;
+    film_id: number;
+    disabled?: boolean;
 }
 
-export default function FrameCard({ item, index }: FrameCardProps) {
+export default function FrameCard({ item, index, film_id, disabled }: FrameCardProps) {
 
     const scale = useSharedValue(1);
     const translateY = useSharedValue(50);
@@ -44,11 +46,21 @@ export default function FrameCard({ item, index }: FrameCardProps) {
     return (
 
         <Reanimated.View style={[animatedStyle, { paddingLeft: 12, paddingRight: 12, paddingBottom: 4 }]}>
-            {/* <Link href={{
-                pathname: '#',
-                params: item,
-            }} asChild> */}
             <Pressable
+                onPress={() => {
+                    if (disabled) return;
+                    router.push({
+                        pathname: '/(modal)/frame', params: {
+                            film_id: film_id,
+                            frame_no: item.frame_no,
+                            frame_id: item.id,
+                            lens: item.lens,
+                            aperture: item.aperture,
+                            shutter_speed: item.shutter_speed,
+                            note: item.note,
+                        }
+                    })
+                }}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
             >
@@ -145,7 +157,6 @@ export default function FrameCard({ item, index }: FrameCardProps) {
 
                 </View >
             </Pressable>
-            {/* </Link> */}
         </Reanimated.View >
     )
 
