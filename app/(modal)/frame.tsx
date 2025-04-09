@@ -5,7 +5,7 @@ import CloseButton from "@/components/CloseButton";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useLocalSearchParams, router } from 'expo-router';
-import IsoPicker from '@/components/IsoPicker';
+
 import * as Haptics from "expo-haptics";
 import { Frame } from '@/utils/types';
 

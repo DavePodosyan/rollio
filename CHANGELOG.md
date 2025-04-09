@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] – 2024-04-02
+
+### ✨ New Features
+- Frames can now be **edited** after being logged
+- Added **expected shots** field to rolls (e.g. 36, 24, 12)
+- Added **push/pull development** options for film rolls (e.g. Push +1)
+- Frames now include a **lens** field, autofilled from the previous frame
+
+### 🎯 Improvements
+- **Camera, film, and lens fields** now show **suggestions based on previous entries**
+
+### 🔧 Internal
+- Database schema updated to support new fields
+- Smooth fade UI for suggestion scroll views (visual polish)
+
 ---
 
 ## [1.0.0] – 2025-04-01
