@@ -29,7 +29,7 @@ export default function Frame_Details() {
 
     const [form, setForm] = React.useState({
         lens: lens || '',
-        aperture: aperture || '5.6',
+        aperture: Number(aperture) || 5.6,
         shutter_speed: shutter_speed || '1/125',
         note: note || '',
     });

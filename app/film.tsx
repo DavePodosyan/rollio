@@ -73,6 +73,7 @@ export default function Film() {
     const bottomSheetRef = useRef<BottomSheet>(null);
 
     const openBottomSheet = () => {
+        bottomSheetRef.current?.forceClose();
         bottomSheetRef.current?.collapse();
     }
 

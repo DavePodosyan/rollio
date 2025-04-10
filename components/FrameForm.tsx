@@ -116,7 +116,7 @@ export function FrameForm({ form, setForm, isEdit = false, lensSuggestions = [] 
                     defaultValue={form.aperture}
                     label="Aperture"
                     icon={ApertureIcon}
-                    formatValue={(value) => "f/" + value}
+                    formatValue={(value) => `f/${value}`}
                     onValueChange={(aperture) => onChange('aperture', aperture)}
                 />
 

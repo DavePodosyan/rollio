@@ -1,18 +1,18 @@
 export const apertureValues = [
-    { value: "1.0", major: true }, { value: "1.1", major: false }, { value: "1.2", major: false },
-    { value: "1.4", major: true }, { value: "1.6", major: false }, { value: "1.8", major: false },
-    { value: "2.0", major: true }, { value: "2.2", major: false }, { value: "2.5", major: false },
-    { value: "2.8", major: true }, { value: "3.2", major: false }, { value: "3.5", major: false },
-    { value: "4.0", major: true }, { value: "4.5", major: false }, { value: "5.0", major: false },
-    { value: "5.6", major: true }, { value: "6.3", major: false }, { value: "7.1", major: false },
-    { value: "8.0", major: true }, { value: "9.0", major: false }, { value: "10.0", major: false },
-    { value: "11.0", major: true }, { value: "13.0", major: false }, { value: "14.0", major: false },
-    { value: "16.0", major: true }, { value: "18.0", major: false }, { value: "20.0", major: false },
-    { value: "22.0", major: true }, { value: "25.0", major: false }, { value: "29.0", major: false },
-    { value: "32.0", major: true }, { value: "36.0", major: false }, { value: "40.0", major: false },
-    { value: "45.0", major: true }, { value: "51.0", major: false }, { value: "57.0", major: false },
-    { value: "64.0", major: true }, { value: "72.0", major: false }, { value: "81.0", major: false },
-    { value: "91.0", major: true }
+    { value: 1.0, major: true }, { value: 1.1, major: false }, { value: 1.2, major: false },
+    { value: 1.4, major: true }, { value: 1.6, major: false }, { value: 1.8, major: false },
+    { value: 2.0, major: true }, { value: 2.2, major: false }, { value: 2.5, major: false },
+    { value: 2.8, major: true }, { value: 3.2, major: false }, { value: 3.5, major: false },
+    { value: 4.0, major: true }, { value: 4.5, major: false }, { value: 5.0, major: false },
+    { value: 5.6, major: true }, { value: 6.3, major: false }, { value: 7.1, major: false },
+    { value: 8.0, major: true }, { value: 9.0, major: false }, { value: 10.0, major: false },
+    { value: 11.0, major: true }, { value: 13.0, major: false }, { value: 14.0, major: false },
+    { value: 16.0, major: true }, { value: 18.0, major: false }, { value: 20.0, major: false },
+    { value: 22.0, major: true }, { value: 25.0, major: false }, { value: 29.0, major: false },
+    { value: 32.0, major: true }, { value: 36.0, major: false }, { value: 40.0, major: false },
+    { value: 45.0, major: true }, { value: 51.0, major: false }, { value: 57.0, major: false },
+    { value: 64.0, major: true }, { value: 72.0, major: false }, { value: 81.0, major: false },
+    { value: 91.0, major: true }
 ];
 
 export const shutterSpeedValues = [
