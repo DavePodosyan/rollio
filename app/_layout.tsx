@@ -87,7 +87,7 @@ export default function RootLayout() {
   };
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{ backgroundColor: '#09090B' }}>
       <SQLiteProvider databaseName="rollio.db" onInit={creatDbIfNotExists}>
         <Stack
           screenOptions={{
