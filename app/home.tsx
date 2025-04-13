@@ -8,6 +8,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect } from 'expo-router';
 import { type FilmRoll } from '@/utils/types';
 import * as Haptics from "expo-haptics";
+import * as StoreReview from 'expo-store-review';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Home() {
     const database = useSQLiteContext();
@@ -21,7 +23,7 @@ export default function Home() {
 
     useFocusEffect(React.useCallback(() => {
         console.log('Loading data...');
-
+        maybeAskForReview();
         loadData();
     }, []));
 
@@ -42,6 +44,28 @@ export default function Home() {
             loadData();
         });
     }
+
+    const maybeAskForReview = async () => {
+        try {
+            const hasAsked = await AsyncStorage.getItem('has_asked_for_review');
+
+            if (hasAsked === 'true') return;
+
+            const isAvailable = await StoreReview.isAvailableAsync();
+            if (!isAvailable) return;
+
+            const rolls = await database.getAllAsync<{ id: number }>(
+                'SELECT id FROM films'
+            );
+
+            if (rolls.length > 2) {
+                StoreReview.requestReview();
+                await AsyncStorage.setItem('has_asked_for_review', 'true');
+            }
+        } catch (error) {
+            console.log('Review prompt check failed:', error);
+        }
+    };
 
     return (
         <ImageBackground
