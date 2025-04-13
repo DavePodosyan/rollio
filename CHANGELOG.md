@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] – 2024-04-03
+
+### 🛠 Improvements
+- Added smart review prompt — users are asked to review the app after logging 3 rolls (only once)
+- Fixed minor scroll UI polish for suggestion fields
+
+---
+
 ## [1.1.0] – 2024-04-02
 
 ### ✨ New Features
