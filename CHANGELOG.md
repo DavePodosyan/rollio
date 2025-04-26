@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] – 2024-04-26
+
+### 🛠 Improvements
+-  Improved number picker scrolling for a smoother experience.
+
+---
+
 ## [1.1.1] – 2024-04-03
 
 ### 🛠 Improvements
