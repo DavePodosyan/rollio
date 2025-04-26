@@ -79,24 +79,6 @@ export default function Frame_Details() {
         }
     };
 
-    const loadPreviousFrame = async () => {
-        if (isEdit) return; // skip if editing
-
-        try {
-            const [lastFrame] = await database.getAllAsync<Frame>(`
-                SELECT lens FROM frames 
-                WHERE film_id = ? AND frame_no = ? 
-                LIMIT 1
-            `, [film_id, frame_no]);
-
-            if (lastFrame?.lens) {
-                setForm(prev => ({ ...prev, lens: lastFrame.lens || '' }));
-            }
-        } catch (error) {
-            console.log('Error loading previous frame lens:', error);
-        }
-    };
-
     const saveFrameToDb = async () => {
         console.log('Saving to database...');
 

@@ -25,7 +25,7 @@ export default function HorizontalNumberPicker({ values, defaultValue, label, ic
     const flatListRef = React.useRef<FlatList>(null);
 
     React.useEffect(() => {
-        scrollToValue(DEFAULT_VALUE_INDEX);
+        // scrollToValue(DEFAULT_VALUE_INDEX);
     }, []);
 
     const handleSelectValue = (index: number) => {
@@ -122,14 +122,23 @@ export default function HorizontalNumberPicker({ values, defaultValue, label, ic
                     onScroll={handleScroll}
                     // onScrollEndDrag={handleScrollEnd}
                     onMomentumScrollEnd={handleScrollEnd}
-                    initialScrollIndex={DEFAULT_VALUE_INDEX}
+                    // initialScrollIndex={DEFAULT_VALUE_INDEX}
                     getItemLayout={(data, index) => ({
                         length: ITEM_WIDTH,
                         offset: ITEM_WIDTH * index,
                         index,
                     })}
                     keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item, index }) => renderItem(item, index)} />
+                    renderItem={({ item, index }) => renderItem(item, index)}
+                    onLayout={() => {
+                        if (flatListRef.current) {
+                            flatListRef.current.scrollToOffset({
+                                offset: DEFAULT_VALUE_INDEX * ITEM_WIDTH,
+                                animated: false, // important: no animation
+                            });
+                        }
+                    }}
+                />
             </View>
         </View>
     );
