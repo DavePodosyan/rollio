@@ -58,6 +58,7 @@ export default function FrameCard({ item, index, film_id, disabled }: FrameCardP
                             aperture: item.aperture,
                             shutter_speed: item.shutter_speed,
                             note: item.note,
+                            image: item.image,
                         }
                     })
                 }}

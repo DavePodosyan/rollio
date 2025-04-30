@@ -65,7 +65,8 @@ export default function RootLayout() {
     const columnsToAdd = [
       { table: 'films', column: 'expected_shots', type: 'INTEGER', defaultValue: '36' },
       { table: 'films', column: 'push_pull', type: 'INTEGER', defaultValue: '0' },
-      { table: 'frames', column: 'lens', type: 'TEXT', defaultValue: '""' }
+      { table: 'frames', column: 'lens', type: 'TEXT', defaultValue: '""' },
+      { table: 'frames', column: 'image', type: 'TEXT', defaultValue: '""' }
     ];
 
     for (const { table, column, type, defaultValue } of columnsToAdd) {

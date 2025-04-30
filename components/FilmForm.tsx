@@ -106,7 +106,6 @@ export function FilmForm({ form, setForm, isEdit = false, filmSuggestions = [], 
                                         key={film}
                                         onPress={() => {
                                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
-                                            console.log(film);
 
                                             onChange('title', film)
                                         }

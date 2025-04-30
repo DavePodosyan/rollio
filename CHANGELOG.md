@@ -1,6 +1,16 @@
 # 📦 Rollio Changelog
 
 All notable changes to this project will be documented in this file.
+## [1.2.0] – 2024-04-04
+
+### ✨ New Feature
+- Added support for attaching an image to each frame (optional)
+  - Perfect for logging scans, previews, or behind-the-scenes photos
+
+### 🛠 Improvements
+- Small internal cleanup and prep for future features
+
+---
 
 ## [1.1.2] – 2024-04-26
 

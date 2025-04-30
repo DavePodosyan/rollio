@@ -14,6 +14,7 @@ import BottomSheet, { BottomSheetView, BottomSheetBackdrop } from '@gorhom/botto
 import { BlurView } from 'expo-blur';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 import * as Haptics from "expo-haptics";
+import { deleteFilmWithFrameImages } from '@/utils/filmService';
 
 export default function Film() {
     const database = useSQLiteContext();
@@ -40,9 +41,9 @@ export default function Film() {
     }, []));
 
     const onFilmDelete = () => {
-        database.runAsync(`DELETE FROM films WHERE id = ?`, [film.id]).then(() => {
+        deleteFilmWithFrameImages(database, film.id).then(() => {
             bottomSheetRef.current?.close();
-            router.back()
+            router.back();
         });
     }
 

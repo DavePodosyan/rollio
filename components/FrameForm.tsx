@@ -12,6 +12,8 @@ import ApertureIcon from '@/assets/icons/Aperture.svg';
 import ShutterSpeedIcon from '@/assets/icons/ShutterSpeed.svg';
 import HorizontalNumberPicker from './HorizontalNumberPicker';
 
+import ImageUploader from './ImageUploader';
+
 interface FrameFormProps {
     form: any;
     setForm: (value: any) => void;
@@ -19,7 +21,7 @@ interface FrameFormProps {
     lensSuggestions?: string[];
 }
 
-export function FrameForm({ form, setForm, isEdit = false, lensSuggestions = [] }: FrameFormProps) {
+export default function FrameForm({ form, setForm, isEdit = false, lensSuggestions = [] }: FrameFormProps) {
     const onChange = (key: string, value: string | number) => {
         setForm({ ...form, [key]: value });
     };
@@ -75,7 +77,6 @@ export function FrameForm({ form, setForm, isEdit = false, lensSuggestions = [] 
                                         key={lens}
                                         onPress={() => {
                                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
-                                            console.log(lens);
 
                                             onChange('lens', lens)
                                         }
@@ -149,6 +150,13 @@ export function FrameForm({ form, setForm, isEdit = false, lensSuggestions = [] 
                 />
             </View>
 
+            <View style={{ marginBottom: 24 }}>
+                <ImageUploader
+                    onChange={(image) => onChange('image', image ?? '')}
+                    value={form.image}
+                />
+            </View>
+
 
         </View>
 
@@ -188,7 +196,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
         borderWidth: 1,
         padding: 16,
-        backgroundColor: '#000',
+        backgroundColor: '#0B0B0F',
         borderRadius: 20,
         borderColor: '#FFFFFF99',
         color: '#fff',

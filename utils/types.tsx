@@ -20,4 +20,5 @@ export type Frame = {
     note: string | null;
     created_at: string;
     lens: string | null;
+    image: string | null;
 };

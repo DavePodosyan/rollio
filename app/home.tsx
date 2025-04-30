@@ -5,6 +5,7 @@ import AddButton from "@/components/AddButton";
 import FilmCard from '@/components/FilmCard';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useSQLiteContext } from 'expo-sqlite';
+import { deleteFilmWithFrameImages } from '@/utils/filmService';
 import { useFocusEffect } from 'expo-router';
 import { type FilmRoll } from '@/utils/types';
 import * as Haptics from "expo-haptics";
@@ -39,7 +40,7 @@ export default function Home() {
     const insets = useSafeAreaInsets();
 
     const deleteItem = (id: number) => {
-        database.runAsync(`DELETE FROM films WHERE id = ?`, [id]).then(() => {
+        deleteFilmWithFrameImages(database, id).then(() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             loadData();
         });
