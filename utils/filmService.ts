@@ -8,10 +8,12 @@ export const deleteFilmWithFrameImages = async (database: SQLiteDatabase, film_i
     const frames = await database.getAllAsync<{ image: string }>(`SELECT image FROM frames WHERE film_id = ? AND image IS NOT NULL`, [film_id]);
 
     for (const frame of frames) {
-        deleteFrameImage(frame.image);
+        if (frame.image) {
+            deleteFrameImage(frame.image);
+        }
     }
 
-    database.runAsync(`DELETE FROM films WHERE id = ?`, [film_id]);
+    await database.runAsync(`DELETE FROM films WHERE id = ?`, [film_id]);
 
 }
 

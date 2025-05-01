@@ -1,7 +1,17 @@
 # 📦 Rollio Changelog
 
 All notable changes to this project will be documented in this file.
-## [1.2.0] – 2024-04-04
+
+## [1.2.1] – 2024-05-01
+
+### 🐞 Bug Fix
+- Fixed a bug where films could not be deleted if any of their frames had an empty string as the image value
+- Image deletion now properly handles empty or invalid paths
+- Added missing `await` to database deletion to ensure proper cleanup
+
+---
+
+## [1.2.0] – 2024-04-30
 
 ### ✨ New Feature
 - Added support for attaching an image to each frame (optional)
