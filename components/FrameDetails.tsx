@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, NativeSyntheticEvent, NativeScrollEvent, Image } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, NativeSyntheticEvent, NativeScrollEvent, Image, Modal, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from "expo-haptics";
 
@@ -10,62 +10,101 @@ import { apertureValues, shutterSpeedValues } from '@/utils/constants';
 
 import ApertureIcon from '@/assets/icons/Aperture.svg';
 import ShutterSpeedIcon from '@/assets/icons/ShutterSpeed.svg';
+import LensIcon from '@/assets/icons/Lens.svg';
 
 
 import ImageUploader from './ImageUploader';
 
 interface FrameDetailsProps {
+    lens: string | null;
     aperture: string;
     shutter_speed: string;
     note: string | null;
     image: string | null;
 }
 
-export default function FrameDetails({ aperture, shutter_speed, note, image }: FrameDetailsProps) {
+export default function FrameDetails({ lens, aperture, shutter_speed, note, image }: FrameDetailsProps) {
+    const [previewVisible, setPreviewVisible] = React.useState(false);
 
     return (
-        <View>
+        <>
+            <View>
 
-            <View style={styles.itemContainer}>
-                <View style={styles.iconLabelContainer}>
-                    <View style={styles.iconContainer}>
-                        <ApertureIcon />
+                {lens && (
+                    <View style={styles.itemContainer}>
+                        <View style={styles.iconLabelContainer}>
+                            <View style={styles.iconContainer}>
+                                <LensIcon />
+                            </View>
+                            <Text style={styles.iconLabel}>{lens}</Text>
+                        </View>
                     </View>
-                    <Text style={styles.iconLabel}>Aperture</Text>
+                )}
+
+                <View style={styles.itemContainer}>
+                    <View style={styles.iconLabelContainer}>
+                        <View style={styles.iconContainer}>
+                            <ApertureIcon />
+                        </View>
+                        <Text style={styles.iconLabel}>Aperture</Text>
+                    </View>
+                    <Text style={[styles.iconLabel, styles.iconValue]}>f/{aperture}</Text>
                 </View>
-                <Text style={[styles.iconLabel, styles.iconValue]}>f/{aperture}</Text>
+
+                <View style={styles.itemContainer}>
+                    <View style={styles.iconLabelContainer}>
+                        <View style={styles.iconContainer}>
+                            <ShutterSpeedIcon />
+                        </View>
+                        <Text style={styles.iconLabel}>Shutter Speed</Text>
+                    </View>
+                    <Text style={[styles.iconLabel, styles.iconValue]}>{shutter_speed}</Text>
+                </View>
+
+                {note && (
+                    <View style={{ marginTop: 12, marginBottom: 24 }}>
+                        <Text style={styles.iconLabel}>Note:</Text>
+                        <Text style={[styles.iconLabel, { fontSize: 15 }]}>{note}</Text>
+                    </View>
+                )}
+
+
+                {image && (
+                    <TouchableOpacity onPress={() => setPreviewVisible(true)}>
+                        <Image source={{ uri: image }} style={{ width: '100%', height: 250, borderRadius: 12, marginTop: 12 }} />
+                    </TouchableOpacity>
+                )}
+
+
+
             </View>
 
-            <View style={styles.itemContainer}>
-                <View style={styles.iconLabelContainer}>
-                    <View style={styles.iconContainer}>
-                        <ShutterSpeedIcon />
-                    </View>
-                    <Text style={styles.iconLabel}>Shutter Speed</Text>
-                </View>
-                <Text style={[styles.iconLabel, styles.iconValue]}>{shutter_speed}</Text>
-            </View>
-
-            {note && (
-                <View style={{ marginTop: 12, marginBottom: 24 }}>
-                    <Text style={styles.iconLabel}>Note:</Text>
-                    <Text style={[styles.iconLabel, { fontSize: 15 }]}>{note}</Text>
-                </View>
-            )}
-
-
-            {image && (
-                <TouchableOpacity>
-                    <Image source={{ uri: image }} style={{ width: '100%', height: 250, borderRadius: 12, marginTop: 12 }} />
-                </TouchableOpacity>
-            )}
-
-
-
-
-
-
-        </View>
+            <Modal
+                visible={previewVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setPreviewVisible(false)}
+            >
+                <Pressable
+                    style={{
+                        flex: 1,
+                        backgroundColor: '#000',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                    onPress={() => setPreviewVisible(false)}
+                >
+                    <Image
+                        source={image ? { uri: image } : undefined}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            resizeMode: 'contain',
+                        }}
+                    />
+                </Pressable>
+            </Modal>
+        </>
 
     );
 }

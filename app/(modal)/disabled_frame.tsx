@@ -83,6 +83,7 @@ export default function Frame_Details() {
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                             <View>
                                 <FrameDetails
+                                    lens={form.lens}
                                     aperture={form.aperture.toString()}
                                     shutter_speed={form.shutter_speed}
                                     note={form.note}
