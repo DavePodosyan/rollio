@@ -48,9 +48,9 @@ export default function FrameCard({ item, index, film_id, disabled }: FrameCardP
         <Reanimated.View style={[animatedStyle, { paddingLeft: 12, paddingRight: 12, paddingBottom: 4 }]}>
             <Pressable
                 onPress={() => {
-                    if (disabled) return;
                     router.push({
-                        pathname: '/(modal)/frame', params: {
+                        pathname: disabled ? '/(modal)/disabled_frame' : '/(modal)/frame',
+                        params: {
                             film_id: film_id,
                             frame_no: item.frame_no,
                             frame_id: item.id,

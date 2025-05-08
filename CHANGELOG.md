@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] – 2024-05-08
+
+### ✨ New Feature
+- You can now view frame details even when the film is marked as "developing" or "archived"
+- Frames open in **read-only mode** for non-active rolls
+
+### 🛠 Improvements
+- Improved the consistency of frame interaction across film statuses
+
+---
+
 ## [1.2.1] – 2024-05-01
 
 ### 🐞 Bug Fix
