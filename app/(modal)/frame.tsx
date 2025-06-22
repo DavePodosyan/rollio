@@ -29,7 +29,6 @@ import { saveFrameImage, deleteFrameImage } from '@/utils/filmService';
 
 export default function Frame_Details() {
     const insets = useSafeAreaInsets();
-
     const props = useLocalSearchParams();
     const film_id = Number(props.film_id as string);
     const frame_no = Number(props.frame_no as string);
@@ -41,6 +40,7 @@ export default function Frame_Details() {
     const image = props.image as string | null;
     const isEdit = Boolean(frame_id);
 
+    const [loading, setLoading] = React.useState(true);
     const [form, setForm] = React.useState({
         lens: lens || '',
         aperture: Number(aperture) || 0,
@@ -111,6 +111,8 @@ export default function Frame_Details() {
             setLensSuggestions(lens);
         } catch (error) {
             console.log('Error loading lens suggestions:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -225,31 +227,35 @@ export default function Frame_Details() {
                 >
                     <TouchableHighlight>
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                            <View><FrameForm
-                                form={form}
-                                setForm={setForm}
-                                isEdit={isEdit}
-                                lensSuggestions={lensSuggestions}
-                            />
-
-                                <TouchableOpacity
-                                    onPress={saveFrameToDb}
-                                    style={{
-                                        height: 52,
-                                        backgroundColor: "#A8A7FF",
-                                        borderRadius: 20,
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        marginTop: 12,
-                                        // marginBottom: 54,
-                                    }}
-                                >
-                                    <Text style={{
-                                        fontFamily: 'LufgaMedium',
-                                        fontSize: 16,
-                                        color: '#18181B',
-                                    }}>Save</Text>
-                                </TouchableOpacity></View>
+                            <View>
+                                {!loading && (
+                                    <>
+                                        <FrameForm
+                                            form={form}
+                                            setForm={setForm}
+                                            isEdit={isEdit}
+                                            lensSuggestions={lensSuggestions}
+                                        />
+                                        <TouchableOpacity
+                                            onPress={saveFrameToDb}
+                                            style={{
+                                                height: 52,
+                                                backgroundColor: "#A8A7FF",
+                                                borderRadius: 20,
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                marginTop: 12,
+                                            }}
+                                        >
+                                            <Text style={{
+                                                fontFamily: 'LufgaMedium',
+                                                fontSize: 16,
+                                                color: '#18181B',
+                                            }}>Save</Text>
+                                        </TouchableOpacity>
+                                    </>
+                                )}
+                            </View>
 
                         </TouchableWithoutFeedback>
                     </TouchableHighlight>
