@@ -12,7 +12,7 @@ export const apertureValues = [
     { value: 32.0, major: true }, { value: 36.0, major: false }, { value: 40.0, major: false },
     { value: 45.0, major: true }, { value: 51.0, major: false }, { value: 57.0, major: false },
     { value: 64.0, major: true }, { value: 72.0, major: false }, { value: 81.0, major: false },
-    { value: 91.0, major: true }
+    { value: 91.0, major: true }, { value: 0, major: true }
 ];
 
 export const shutterSpeedValues = [
@@ -23,13 +23,14 @@ export const shutterSpeedValues = [
     { value: "1/15", major: true }, { value: "1/20", major: false }, { value: "1/25", major: false },
     { value: "1/30", major: true }, { value: "1/40", major: false }, { value: "1/50", major: false },
     { value: "1/60", major: true }, { value: "1/80", major: false }, { value: "1/100", major: false },
-    { value: "1/125", major: true }, { value: "1/160", major: false }, { value: "1/200", major: false },
-    { value: "1/250", major: true }, { value: "1/320", major: false }, { value: "1/400", major: false },
-    { value: "1/500", major: true }, { value: "1/640", major: false }, { value: "1/800", major: false },
+    { value: "1/125", major: true }, { value: "1/160", major: false },
+    { value: "1/200", major: false }, { value: "1/250", major: true }, { value: "1/320", major: false },
+    { value: "1/350", major: false }, { value: "1/400", major: false }, { value: "1/500", major: true },
+    { value: "1/640", major: false }, { value: "1/750", major: false }, { value: "1/800", major: false },
     { value: "1/1000", major: true }, { value: "1/1250", major: false }, { value: "1/1600", major: false },
     { value: "1/2000", major: true }, { value: "1/2500", major: false }, { value: "1/3200", major: false },
     { value: "1/4000", major: true }, { value: "1/5000", major: false }, { value: "1/6400", major: false },
-    { value: "1/8000", major: true }
+    { value: "1/8000", major: true }, { value: "Auto", major: false }
 ];
 
 export const isoValues = [
@@ -59,7 +60,19 @@ export const expectedShotsValues = [
     { value: 25, major: true }, { value: 26, major: false }, { value: 27, major: false },
     { value: 28, major: true }, { value: 29, major: false }, { value: 30, major: false },
     { value: 31, major: true }, { value: 32, major: false }, { value: 33, major: false },
-    { value: 34, major: true }, { value: 35, major: false }, { value: 36, major: false }
+    { value: 34, major: true }, { value: 35, major: false }, { value: 36, major: false },
+    { value: 37, major: true }, { value: 38, major: false }, { value: 39, major: false },
+    { value: 40, major: true }, { value: 41, major: false }, { value: 42, major: false },
+    { value: 43, major: true }, { value: 44, major: false }, { value: 45, major: false },
+    { value: 46, major: true }, { value: 47, major: false }, { value: 48, major: false },
+    { value: 49, major: true }, { value: 50, major: false }, { value: 51, major: false },
+    { value: 52, major: true }, { value: 53, major: false }, { value: 54, major: false },
+    { value: 55, major: true }, { value: 56, major: false }, { value: 57, major: false },
+    { value: 58, major: true }, { value: 59, major: false }, { value: 60, major: false },
+    { value: 61, major: true }, { value: 62, major: false }, { value: 63, major: false },
+    { value: 64, major: true }, { value: 65, major: false }, { value: 66, major: false },
+    { value: 67, major: true }, { value: 68, major: false }, { value: 69, major: false },
+    { value: 70, major: true }, { value: 71, major: false }, { value: 72, major: false },
 ];
 
 export const pushPullValues = [

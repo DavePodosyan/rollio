@@ -76,7 +76,7 @@ export default function Home() {
         >
             <View style={{ flex: 1, paddingTop: insets.top, paddingBottom: 0 }}>
                 <View style={{ paddingLeft: 12, paddingRight: 12, paddingTop: 8, paddingBottom: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={{ color: '#FAFAFA', fontFamily: 'Lufga-Medium', fontSize: 48, lineHeight: 56 }}>Film Rolls</Text>
+                    <Text style={{ color: '#FAFAFA', fontFamily: 'LufgaMedium', fontSize: 48, lineHeight: 56 }}>Film Rolls</Text>
                     <AddButton href='/(modal)/film' />
                     {/* <AddButton href='/test' /> */}
                 </View>
@@ -84,10 +84,10 @@ export default function Home() {
                 <View style={{ flex: 1, paddingTop: 4 }}>
                     {data.length === 0 ? (
                         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                            <Text style={{ color: "#fff", fontFamily: 'Lufga-Medium', textAlign: "center", marginTop: 20 }}>
+                            <Text style={{ color: "#fff", fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
                                 You don't have any film rolls yet.
                             </Text>
-                            <Text style={{ color: "#fff", fontFamily: 'Lufga-Medium', textAlign: "center", marginTop: 20 }}>
+                            <Text style={{ color: "#fff", fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
                                 Click the + button to add one.
                             </Text>
                         </View>

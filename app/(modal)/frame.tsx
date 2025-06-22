@@ -43,8 +43,8 @@ export default function Frame_Details() {
 
     const [form, setForm] = React.useState({
         lens: lens || '',
-        aperture: Number(aperture) || 5.6,
-        shutter_speed: shutter_speed || '1/125',
+        aperture: Number(aperture) || 0,
+        shutter_speed: shutter_speed || 'Auto',
         note: note || '',
         image: image || null,
     });
@@ -68,14 +68,29 @@ export default function Frame_Details() {
 
             if (!isEdit && !currentLens) {
                 const [lastFrame] = await database.getAllAsync<Frame>(`
-                    SELECT lens FROM frames 
+                    SELECT lens,aperture,shutter_speed FROM frames 
                     WHERE film_id = ? AND frame_no = ? 
                     LIMIT 1
                 `, [film_id, frame_no]);
 
-                if (lastFrame?.lens) {
-                    currentLens = lastFrame.lens.trim();
-                    setForm(prev => ({ ...prev, lens: currentLens }));
+                console.log('Last frame:', lastFrame);
+
+
+                if (lastFrame) {
+                    const updates: any = {};
+                    if (lastFrame.lens) {
+                        updates.lens = lastFrame.lens.trim();
+                    }
+                    if (lastFrame.aperture) {
+                        updates.aperture = Number(lastFrame.aperture);
+                    }
+                    if (lastFrame.shutter_speed) {
+                        updates.shutter_speed = lastFrame.shutter_speed;
+                    }
+
+                    if (Object.keys(updates).length > 0) {
+                        setForm(prev => ({ ...prev, ...updates }));
+                    }
                 }
             }
 
@@ -107,7 +122,7 @@ export default function Frame_Details() {
             setPreviousImage(null);
         }
 
-        if (form.image && FileSystem.documentDirectory && !form.image.startsWith(FileSystem.documentDirectory)) {
+        if (form.image && !form.image.startsWith('frames/rollio_')) {
 
             return await saveFrameImage(form.image);
         }
@@ -192,7 +207,7 @@ export default function Frame_Details() {
         <View style={{ flex: 1, backgroundColor: '#09090B', paddingTop: 12, paddingLeft: 12, paddingRight: 12 }}>
             <View style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 12 }}>
                 <CloseButton />
-                <Text style={{ color: '#fff', fontFamily: 'Lufga-Medium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}>{isEdit ? 'Edit' : 'Add New'} Frame</Text>
+                <Text style={{ color: '#fff', fontFamily: 'LufgaMedium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}>{isEdit ? 'Edit' : 'Add New'} Frame</Text>
             </View>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -230,7 +245,7 @@ export default function Frame_Details() {
                                     }}
                                 >
                                     <Text style={{
-                                        fontFamily: 'Lufga-Medium',
+                                        fontFamily: 'LufgaMedium',
                                         fontSize: 16,
                                         color: '#18181B',
                                     }}>Save</Text>

@@ -1,4 +1,4 @@
-import { View, Text, ImageBackground, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ImageBackground, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BackButton from "@/components/BackButton";
 import AddButton from "@/components/AddButton";
@@ -41,10 +41,29 @@ export default function Film() {
     }, []));
 
     const onFilmDelete = () => {
-        deleteFilmWithFrameImages(database, film.id).then(() => {
-            bottomSheetRef.current?.close();
-            router.back();
-        });
+
+        Alert.alert(
+            'Delete Film',
+            'Are you sure you want to delete this film? This action cannot be undone.',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => {
+                        deleteFilmWithFrameImages(database, film.id).then(() => {
+                            bottomSheetRef.current?.close();
+                            router.back();
+                        });
+                    },
+                },
+            ],
+            { cancelable: true }
+        );
+
     }
 
     const onFilmEdit = () => {
@@ -130,17 +149,17 @@ export default function Film() {
                     </View>
 
                     <View style={{ paddingTop: 4, paddingLeft: 12, paddingRight: 12, paddingBottom: 8 }}>
-                        <Text style={{ color: '#FAFAFA', fontFamily: 'Lufga-Medium', fontSize: 32, lineHeight: 40, marginBottom: 2 }}>{film.title}</Text>
-                        <Text style={{ color: '#FFFFFF99', fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, marginBottom: 4 }}>{film.camera} - {new Date(film.created_at).toLocaleDateString('en-GB', {
+                        <Text style={{ color: '#FAFAFA', fontFamily: 'LufgaMedium', fontSize: 32, lineHeight: 40, marginBottom: 2 }}>{film.title}</Text>
+                        <Text style={{ color: '#FFFFFF99', fontFamily: 'LufgaRegular', fontSize: 16, lineHeight: 24, marginBottom: 4 }}>{film.camera} - {new Date(film.created_at).toLocaleDateString('en-GB', {
                             day: '2-digit',
                             month: 'short',
                             year: 'numeric',
                         })}</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBlock: 12 }}>
-                            <Text style={{ backgroundColor: '#ffffff0D', color: highlightColor, fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, paddingBlock: 4, paddingInline: 8, borderRadius: 24, marginRight: 8 }}>{film.status}</Text>
-                            <Text style={{ backgroundColor: '#ffffff0D', color: '#ffffff', fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, paddingBlock: 4, paddingInline: 8, borderRadius: 24 }}>ISO: {film.iso}</Text>
+                            <Text style={{ backgroundColor: '#ffffff0D', color: highlightColor, fontFamily: 'LufgaRegular', fontSize: 16, lineHeight: 24, paddingBlock: 4, paddingInline: 8, borderRadius: 24, marginRight: 8 }}>{film.status}</Text>
+                            <Text style={{ backgroundColor: '#ffffff0D', color: '#ffffff', fontFamily: 'LufgaRegular', fontSize: 16, lineHeight: 24, paddingBlock: 4, paddingInline: 8, borderRadius: 24 }}>ISO: {film.iso}</Text>
                             {film.push_pull !== 0 && (
-                                <Text style={{ backgroundColor: '#ffffff0D', color: '#ffffff', fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, paddingBlock: 4, paddingInline: 8, borderRadius: 24 }}>{film.push_pull < 0 ? 'Pull ' : 'Push +'}{film.push_pull}</Text>
+                                <Text style={{ backgroundColor: '#ffffff0D', color: '#ffffff', fontFamily: 'LufgaRegular', fontSize: 16, lineHeight: 24, paddingBlock: 4, paddingInline: 8, borderRadius: 24 }}>{film.push_pull < 0 ? 'Pull ' : 'Push +'}{film.push_pull}</Text>
                             )}
                         </View>
                         <View
@@ -162,7 +181,7 @@ export default function Film() {
                                     borderRadius: height / 2,
                                 }}
                             >
-                                <Text style={{ color: '#18181B', fontFamily: 'Lufga-Medium', fontSize: 18, lineHeight: 26, position: 'absolute', left: 10, top: (height - 26) / 2 }}>{film.frame_count}/{maxShots}</Text>
+                                <Text style={{ color: '#18181B', fontFamily: 'LufgaMedium', fontSize: 18, lineHeight: 26, position: 'absolute', left: 10, top: (height - 26) / 2 }}>{film.frame_count}/{maxShots}</Text>
                             </View>
                         </View>
 
@@ -250,7 +269,7 @@ export default function Film() {
 const styles = StyleSheet.create({
     options: {
         color: '#D0D0D1',
-        fontFamily: 'Lufga-Medium',
+        fontFamily: 'LufgaMedium',
         fontSize: 16,
         lineHeight: 24,
         marginBottom: 16,

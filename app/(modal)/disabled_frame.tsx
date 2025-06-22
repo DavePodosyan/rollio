@@ -43,10 +43,10 @@ export default function Frame_Details() {
 
     const [form, setForm] = React.useState({
         lens: lens || '',
-        aperture: Number(aperture) || 5.6,
-        shutter_speed: shutter_speed || '1/125',
+        aperture: Number(aperture) || 0,
+        shutter_speed: shutter_speed || 'Auto',
         note: note || '',
-        image: image || null,
+        image: image ? FileSystem.documentDirectory + image : null,
     });
 
     const [lensSuggestions, setLensSuggestions] = React.useState<string[]>([]);
@@ -63,7 +63,7 @@ export default function Frame_Details() {
         <View style={{ flex: 1, backgroundColor: '#09090B', paddingTop: 12, paddingLeft: 12, paddingRight: 12 }}>
             <View style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 12 }}>
                 <CloseButton />
-                <Text style={{ color: '#fff', fontFamily: 'Lufga-Medium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}> Frame #{frame_no}</Text>
+                <Text style={{ color: '#fff', fontFamily: 'LufgaMedium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}> Frame #{frame_no}</Text>
             </View>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -84,7 +84,7 @@ export default function Frame_Details() {
                             <View>
                                 <FrameDetails
                                     lens={form.lens}
-                                    aperture={form.aperture.toString()}
+                                    aperture={form.aperture}
                                     shutter_speed={form.shutter_speed}
                                     note={form.note}
                                     image={form.image}

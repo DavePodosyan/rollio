@@ -117,7 +117,10 @@ export default function FrameForm({ form, setForm, isEdit = false, lensSuggestio
                     defaultValue={form.aperture}
                     label="Aperture"
                     icon={ApertureIcon}
-                    formatValue={(value) => `f/${value}`}
+                    formatValue={(value) => {
+                        if (value === 0) return "Auto";
+                        return `f/${value}`;
+                    }}
                     onValueChange={(aperture) => onChange('aperture', aperture)}
                 />
 
@@ -173,7 +176,7 @@ const styles = StyleSheet.create({
     },
     statusButtonText: {
         color: '#fff',
-        fontFamily: 'Lufga-Regular',
+        fontFamily: 'LufgaRegular',
         fontSize: 14,
         lineHeight: 20
     },
@@ -187,7 +190,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         borderColor: '#FFFFFF99',
         color: '#fff',
-        fontFamily: 'Lufga-Regular',
+        fontFamily: 'LufgaRegular',
         fontSize: 14,
         lineHeight: 20
     },
@@ -200,7 +203,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         borderColor: '#FFFFFF99',
         color: '#fff',
-        fontFamily: 'Lufga-Regular',
+        fontFamily: 'LufgaRegular',
         fontSize: 16,
         lineHeight: 22
     },
@@ -219,7 +222,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     suggestionText: {
-        fontFamily: 'Lufga-Regular',
+        fontFamily: 'LufgaRegular',
         color: '#FFFFFF99',
         fontSize: 12,
     },

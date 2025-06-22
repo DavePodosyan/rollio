@@ -19,10 +19,12 @@ export const deleteFilmWithFrameImages = async (database: SQLiteDatabase, film_i
 
 export const deleteFrameImage = async (uri: string) => {
 
+    
     try {
-        const info = await FileSystem.getInfoAsync(uri);
+        const fullPath = FileSystem.documentDirectory + uri
+        const info = await FileSystem.getInfoAsync(fullPath);
         if (info.exists) {
-            await FileSystem.deleteAsync(uri, { idempotent: true });
+            await FileSystem.deleteAsync(fullPath, { idempotent: true });
         }
     } catch (err) {
         console.log('Error deleting image:', err);
@@ -46,7 +48,7 @@ export const saveFrameImage = async (uri: string) => {
     try {
         await FileSystem.copyAsync({ from: uri, to: newPath });
 
-        return newPath;
+        return `frames/rollio_${filename}`;
 
     } catch (error) {
         console.log('Error saving image locally:', error);

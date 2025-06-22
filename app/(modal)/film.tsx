@@ -129,7 +129,7 @@ export default function Film_Details() {
         <View style={{ flex: 1, backgroundColor: '#09090B', paddingTop: 12, paddingLeft: 12, paddingRight: 12 }}>
             <View style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 12 }}>
                 <CloseButton />
-                <Text style={{ color: '#fff', fontFamily: 'Lufga-Medium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}>{isEdit ? 'Edit' : 'Add'} Film Roll</Text>
+                <Text style={{ color: '#fff', fontFamily: 'LufgaMedium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}>{isEdit ? 'Edit' : 'Add'} Film Roll</Text>
             </View>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -163,7 +163,7 @@ export default function Film_Details() {
                             }}
                         >
                             <Text style={{
-                                fontFamily: 'Lufga-Medium',
+                                fontFamily: 'LufgaMedium',
                                 fontSize: 16,
                                 color: '#18181B',
                             }}>Save</Text>

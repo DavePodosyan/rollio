@@ -23,10 +23,25 @@ export default function HorizontalNumberPicker({ values, defaultValue, label, ic
     );
     const [value, setValue] = React.useState(values[DEFAULT_VALUE_INDEX].value);
     const flatListRef = React.useRef<FlatList>(null);
+    const isScrollingRef = React.useRef(false); // track whether user is scrolling
+
 
     React.useEffect(() => {
-        // scrollToValue(DEFAULT_VALUE_INDEX);
-    }, []);
+        if (!isScrollingRef.current) {
+            const newIndex = values.findIndex((item) => item.value === defaultValue);
+
+            if (newIndex !== -1 && defaultValue !== value) {
+                setValue(defaultValue);
+
+                if (flatListRef.current) {
+                    flatListRef.current.scrollToOffset({
+                        offset: newIndex * ITEM_WIDTH,
+                        animated: false, // disable animation on external update
+                    });
+                }
+            }
+        }
+    }, [defaultValue, values]);
 
     const handleSelectValue = (index: number) => {
         setValue(values[index].value);
@@ -46,24 +61,24 @@ export default function HorizontalNumberPicker({ values, defaultValue, label, ic
     };
 
     const handleScroll = (event: any) => {
+        isScrollingRef.current = true;
+
         const currentScrollPosition = event.nativeEvent.contentOffset.x;
-        var index = Math.round(currentScrollPosition / ITEM_WIDTH);
+        const index = Math.round(currentScrollPosition / ITEM_WIDTH);
 
         if (index >= 0 && index < values.length) {
-            const newiso = values[index].value;
-            if (newiso !== value) {
-                setValue(newiso);
-
-                if (onValueChange) {
-                    onValueChange(newiso);
-                }
-
+            const newVal = values[index].value;
+            if (newVal !== value) {
+                setValue(newVal);
+                onValueChange?.(newVal);
                 handleHapticFeedback();
             }
         }
     };
 
     const handleScrollEnd = (event: any) => {
+        isScrollingRef.current = false;
+
         const scrollX = event.nativeEvent.contentOffset.x;
         const maxScroll = ITEM_WIDTH * (values.length - 1);
 
@@ -84,6 +99,8 @@ export default function HorizontalNumberPicker({ values, defaultValue, label, ic
                         styles.line,
                         item.major ? styles.majorLine : styles.minorLine,
                         item.value === value && styles.selectedLine,
+                        item.value === 0 && styles.selectedLineAuto,
+                        item.value === 'Auto' && styles.selectedLineAuto,
                     ]}
                 />
             </TouchableOpacity>
@@ -101,7 +118,12 @@ export default function HorizontalNumberPicker({ values, defaultValue, label, ic
                     )}
                     <Text style={styles.label}>{label}</Text>
                 </View>
-                <Text style={[styles.label, styles.value]}>
+                <Text style={[
+                    styles.label,
+                    styles.value,
+                    value === 0 && styles.valueAuto,
+                    value === 'Auto' && styles.valueAuto
+                ]}>
                     {formatValue ? formatValue(value) : value}
                 </Text>
             </View>
@@ -165,7 +187,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     label: {
-        fontFamily: 'Lufga-Regular',
+        fontFamily: 'LufgaRegular',
         color: '#fff',
         fontSize: 14,
         lineHeight: 24,
@@ -173,6 +195,9 @@ const styles = StyleSheet.create({
     value: {
         width: '50%',
         color: '#A8A7FF'
+    },
+    valueAuto: {
+        color: '#89FFB2'
     },
     pickerContainer: {
         width: "100%",
@@ -201,5 +226,11 @@ const styles = StyleSheet.create({
         width: 3,
         opacity: 1
     },
+    selectedLineAuto: {
+        backgroundColor: "#89FFB2",
+        // height: 24,
+        width: 3,
+        opacity: 1
+    }
 
 });

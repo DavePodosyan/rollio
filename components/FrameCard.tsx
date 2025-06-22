@@ -78,7 +78,7 @@ export default function FrameCard({ item, index, film_id, disabled }: FrameCardP
                                 justifyContent: "center",
                             }}
                         >
-                            <Text style={{ color: '#FFFFFF', fontFamily: 'Lufga-Medium', fontSize: 18, lineHeight: 26 }}>{item.frame_no}</Text>
+                            <Text style={{ color: '#FFFFFF', fontFamily: 'LufgaMedium', fontSize: 18, lineHeight: 26 }}>{item.frame_no}</Text>
                         </View >
                     </View>
                     <View style={{ marginLeft: 16, minHeight: 52, flex: 1 }}>
@@ -86,7 +86,7 @@ export default function FrameCard({ item, index, film_id, disabled }: FrameCardP
                             style={{
                                 flex: 1,
                                 color: '#FFFFFF',
-                                fontFamily: 'Lufga-Regular',
+                                fontFamily: 'LufgaRegular',
                                 fontSize: 18,
                                 lineHeight: 26,
                                 marginBottom: 4
@@ -124,7 +124,7 @@ export default function FrameCard({ item, index, film_id, disabled }: FrameCardP
                                     </Defs>
                                 </Svg>
 
-                                <Text style={{ color: '#FFFFFF', fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, marginLeft: 8 }}>f/{item.aperture}</Text>
+                                <Text style={{ color: '#FFFFFF', fontFamily: 'LufgaRegular', fontSize: 16, lineHeight: 24, marginLeft: 8 }}>{Number(item.aperture) === 0 ? 'Auto' : 'f/' + item.aperture}</Text>
                             </View >
 
                             <View style={{
@@ -148,7 +148,7 @@ export default function FrameCard({ item, index, film_id, disabled }: FrameCardP
                                     </Defs>
                                 </Svg>
 
-                                <Text style={{ color: '#FFFFFF', fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, marginLeft: 8 }}>{item.shutter_speed}</Text>
+                                <Text style={{ color: '#FFFFFF', fontFamily: 'LufgaRegular', fontSize: 16, lineHeight: 24, marginLeft: 8 }}>{item.shutter_speed}</Text>
                             </View >
 
                         </View>

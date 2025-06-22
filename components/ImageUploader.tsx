@@ -7,7 +7,11 @@ import TrashIcon from '@/assets/icons/TrashIcon.svg';
 import * as FileSystem from 'expo-file-system';
 export default function ImageUploader({ value, onChange }: { value: string | null, onChange: (uri: string | null) => void }) {
     const [previewVisible, setPreviewVisible] = React.useState(false);
-
+    
+    if(value?.startsWith('frames/rollio_')){
+        // Convert the relative path to a full file URI
+        value = FileSystem.documentDirectory + value;
+    }
     const handleUploadPress = () => {
         Alert.alert(
             'Select Image',
@@ -34,6 +38,7 @@ export default function ImageUploader({ value, onChange }: { value: string | nul
         });
 
         if (!result.canceled && result.assets?.[0]?.uri) {
+            console.log('Photo taken:', result.assets);
             onChange(result.assets[0].uri);
         }
     };
@@ -46,6 +51,7 @@ export default function ImageUploader({ value, onChange }: { value: string | nul
         });
 
         if (!result.canceled && result.assets?.[0]?.uri) {
+            console.log('Photo taken:', result.assets);
             onChange(result.assets[0].uri);
         }
     };
@@ -126,7 +132,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         lineHeight: 20,
         color: '#FFFFFF99',
-        fontFamily: 'Lufga-Regular',
+        fontFamily: 'LufgaRegular',
     },
     image: {
         width: "100%",

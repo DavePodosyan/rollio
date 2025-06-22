@@ -114,8 +114,8 @@ export default function FilmCard({ item, onDelete, index }: FilmCardProps) {
                         >
 
                             <View style={{ backgroundColor: '#FFFFFF0D', borderRadius: 32, padding: 24 }}>
-                                <Text style={{ backgroundColor: highlightColor, color: '#18181B', fontFamily: 'Lufga-Regular', fontSize: 12, lineHeight: 20, paddingBlock: 6, paddingInline: 8, borderRadius: 24, position: 'absolute', right: 10, top: 10 }}>{item.status}</Text>
-                                <Text style={{ color: '#FFFFFF99', fontFamily: 'Lufga-Regular', fontSize: 16, lineHeight: 24, marginBottom: 4, }}>
+                                <Text style={{ backgroundColor: highlightColor, color: '#18181B', fontFamily: 'LufgaRegular', fontSize: 12, lineHeight: 20, paddingBlock: 6, paddingInline: 8, borderRadius: 24, position: 'absolute', right: 10, top: 10 }}>{item.status}</Text>
+                                <Text style={{ color: '#FFFFFF99', fontFamily: 'LufgaRegular', fontSize: 16, lineHeight: 24, marginBottom: 4, }}>
                                     {item.camera
                                         ? `${item.camera} - `
                                         : ''}
@@ -125,7 +125,7 @@ export default function FilmCard({ item, onDelete, index }: FilmCardProps) {
                                         year: 'numeric',
                                     })}
                                 </Text>
-                                <Text style={{ color: '#FAFAFA', fontFamily: 'Lufga-Medium', fontSize: 32, lineHeight: 40, marginBottom: 32 }}>{item.title}</Text>
+                                <Text style={{ color: '#FAFAFA', fontFamily: 'LufgaMedium', fontSize: 32, lineHeight: 40, marginBottom: 32 }}>{item.title}</Text>
 
                                 <View
                                     style={{
@@ -145,7 +145,7 @@ export default function FilmCard({ item, onDelete, index }: FilmCardProps) {
                                             borderRadius: height / 2,
                                         }}
                                     >
-                                        <Text style={{ color: '#18181B', fontFamily: 'Lufga-Medium', fontSize: 18, lineHeight: 26, position: 'absolute', left: 10, top: (height - 26) / 2 }}>{item.frame_count}/{maxShots}</Text>
+                                        <Text style={{ color: '#18181B', fontFamily: 'LufgaMedium', fontSize: 18, lineHeight: 26, position: 'absolute', left: 10, top: (height - 26) / 2 }}>{item.frame_count}/{maxShots}</Text>
                                     </View>
                                 </View>
                             </View >

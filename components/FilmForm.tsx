@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     },
     statusButtonText: {
         color: '#fff',
-        fontFamily: 'Lufga-Regular',
+        fontFamily: 'LufgaRegular',
         fontSize: 14,
         lineHeight: 20
     },
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         borderColor: '#FFFFFF99',
         color: '#fff',
-        fontFamily: 'Lufga-Regular',
+        fontFamily: 'LufgaRegular',
         fontSize: 14,
         lineHeight: 20
     },
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     suggestionText: {
-        fontFamily: 'Lufga-Regular',
+        fontFamily: 'LufgaRegular',
         color: '#FFFFFF99',
         fontSize: 12,
     },
