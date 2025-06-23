@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.2] – 2024-06-23
+
+### ✨ New Feature
+ - You can now view when each frame was added, and if you made a mistake, you can delete the last frame of a roll.
+
+---
+
+## [1.3.1] – 2024-06-22
+
+### ✨ New Feature
+ - You can now set Aperture and Shutter Speed to Auto (green tick at the end of each scale).
+ - When adding a new frame, Aperture and Shutter Speed are now copied from the previous frame to save you time.
+
+
+### 🛠 Improvements
+- Deleting a film now shows a confirmation dialog so you don’t remove anything by accident.
+
+---
+
 ## [1.3.0] – 2024-05-08
 
 ### ✨ New Feature
