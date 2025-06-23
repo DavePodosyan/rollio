@@ -18,8 +18,8 @@ No logins. No cloud. Just you, your camera, and the notes that matter.
 
 ## 📱 Platforms
 
-- **iOS:** Available on the [App Store](https://apps.apple.com/app/rollio-analog-photography-log/id6744120369) (Currently pending EU availability via DSA compliance)
-- **Android:** Coming soon to the Play Store   
+- **iOS:** Available on the [App Store](https://apps.apple.com/app/rollio-analog-photography-log/id6744120369)
+- **Android:** Available on the [Play Market](https://play.google.com/store/apps/details?id=com.davitpodosyan.rollio)
   
 
 ---
