@@ -37,6 +37,7 @@ export default function Frame_Details() {
     const lens = props.lens as string | null;
     const aperture = props.aperture as string;
     const shutter_speed = props.shutter_speed as string;
+    const created_at = props.created_at as string | null;
     const note = props.note as string;
     const image = props.image as string | null;
     const isEdit = Boolean(frame_id);
@@ -63,7 +64,22 @@ export default function Frame_Details() {
         <View style={{ flex: 1, backgroundColor: '#09090B', paddingTop: 12, paddingLeft: 12, paddingRight: 12 }}>
             <View style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 12 }}>
                 <CloseButton />
-                <Text style={{ color: '#fff', fontFamily: 'LufgaMedium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}> Frame #{frame_no}</Text>
+                <View>
+                    <Text style={{ color: '#fff', fontFamily: 'LufgaMedium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}>Frame #{frame_no}</Text>
+                    {created_at && (
+                        <Text style={{ color: '#fff', fontFamily: 'LufgaMedium', fontSize: 12, lineHeight: 16, marginLeft: 10 }}>
+                            {new Intl.DateTimeFormat('en-US', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false,
+                            }).format(new Date(created_at))}
+                        </Text>
+                    )}
+                </View>
+
             </View>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}

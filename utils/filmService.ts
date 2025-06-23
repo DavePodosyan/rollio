@@ -14,12 +14,29 @@ export const deleteFilmWithFrameImages = async (database: SQLiteDatabase, film_i
     }
 
     await database.runAsync(`DELETE FROM films WHERE id = ?`, [film_id]);
+}
+
+export const deleteFrame = async (database: SQLiteDatabase, frame_id: number) => {
+    const { image, film_id } = await database.getFirstAsync<{ image: string | null, film_id: number }>(
+        `SELECT image,film_id FROM frames WHERE id = ?`,
+        [frame_id]
+    ) || {};
+
+    if (image) {
+        await deleteFrameImage(image);
+    }
+
+    await database.runAsync(`DELETE FROM frames WHERE id = ?`, [frame_id]);
+
+    if (film_id) {
+        await database.runAsync(`UPDATE films SET frame_count = frame_count - 1 WHERE id = ?`, [film_id]);
+    }
 
 }
 
 export const deleteFrameImage = async (uri: string) => {
 
-    
+
     try {
         const fullPath = FileSystem.documentDirectory + uri
         const info = await FileSystem.getInfoAsync(fullPath);

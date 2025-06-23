@@ -10,7 +10,8 @@ import {
     TouchableOpacity,
     TouchableWithoutFeedback,
     TouchableHighlight,
-    Keyboard
+    Keyboard,
+    Alert
 } from 'react-native';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,7 +25,7 @@ import { Frame } from '@/utils/types';
 import CloseButton from "@/components/CloseButton";
 import FrameForm from '@/components/FrameForm';
 
-import { saveFrameImage, deleteFrameImage } from '@/utils/filmService';
+import { saveFrameImage, deleteFrameImage, deleteFrame } from '@/utils/filmService';
 
 
 export default function Frame_Details() {
@@ -36,11 +37,14 @@ export default function Frame_Details() {
     const lens = props.lens as string | null;
     const aperture = props.aperture as string;
     const shutter_speed = props.shutter_speed as string;
+    const created_at = props.created_at as string | null;
     const note = props.note as string;
     const image = props.image as string | null;
     const isEdit = Boolean(frame_id);
 
     const [loading, setLoading] = React.useState(true);
+    const [isLastFrame, setIsLastFrame] = React.useState(false);
+
     const [form, setForm] = React.useState({
         lens: lens || '',
         aperture: Number(aperture) || 0,
@@ -57,6 +61,7 @@ export default function Frame_Details() {
         loadSuggestions();
         if (isEdit) {
             setPreviousImage(image);
+            checkIfLastFrame();
         }
     }, []);
 
@@ -113,6 +118,19 @@ export default function Frame_Details() {
             console.log('Error loading lens suggestions:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const checkIfLastFrame = async () => {
+        const result = await database.getFirstAsync<{ max_frame_no: number }>(
+            `SELECT MAX(frame_no) as max_frame_no FROM frames WHERE film_id = ?`,
+            [film_id]
+        );
+
+        if (result?.max_frame_no === frame_no) {
+            setIsLastFrame(true);
+        } else {
+            setIsLastFrame(false);
         }
     };
 
@@ -203,13 +221,56 @@ export default function Frame_Details() {
 
     }
 
+    const handleFrameDelete = async () => {
+
+
+        Alert.alert(
+            'Delete Frame #' + frame_no,
+            'Are you sure you want to delete this frame?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => {
+                        deleteFrame(database, frame_id).then(() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.back();
+                        });
+                    },
+                },
+            ],
+            { cancelable: true }
+        );
+
+
+    }
+
     return (
 
 
         <View style={{ flex: 1, backgroundColor: '#09090B', paddingTop: 12, paddingLeft: 12, paddingRight: 12 }}>
             <View style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 12 }}>
                 <CloseButton />
-                <Text style={{ color: '#fff', fontFamily: 'LufgaMedium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}>{isEdit ? 'Edit' : 'Add New'} Frame</Text>
+                <View>
+                    <Text style={{ color: '#fff', fontFamily: 'LufgaMedium', fontSize: 16, lineHeight: 24, marginLeft: 10 }}>{isEdit ? 'Edit' : 'Add New'} Frame {isEdit && '#' + frame_no}</Text>
+                    {created_at && (
+                        <Text style={{ color: '#fff', fontFamily: 'LufgaMedium', fontSize: 12, lineHeight: 16, marginLeft: 10 }}>
+                            {new Intl.DateTimeFormat('en-US', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false,
+                            }).format(new Date(created_at))}
+                        </Text>
+                    )}
+
+                </View>
             </View>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -253,6 +314,19 @@ export default function Frame_Details() {
                                                 color: '#18181B',
                                             }}>Save</Text>
                                         </TouchableOpacity>
+                                        {isEdit && isLastFrame &&(
+                                            <TouchableOpacity
+                                                onPress={handleFrameDelete}
+                                                style={{
+                                                    marginTop: 16,
+                                                    alignItems: "center",
+                                                }}
+                                            >
+                                                <Text style={{ color: '#EF4444', fontFamily: 'LufgaMedium', fontSize: 14 }}>
+                                                    Delete Frame
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )}
                                     </>
                                 )}
                             </View>
