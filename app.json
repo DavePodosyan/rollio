@@ -25,6 +25,9 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": [
+        "com.android.vending.BILLING"
+      ],
       "package": "com.davitpodosyan.rollio"
     },
     "web": {
