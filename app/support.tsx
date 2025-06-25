@@ -88,6 +88,7 @@ export default function Support() {
     const [loadError, setLoadError] = useState(false);
     const [validationResult, setValidationResult] = useState<any>(null);
     const [loadingSku, setLoadingSku] = useState<string | null>(null);
+    const processedTransactionIds = new Set();
 
     const {
         connected,
@@ -100,20 +101,31 @@ export default function Support() {
         finishTransaction
     } = useIAP({
         onPurchaseSuccess: async (purchase) => {
-            InteractionManager.runAfterInteractions(() => {
-                try {
-                    finishTransaction({
-                        purchase: purchase,
-                        isConsumable: true
-                    });
+            if (processedTransactionIds.has(purchase.transactionId)) {
+                console.log('Transaction already processed:', purchase.transactionId);
+                return;
+            }
+
+            processedTransactionIds.add(purchase.transactionId);
+
+            try {
+                await finishTransaction({
+                    purchase: purchase,
+                    isConsumable: true
+                });
+
+                InteractionManager.runAfterInteractions(() => {
                     Alert.alert('Thank you ❤️', 'Your support is greatly appreciated!');
-                    // alert('Thank you ❤️', 'Your support is greatly appreciated!');
-                    setLoadingSku(null);
-                } catch (e) {
-                    console.log('Error finishing transaction', e);
-                    setLoadingSku(null);
-                }
-            });
+                    console.log('Purchase successful:');
+                });
+
+                setLoadingSku(null);
+            } catch (e) {
+                console.log('Error finishing transaction', e);
+                setLoadingSku(null);
+            }
+
+
         },
         onPurchaseError: (error) => {
             InteractionManager.runAfterInteractions(() => {
@@ -157,6 +169,8 @@ export default function Support() {
     // useEffect(() => {
     //     if (currentPurchase) {
     //         InteractionManager.runAfterInteractions(async () => {
+    //             console.log('Current purchase:', currentPurchase);
+
     //             try {
     //                 await finishTransaction({
     //                     purchase: currentPurchase,
@@ -254,11 +268,15 @@ export default function Support() {
                                                                 style={[styles.supportButton]}
                                                                 onPress={() => {
                                                                     setLoadingSku(item.id);
-                                                                    requestPurchase({
-                                                                        request: {
-                                                                            skus: [item.id],
-                                                                        },
-                                                                    });
+
+                                                                    setTimeout(() => {
+                                                                        requestPurchase({
+                                                                            request: {
+                                                                                skus: [item.id],
+                                                                            },
+                                                                        });
+                                                                    }, 1000);
+
                                                                     setTimeout(() => {
                                                                         setLoadingSku((prev) => prev === item.id ? null : prev);
                                                                     }, 20000);
