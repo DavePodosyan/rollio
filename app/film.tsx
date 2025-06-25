@@ -15,6 +15,7 @@ import { BlurView } from 'expo-blur';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 import * as Haptics from "expo-haptics";
 import { deleteFilmWithFrameImages } from '@/utils/filmService';
+import EnjoyingRollio from '@/components/EnjoyingRollio';
 
 export default function Film() {
     const database = useSQLiteContext();
@@ -195,6 +196,7 @@ export default function Film() {
                             keyExtractor={item => item.id.toString()}
                             contentContainerStyle={{ paddingTop: 16, paddingBottom: 50 }}
                             showsVerticalScrollIndicator={false}
+                            ListFooterComponent={<EnjoyingRollio />}
                         />
                     </View>
                     <BlurView

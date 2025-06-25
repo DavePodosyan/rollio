@@ -11,6 +11,7 @@ import { type FilmRoll } from '@/utils/types';
 import * as Haptics from "expo-haptics";
 import * as StoreReview from 'expo-store-review';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import EnjoyingRollio from '@/components/EnjoyingRollio';
 
 export default function Home() {
     const database = useSQLiteContext();
@@ -92,14 +93,19 @@ export default function Home() {
                             </Text>
                         </View>
                     ) : (
-                        <FlatList
-                            data={data}
-                            keyExtractor={(item) => item.id.toString()}
-                            disableIntervalMomentum={true}
-                            renderItem={({ item, index }) => <FilmCard item={item} index={index} onDelete={() => deleteItem(item.id)} />}
-                            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FFFFFF99" />}
-                            contentContainerStyle={{ paddingBottom: 50 }}
-                        />
+                        <>
+                            <FlatList
+                                data={data}
+                                keyExtractor={(item) => item.id.toString()}
+                                disableIntervalMomentum={true}
+                                renderItem={({ item, index }) => <FilmCard item={item} index={index} onDelete={() => deleteItem(item.id)} />}
+                                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FFFFFF99" />}
+                                contentContainerStyle={{ paddingBottom: 50 }}
+                                ListFooterComponent={<EnjoyingRollio />}
+                            />
+
+                        </>
+
                     )}
 
 

@@ -58,6 +58,7 @@ function RootLayoutNav() {
           }}>
           <Stack.Screen name="home" />
           <Stack.Screen name="film" />
+          <Stack.Screen name="support"/>
           <Stack.Screen name="(modal)/film" options={{ presentation: 'modal', gestureEnabled: false }} />
           <Stack.Screen name="(modal)/frame" options={{ presentation: 'modal', gestureEnabled: false }} />
           <Stack.Screen name="(modal)/disabled_frame" options={{ presentation: 'modal', gestureEnabled: true }} />
