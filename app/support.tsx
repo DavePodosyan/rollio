@@ -241,12 +241,8 @@ export default function Support() {
 
                             <View>
                                 {!connected ? (
-                                    <Text>
+                                    <Text style={{ color: '#D1D1D1', fontFamily: 'LufgaRegular', fontSize: 12, lineHeight: 20 }}>
                                         Connecting to the App Store... Please wait.
-                                    </Text>
-                                ) : !isReady ? (
-                                    <Text>
-                                        {/* Fetching products... Please wait. */}
                                     </Text>
                                 ) : (
                                     <View style={{ gap: 20 }}>
