@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] – 2025-06-25
+
+### ✨ New Feature
+- Introduced a dedicated **Support Page** to thank contributors and offer in-app purchase options.
+- Users can now support the project with **optional contributions** via App Store or Play Store.
+
+### 🛠 Improvements
+- Product buttons now show a loading indicator while a purchase is in progress.
+- Frame animations on the Support Page now appear sequentially for a smoother feel.
+
+---
+
 ## [1.3.2] – 2024-06-23
 
 ### ✨ New Feature

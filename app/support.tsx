@@ -8,7 +8,9 @@ import {
     TouchableOpacity,
     Alert,
     Platform,
-    Linking
+    Linking,
+    ActivityIndicator,
+    Share
 } from 'react-native';
 import Reanimated, {
     useSharedValue,
@@ -23,7 +25,6 @@ import React, { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useIAP } from 'expo-iap';
-import * as Sharing from 'expo-sharing';
 
 import HeartShineIcon from '@/assets/icons/HeartShine.svg';
 import StarFallIcon from '@/assets/icons/StarFall.svg';
@@ -68,19 +69,14 @@ export default function Support() {
     });
 
     const handleSharing = async () => {
-        const message = 'Check out Rollio - the app for film photography enthusiasts!';
-        const url = 'https://rollio.davitp.dev/app-link';
-
         try {
-            if (await Sharing.isAvailableAsync()) {
-                await Sharing.shareAsync(url, {
-                    dialogTitle: message,
-                    mimeType: 'text/plain',
-                    UTI: 'public.text',
-                });
-            } else {
-                Alert.alert('Sharing not available', 'Your device does not support sharing.');
-            }
+            await Share.share({
+                message: 'Check out Rollio – the app for film photography enthusiasts!\n\nhttps://rollio.davitp.dev/app-link',
+            }, {
+                dialogTitle: 'Share Rollio',
+                subject: 'Rollio - Film Photography App'
+
+            });
         } catch (error) {
             console.error('Error sharing:', error);
             Alert.alert('Error', 'Failed to share the app. Please try again later.');
@@ -91,6 +87,7 @@ export default function Support() {
     const [isReady, setIsReady] = useState(false);
     const [loadError, setLoadError] = useState(false);
     const [validationResult, setValidationResult] = useState<any>(null);
+    const [loadingSku, setLoadingSku] = useState<string | null>(null);
 
     const {
         connected,
@@ -103,7 +100,6 @@ export default function Support() {
         finishTransaction
     } = useIAP({
         onPurchaseSuccess: async (purchase) => {
-
             InteractionManager.runAfterInteractions(() => {
                 try {
                     finishTransaction({
@@ -112,16 +108,17 @@ export default function Support() {
                     });
                     Alert.alert('Thank you ❤️', 'Your support is greatly appreciated!');
                     // alert('Thank you ❤️', 'Your support is greatly appreciated!');
+                    setLoadingSku(null);
                 } catch (e) {
                     console.log('Error finishing transaction', e);
+                    setLoadingSku(null);
                 }
             });
-
-
         },
         onPurchaseError: (error) => {
             InteractionManager.runAfterInteractions(() => {
                 Alert.alert('An error occured while processing your purchase. Please try again later.');
+                setLoadingSku(null);
             });
         },
         onSyncError: (error) => {
@@ -250,22 +247,29 @@ export default function Support() {
                                             .sort((a, b) => productSkus.indexOf(a.id) - productSkus.indexOf(b.id))
                                             .map((item) => {
                                                 if (item.platform === 'android') {
-                                                    return (
 
+                                                    return (
                                                         <View key={item.title} style={{ gap: 0 }}>
                                                             <TouchableOpacity
                                                                 style={[styles.supportButton]}
                                                                 onPress={() => {
+                                                                    setLoadingSku(item.id);
                                                                     requestPurchase({
                                                                         request: {
                                                                             skus: [item.id],
                                                                         },
                                                                     });
+                                                                    setTimeout(() => {
+                                                                        setLoadingSku((prev) => prev === item.id ? null : prev);
+                                                                    }, 20000);
                                                                 }}>
-                                                                <Text style={styles.buttonText}>
-                                                                    {item.oneTimePurchaseOfferDetails?.formattedPrice} -{' '}
-                                                                    {item.title}
-                                                                </Text>
+                                                                {loadingSku === item.id ? (
+                                                                    <ActivityIndicator color="#FFFFFF" />
+                                                                ) : (
+                                                                    <Text style={styles.buttonText}>
+                                                                        {item.oneTimePurchaseOfferDetails?.formattedPrice} - {item.displayName}
+                                                                    </Text>
+                                                                )}
                                                             </TouchableOpacity>
                                                         </View>
                                                     );
@@ -277,17 +281,23 @@ export default function Support() {
                                                             <TouchableOpacity
                                                                 style={[styles.supportButton]}
                                                                 onPress={() => {
+                                                                    setLoadingSku(item.id);
                                                                     requestPurchase({
                                                                         request: {
                                                                             sku: item.id,
                                                                         },
                                                                     });
+                                                                    setTimeout(() => {
+                                                                        setLoadingSku((prev) => prev === item.id ? null : prev);
+                                                                    }, 20000);
                                                                 }}>
-                                                                <Text style={styles.buttonText}>
-                                                                    {item.displayPrice} -{' '}
-                                                                    {item.title}
-
-                                                                </Text>
+                                                                {loadingSku === item.id ? (
+                                                                    <ActivityIndicator color="#FFFFFF" />
+                                                                ) : (
+                                                                    <Text style={styles.buttonText}>
+                                                                        {item.displayPrice} - {item.title}
+                                                                    </Text>
+                                                                )}
                                                             </TouchableOpacity>
                                                         </View>
                                                     );
