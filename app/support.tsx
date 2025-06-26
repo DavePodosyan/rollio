@@ -362,7 +362,7 @@ export default function Support() {
                                 </Text>
                             </View>
                             <Text style={{ color: '#D1D1D1', fontFamily: 'LufgaRegular', fontSize: 14, lineHeight: 20, marginBottom: 20 }}>
-                                Know someone into film photography? Share Rollio with them and help it reach more film lovers.
+                                Know someone who is into film photography? Share Rollio with them and help it reach more film lovers.
                             </Text>
 
                             <TouchableOpacity
