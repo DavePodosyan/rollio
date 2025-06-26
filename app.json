@@ -17,7 +17,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.davitpodosyan.rollio",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Rollio requires access to the camera to add images to your frames.",
+        "NSPhotoLibraryUsageDescription": "Rollio requires access to the photo library to add images to your frames."
       }
     },
     "android": {
