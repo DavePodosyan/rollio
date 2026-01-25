@@ -21,7 +21,6 @@ import Reanimated, {
     withDelay
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import BackButton from "@/components/BackButton";
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
