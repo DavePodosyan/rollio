@@ -2,18 +2,14 @@
   "expo": {
     "name": "Rollio",
     "slug": "Rollio",
-    "version": "1.4.1",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/splash-icon-light.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "icon": {
-        "dark": "./assets/images/icon-light.png",
-        "light": "./assets/images/icon-light.png",
-        "tinted": "./assets/images/icon-tinted.png"
-      },
+      "icon": "./assets/images/rollio-glass.icon",
       "supportsTablet": true,
       "bundleIdentifier": "com.davitpodosyan.rollio",
       "infoPlist": {
@@ -40,10 +36,14 @@
       [
         "expo-splash-screen",
         {
+          "backgroundColor": "#E5E0FF",
           "image": "./assets/images/splash-icon-light.png",
+          "dark": {
+            "backgroundColor": "#100528",
+            "image": "./assets/images/splash-icon-light.png"
+          },
           "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#19083C"
+          "resizeMode": "contain"
         }
       ],
       [
@@ -68,6 +68,19 @@
           "android": {
             "enableProguardInReleaseBuilds": true
           }
+        }
+      ],
+      "expo-font",
+      "expo-web-browser",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "isAccessMediaLocationEnabled": true,
+          "granularPermissions": [
+            "photo"
+          ]
         }
       ]
     ],

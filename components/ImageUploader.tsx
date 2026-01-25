@@ -1,24 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Image, Text, StyleSheet, Alert, Modal, Pressable } from 'react-native';
-import { AntDesign } from '@expo/vector-icons'; // for trash icon
+import React, { useMemo, useState } from 'react';
+import {
+    View,
+    TouchableOpacity,
+    Image,
+    Text,
+    StyleSheet,
+    Alert,
+    Modal,
+    Pressable,
+    useColorScheme
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as MediaLibrary from 'expo-media-library';
+// Make sure this is the beta API or standard API you intend to use
+import { Paths, File } from 'expo-file-system';
+import { Host, ContextMenu, Button as SButton, Text as SText } from '@expo/ui/swift-ui';
+
+// Icons
 import PlusIcon from '@/assets/icons/PlusIcon.svg';
 import TrashIcon from '@/assets/icons/TrashIcon.svg';
-import * as FileSystem from 'expo-file-system';
-export default function ImageUploader({ value, onChange }: { value: string | null, onChange: (uri: string | null) => void }) {
-    const [previewVisible, setPreviewVisible] = React.useState(false);
-    
-    if(value?.startsWith('frames/rollio_')){
-        // Convert the relative path to a full file URI
-        value = FileSystem.documentDirectory + value;
-    }
+import { GlassContainer, GlassView } from 'expo-glass-effect';
+import { SymbolView } from 'expo-symbols';
+import ContextMenuFilm from './ContextMenuFilm.ios';
+
+interface ImageUploaderProps {
+    value: string | null;
+    onChange: (uri: string | null) => void;
+}
+
+export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
+    const [previewVisible, setPreviewVisible] = useState(false);
+    const colorScheme = useColorScheme();
+    // 1. FIX: Memoize the URI calculation to prevent performance hits on re-renders
+    const displayUri = useMemo(() => {
+        if (value?.startsWith('frames/rollio_')) {
+            const file = new File(Paths.document, value);
+            return file.exists ? file.uri : null;
+        }
+        return value;
+    }, [value]);
+
     const handleUploadPress = () => {
         Alert.alert(
             'Select Image',
             'Choose an option',
             [
                 { text: 'Take Photo', onPress: takePhoto },
-                { text: 'Pick from Gallery', onPress: pickFromGallery },
+                { text: 'Pick from Photos', onPress: pickFromGallery },
                 { text: 'Cancel', style: 'cancel' },
             ],
             { cancelable: true }
@@ -33,54 +61,108 @@ export default function ImageUploader({ value, onChange }: { value: string | nul
         }
 
         const result = await ImagePicker.launchCameraAsync({
-            allowsEditing: false, // no cropping
+            allowsEditing: false,
             quality: 0.7,
         });
 
-        if (!result.canceled && result.assets?.[0]?.uri) {
-            console.log('Photo taken:', result.assets);
-            onChange(result.assets[0].uri);
-        }
+        handleImageResult(result);
     };
 
     const pickFromGallery = async () => {
+        // Note: Android 13+ Photo Picker usually doesn't need explicit permissions, 
+        // but it's good practice to leave this check for older OS versions.
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            allowsEditing: false, // no cropping
+            mediaTypes: ImagePicker.MediaTypeOptions.Images, // 2. FIX: Use Enum for type safety
+            allowsEditing: false,
             quality: 0.7,
         });
 
+        handleImageResult(result);
+    };
+
+    const handleImageResult = (result: ImagePicker.ImagePickerResult) => {
         if (!result.canceled && result.assets?.[0]?.uri) {
-            console.log('Photo taken:', result.assets);
             onChange(result.assets[0].uri);
         }
     };
 
-    const handleRemove = async () => {
-        onChange(null);
+    const handleImageSavetoGallery = async () => {
+        if (!displayUri) return;
+
+        try {
+            await MediaLibrary.saveToLibraryAsync(displayUri);
+            Alert.alert('Success', 'Image saved to your photo gallery.');
+        } catch (error: any) {
+            Alert.alert('Error', 'Failed to save image: ' + error.message);
+        }
+    }
+
+    const handleRemove = () => {
+        // Optional: Add a confirmation before deleting
+        Alert.alert(
+            'Remove Image',
+            'Are you sure you want to remove the image?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Remove',
+                    style: 'destructive',
+                    onPress: () => onChange(null),
+                },
+            ],
+            { cancelable: true }
+        );
     };
 
     return (
         <>
-            <TouchableOpacity
-                style={[styles.container, { height: value ? 250 : 135, borderWidth: value ? 0 : 1 }]}
-                onPress={value ? () => setPreviewVisible(true) : handleUploadPress}
-                activeOpacity={0.8}
+            <Pressable onPress={displayUri ? () => setPreviewVisible(false) : handleUploadPress}
             >
-                {value ? (
-                    <>
-                        <Image source={{ uri: value }} style={styles.image} resizeMode="cover" />
-                        <TouchableOpacity style={styles.removeButton} onPress={handleRemove}>
-                            <TrashIcon width={32} height={32} />
-                        </TouchableOpacity>
-                    </>
-                ) : (
-                    <View style={styles.placeholder}>
-                        <PlusIcon width={32} height={32} style={{ marginBottom: 8 }} />
-                        <Text style={styles.uploadText}>Upload image</Text>
-                    </View>
-                )}
-            </TouchableOpacity>
+
+                <GlassView isInteractive={true} glassEffectStyle='regular'
+                    tintColor={colorScheme === 'dark' ? '#09090b6d' : '#ffffff'}
+                    style={{ padding: 1, borderRadius: 22, height: displayUri ? 250 : 135, marginBottom: 10, justifyContent: 'center', alignItems: 'center' }}
+                >
+
+                    {displayUri ? (
+                        <>
+                            <Image
+                                source={{ uri: displayUri }}
+                                style={styles.image}
+                                resizeMode="cover"
+                            />
+                            <GlassView isInteractive={true} glassEffectStyle='clear'
+                                style={styles.removeButton}
+                            >
+                                {/* <Pressable onPress={null} style={{ justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+                                    <SymbolView name="trash" size={22} tintColor="#fff" />
+                                </Pressable> */}
+                                <Host matchContents>
+                                    <ContextMenu>
+                                        <ContextMenu.Items>
+                                            <SButton
+                                                systemImage="arrow.trianglehead.2.clockwise.rotate.90"
+                                                onPress={() => handleUploadPress()}
+                                            >Replace</SButton>
+                                            <SButton systemImage="square.and.arrow.down" onPress={() => handleImageSavetoGallery()}> Save to photos</SButton>
+                                            <SButton systemImage="trash" role="destructive" onPress={() => handleRemove()}>Remove</SButton>
+                                        </ContextMenu.Items>
+                                        <ContextMenu.Trigger>
+                                            <SymbolView name="ellipsis" size={22} tintColor="#fff" style={{ padding: 13 }} />
+                                        </ContextMenu.Trigger>
+                                    </ContextMenu>
+                                </Host>
+                            </GlassView>
+                        </>
+                    ) : (
+                        <View style={styles.placeholder}>
+                            <SymbolView name="paperclip" size={32} tintColor={colorScheme === 'dark' ? "#ffffff" : "#100528"} style={{ marginBottom: 8 }} />
+                            <Text style={[styles.uploadText, { color: colorScheme === 'dark' ? "#ffffff" : "#100528" }]}>Attach image</Text>
+                        </View>
+                    )}
+                </GlassView>
+            </Pressable>
+
             <Modal
                 visible={previewVisible}
                 transparent={true}
@@ -88,41 +170,31 @@ export default function ImageUploader({ value, onChange }: { value: string | nul
                 onRequestClose={() => setPreviewVisible(false)}
             >
                 <Pressable
-                    style={{
-                        flex: 1,
-                        backgroundColor: '#000',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
+                    style={styles.modalOverlay}
                     onPress={() => setPreviewVisible(false)}
                 >
                     <Image
-                        source={value ? { uri: value } : undefined}
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            resizeMode: 'contain',
-                        }}
+                        source={displayUri ? { uri: displayUri } : undefined}
+                        style={styles.fullImage}
                     />
                 </Pressable>
             </Modal>
         </>
-
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         width: "100%",
-        borderWidth: 1,
-        borderColor: '#FFFFFF99',
-        borderRadius: 20,
-        borderStyle: 'dashed',
-        backgroundColor: '#0B0B0F',
+        // borderWidth: 1,
+        // borderColor: '#FFFFFF99',
+        // borderRadius: 20,
+        // borderStyle: 'dashed',
+        // backgroundColor: '#0B0B0F',
         justifyContent: 'center',
         alignItems: 'center',
-        // overflow: 'hidden',
         position: 'relative',
+        overflow: 'hidden', // Ensures image respects border radius
     },
     placeholder: {
         justifyContent: 'center',
@@ -131,20 +203,36 @@ const styles = StyleSheet.create({
     uploadText: {
         fontSize: 14,
         lineHeight: 20,
-        color: '#FFFFFF99',
         fontFamily: 'LufgaRegular',
+        color: '#8E8E93',
     },
     image: {
         width: "100%",
         height: "100%",
-        borderRadius: 20,
+        borderRadius: 21,
+        objectFit: "cover",
     },
     removeButton: {
+        width: 35,
+        height: 35,
+        justifyContent: 'center',
+        alignItems: 'center',
         position: 'absolute',
         top: 10,
         right: 10,
-        backgroundColor: '#00000099',
-        borderRadius: 16,
-        padding: 6,
+        // backgroundColor: 'rgba(0,0,0,0.6)', // 5. FIX: Use rgba for better readability than hex with opacity
+        borderRadius: 35,
+        zIndex: 10, // Ensures it sits above the image
     },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: '#000',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    fullImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'contain',
+    }
 });

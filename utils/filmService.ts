@@ -1,5 +1,5 @@
 
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { SQLiteDatabase } from 'expo-sqlite';
 
 export const deleteFilmWithFrameImages = async (database: SQLiteDatabase, film_id: number) => {
