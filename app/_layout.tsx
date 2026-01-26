@@ -36,7 +36,7 @@ export default function RootLayout() {
 
                     <Stack.Screen name="(modal)" options={{
                         presentation: "modal",
-                        gestureEnabled: false,
+                        gestureEnabled: true,
                         headerShown: false
                     }} />
                 </Stack>

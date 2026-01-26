@@ -1,17 +1,11 @@
-import { Host, VStack, Form, } from "@expo/ui/swift-ui";
-import { background } from "@expo/ui/swift-ui/modifiers";
-import { FlatList, RefreshControl, ScrollView, View, Text, ActivityIndicator, StyleSheet, useColorScheme, TouchableOpacity } from "react-native";
+import { FlatList, View, Text, StyleSheet, useColorScheme } from "react-native";
 import { useFilms } from "@/hooks/useFilms";
 import { Film } from "@/types";
 import { router, useFocusEffect, useNavigation } from "expo-router";
 import FilmListItem from "@/components/FilmListItem";
-import { useHeaderHeight } from "@react-navigation/elements";
 import EnjoyingRollio from "@/components/EnjoyingRollio";
-import { Image, ImageBackground } from 'expo-image';
 import { LinearGradient } from "expo-linear-gradient";
-import { useCallback, useState, useEffect, useLayoutEffect } from "react";
-import { GlassContainer, GlassView } from "expo-glass-effect";
-import { SymbolView } from "expo-symbols";
+import { useCallback, useState, useEffect } from "react";
 
 export default function Home() {
     const colorScheme = useColorScheme();
@@ -26,9 +20,9 @@ export default function Home() {
     //             // title: "Film Rolls",
     //             headerRight: () => (
     //                 <View>
-    //                     <TouchableOpacity onPress={() => router.push('/new-film')} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
+    //                     <Pressable onPress={() => router.push('/new-film')} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
     //                         <SymbolView name="plus" size={22} tintColor={colorScheme === 'dark' ? '#fff' : '#100528'} />
-    //                     </TouchableOpacity>
+    //                     </Pressable>
     //                 </View>
     //             ),
     //         });

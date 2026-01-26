@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { TouchableOpacity, Text, View, Pressable, StyleSheet, useColorScheme } from 'react-native';
+import { Text, View, Pressable, StyleSheet, useColorScheme } from 'react-native';
 import { Film } from '@/types';
 import Animated, {
     useSharedValue,
@@ -60,7 +60,7 @@ function FilmListItemBase({ film, index, onPress }: Props) {
         //     }
         // >
         <Pressable
-            onPress={() => router.push({pathname: '/(tabs)/films/[id]', params: { id: film.id.toString(), title: film.title }})}
+            onPress={() => router.push({ pathname: '/(tabs)/films/[id]', params: { id: film.id.toString(), title: film.title } })}
             // onPressIn={pressIn}
             // onPressOut={pressOut}
             style={{}}>
@@ -74,7 +74,7 @@ function FilmListItemBase({ film, index, onPress }: Props) {
                 >
                     <GlassView
                         isInteractive={true}
-                        glassEffectStyle="clear"
+                        glassEffectStyle="regular"
                         tintColor={statusColor}
                         style={{
                             position: 'absolute',
@@ -113,13 +113,14 @@ function FilmListItemBase({ film, index, onPress }: Props) {
                         </Text>
                     </View>
                     <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10, color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium' }}>{film.title}</Text>
-                    <GlassView
-                        isInteractive={true}
-                        glassEffectStyle="clear"
-                        tintColor={colorScheme === 'dark' ? '#09090b6d' : '#E6E6EB'}
+                    <View
+                        // isInteractive={true}
+                        // glassEffectStyle="clear"
+                        // tintColor={colorScheme === 'dark' ? '#09090b6d' : '#E6E6EB'}
                         style={{
                             borderRadius: 12,
-                            height: 28
+                            height: 28,
+                            backgroundColor: colorScheme === 'dark' ? '#09090b6d' : '#e5e0ff4d',
                         }}
                     >
                         <View style={{
@@ -140,7 +141,7 @@ function FilmListItemBase({ film, index, onPress }: Props) {
                                 {film.frame_count}/{maxShots}
                             </Text>
                         </View>
-                    </GlassView>
+                    </View>
                 </GlassView>
             </GlassContainer>
         </Pressable>
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
 
 // export default FilmListItemBase;
 
-export default React.memo(FilmListItemBase, (prev, next) => {
+export default memo(FilmListItemBase, (prev, next) => {
     // re-render only if visible fields actually changed
     return (
         prev.index === next.index &&

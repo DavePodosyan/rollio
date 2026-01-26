@@ -1,21 +1,19 @@
 import { useFilms } from "@/hooks/useFilms";
 import { CreateFilmInput, FilmStatus } from "@/types";
 import { router, useNavigation, useLocalSearchParams } from "expo-router";
-import { Text, View, ScrollView, Animated, Keyboard, TouchableOpacity, Alert, TextInput, FlatList, Touchable, Pressable, ActivityIndicator, useColorScheme } from "react-native";
+import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme } from "react-native";
 import RulerPicker from '@/components/RulerPicker';
-import { GlassContainer, GlassView } from "expo-glass-effect";
+import { GlassView } from "expo-glass-effect";
 import { useEffect, useState, useRef, use, useCallback, useMemo } from "react";
 import { ISO_OPTIONS, PUSH_PULL_OPTIONS, EXPECTED_SHOTS } from "@/utils/cameraSettings";
-import { ScreenStackHeaderRightView } from "react-native-screens";
 import { SymbolView } from "expo-symbols";
 import { LinearGradient } from "expo-linear-gradient";
-import { DateTimePicker, Host, Picker } from '@expo/ui/swift-ui';
-import { background, backgroundOverlay, cornerRadius, foregroundStyle, glassEffect, overlay, padding, tint } from '@expo/ui/swift-ui/modifiers';
+import { DateTimePicker, Host } from '@expo/ui/swift-ui';
 import * as Haptics from "expo-haptics";
 import { useFilm } from "@/hooks/useFilm";
 import { getStatusColor } from "@/utils/statusColors";
 import MySegmentedControl from "@/modules/my-segmented-control";
-import { setOptions } from "expo-splash-screen";
+import { usePreventRemove } from "@react-navigation/native";
 
 export default function NewFilm() {
     const colorScheme = useColorScheme();
@@ -37,7 +35,7 @@ export default function NewFilm() {
 
     const [formData, setFormData] = useState<CreateFilmInput>({
         title: "",
-        iso: 1600,
+        iso: 400,
         camera: null,
         status: FilmStatus.InCamera,
         expected_shots: 36,
@@ -45,11 +43,73 @@ export default function NewFilm() {
         created_at: new Date().toISOString(),
     });
 
+    const initialDataRef = useRef<CreateFilmInput>({
+        title: "",
+        iso: 400,
+        camera: null,
+        status: FilmStatus.InCamera,
+        expected_shots: 36,
+        push_pull: 0,
+        created_at: new Date().toISOString(),
+    });
+
+    const hasUnsavedChanges = useCallback(() => {
+        if (!initialDataRef.current) return false;
+
+        return JSON.stringify(initialDataRef.current) !== JSON.stringify(formData);
+    }, [formData]);
+
     const [focusedField, setFocusedField] = useState<'title' | 'camera' | null>(null);
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const slideAnim = useRef(new Animated.Value(0)).current; // For smooth slide in/out
+
+    usePreventRemove(hasUnsavedChanges(), ({ data }) => {
+        // ActionSheetIOS.showActionSheetWithOptions({
+        //     // title: 'Discard changes?',
+        //     message: 'Are you sure you want to discard your changes?',
+        //     options: ['Discard Changes'],
+
+        //     destructiveButtonIndex: 0,
+        // }, (buttonIndex) => {
+        //     if (buttonIndex === 0) {
+        //         // Do nothing, stay on the screen
+        //         navigation.dispatch(data.action);
+        //         return;
+        //     }
+        // });
+
+        // Otherwise, we dispatch the action that was blocked earlier
+        // console.log(formData);
+        // console.log(initialDataRef.current);
+
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+        Alert.alert(
+            'Discard changes?',
+            'You have unsaved changes. Discard them and leave the screen?',
+            [
+                { text: "Don't leave", style: 'cancel', onPress: () => { } },
+                {
+                    text: 'Discard',
+                    style: 'destructive',
+                    onPress: () => navigation.dispatch(data.action),
+                },
+            ],
+            {
+                cancelable: true,
+            }
+        );
+    });
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', (e) => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        });
+
+        return unsubscribe;
+    }, [navigation]);
 
     // Prefill form for edit
     useEffect(() => {
@@ -63,9 +123,32 @@ export default function NewFilm() {
                 push_pull: film.push_pull,
                 created_at: film.created_at,
             });
+
+            initialDataRef.current = {
+                title: film.title,
+                camera: film.camera,
+                iso: film.iso,
+                status: film.status,
+                expected_shots: film.expected_shots,
+                push_pull: film.push_pull,
+                created_at: film.created_at,
+            };
+
             isReady.current = true;
+
+            console.log(formData.status);
+            console.log(film.status);
+
+
+            console.log(statusValues.indexOf(formData.status));
+
         }
     }, [mode, film]);
+
+    useEffect(() => {
+        console.log(formData.status);
+
+    }, [formData]);
 
     useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
@@ -112,6 +195,8 @@ export default function NewFilm() {
             await addNewFilm({ ...formData, title });
         }
 
+        initialDataRef.current = formData;
+
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         router.back();
     }, [formData, addNewFilm]);
@@ -144,6 +229,10 @@ export default function NewFilm() {
     const statusColors = useMemo(() =>
         Object.values(FilmStatus).map(status => getStatusColor(status as FilmStatus)),
         []);
+    const currentStatusIndex = useMemo(() => {
+        const index = statusValues.indexOf(formData.status);
+        return index === -1 ? 0 : index; // Fallback to 0 if not found
+    }, [formData.status, statusValues]);
 
     // Loading: Show spinner if edit + fetching
     if (filmLoading || loading || !isReady.current) {
@@ -174,7 +263,7 @@ export default function NewFilm() {
                             // color="white"
                             onDateSelected={date => {
                                 //since we store dates as iso string, initialdate includes time, but when picking date they can't set time, so we need to set time to 00:00:00
-                                date.setHours(0, 0, 0, 0);
+                                // date.setHours(0, 0, 0, 0);
                                 setFormData(prev => ({ ...prev, created_at: date.toISOString() }));
                                 // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             }}
@@ -183,7 +272,7 @@ export default function NewFilm() {
                             variant="compact"
                             modifiers={
                                 [
-                                    
+
                                     // padding({ top: 6, bottom: 6, leading: 6, trailing: 6 }),
                                     // cornerRadius(16),
                                     // tint('red'),
@@ -309,11 +398,12 @@ export default function NewFilm() {
                 {/* {mode === 'edit' && ( */}
                 <View style={{ padding: 18, marginTop: 30, paddingHorizontal: 20, gap: 12 }}>
                     <MySegmentedControl
+                        // key={`status-control-${formData.status}`}
                         style={{ width: '100%', height: 40 }}
                         values={statusValues}
                         activeColors={statusColors}
-                        selectedIndex={statusValues.indexOf(formData.status)}
-                        onValueChange={({ nativeEvent: { index } }) => {
+                        selectedIndex={currentStatusIndex}
+                        onValueChange={({ nativeEvent: { index } }) => {                            
                             setFormData(prev => ({ ...prev, status: Object.values(FilmStatus)[index] as FilmStatus }));
                         }}
                         activeTextColor="#ffffff"              // Text inside the bubble

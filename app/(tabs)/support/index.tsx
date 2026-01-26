@@ -11,7 +11,7 @@ import {
     Linking,
     ActivityIndicator,
     Share,
-    useColorScheme
+    useColorScheme,
 } from 'react-native';
 import Reanimated, {
     useSharedValue,
@@ -21,7 +21,7 @@ import Reanimated, {
     withDelay
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -33,6 +33,9 @@ import ShareIcon from '@/assets/icons/Share.svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useNavigation } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import { GlassContainer, GlassView } from 'expo-glass-effect';
+import { GlassEffectContainer, Group, Host, HStack, Image, VStack } from '@expo/ui/swift-ui';
+import { Animation, animation, frame, glassEffect, glassEffectId, onTapGesture } from '@expo/ui/swift-ui/modifiers';
 const productSkus = [
     'support.1',
     'support.5',
@@ -58,9 +61,9 @@ export default function Support() {
     //         headerRight: () => null,
     //         // headerRight: () => (
     //         //     <View>
-    //         //         <TouchableOpacity onPress={() => router.push('/tabs/home/new_film')} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
+    //         //         <Pressable onPress={() => router.push('/tabs/home/new_film')} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
     //         //             <SymbolView name="minus" size={22} />
-    //         //         </TouchableOpacity>
+    //         //         </Pressable>
     //         //     </View>
     //         // ),
     //     });
@@ -73,14 +76,16 @@ export default function Support() {
                 headerRight: () => null,
                 // headerRight: () => (
                 //     <View>
-                //         <TouchableOpacity onPress={() => router.push('/tabs/home/new_film')} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
+                //         <Pressable onPress={() => router.push('/tabs/home/new_film')} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
                 //             <SymbolView name="minus" size={22} />
-                //         </TouchableOpacity>
+                //         </Pressable>
                 //     </View>
                 // ),
             });
         }, [parentNav, colorScheme])
     );
+
+    const [testBool, setTestBool] = useState(true);
 
     return (
         <View style={{ flex: 1 }}>
@@ -95,39 +100,67 @@ export default function Support() {
                 end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
             >
                 <ScrollView contentInsetAdjustmentBehavior="automatic">
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
-                    <Text style={{ color: colorScheme === "dark" ? "#fff" : "#100528", fontFamily: "LufgaMedium", fontSize: 18, margin: 20 }}>Support Page</Text>
+
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, paddingTop: 100, paddingBottom: 100 }}>
+                        <Host matchContents>
+                            <VStack>
+                                <GlassEffectContainer>
+                                    <HStack>
+                                        <Image systemName='photo' modifiers={[
+                                            frame({ width: 80, height: 80 }),
+                                            glassEffect({
+                                                glass: {
+                                                    variant: 'clear',
+                                                    interactive: true,
+
+                                                }
+                                            }),
+                                            glassEffectId('photoIcon', 'photoIcon'),
+                                            onTapGesture(() => {
+                                                setTestBool(!testBool);
+                                                console.log('Tapped photo icon', testBool);
+                                            })
+                                        ]} />
+                                        {testBool && (
+                                            <Group modifiers={[
+
+                                                animation(Animation.easeInOut({ duration: 1 }), testBool),
+                                                glassEffect({
+                                                    glass: {
+                                                        variant: 'clear',
+                                                    }
+                                                }),
+                                                glassEffectId('buildingGroup', 'photoIcon'),
+                                            ]}>
+                                                <Image systemName='building.2' modifiers={[
+                                                    frame({ width: 80, height: 80 }),
+
+                                                ]} />
+                                                <Image systemName='camera' modifiers={[
+                                                    frame({ width: 80, height: 80 }),
+                                                ]}
+                                                />
+                                            </Group>
+                                        )}
+
+                                    </HStack>
+                                </GlassEffectContainer>
+                            </VStack>
+                        </Host>
+                    </View>
+                    {/* <View style={styles.container}>
+                        <Image
+                            style={styles.backgroundImage}
+                            source={{
+                                uri: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400&h=600&fit=crop',
+                            }}
+                        />
+                        <GlassContainer spacing={10} style={styles.containerStyle}>
+                            <GlassView style={styles.glass1} isInteractive />
+                            <GlassView style={styles.glass2} isInteractive />
+                            <GlassView style={styles.glass3} isInteractive />
+                        </GlassContainer>
+                    </View> */}
                 </ScrollView>
             </LinearGradient>
         </View>
@@ -511,33 +544,69 @@ export default function Support() {
     );
 }
 
+// const styles = StyleSheet.create({
+//     blocks: {
+//         paddingLeft: 18,
+//         paddingRight: 18,
+//         paddingTop: 24,
+//         paddingBottom: 24,
+//         backgroundColor: '#ffffff0D',
+//         borderRadius: 24,
+//         marginBottom: 20,
+//     },
+//     supportButton: {
+//         paddingVertical: 12,
+//         paddingHorizontal: 24,
+//         borderRadius: 9999,
+//         backgroundColor: '#ffffff0D',
+//         borderWidth: 1,
+//         borderColor: 'rgba(255, 255, 255, 0.15)',
+//         shadowColor: '#000',
+//         shadowOffset: { width: 0, height: 1 },
+//         shadowOpacity: 0.2,
+//         shadowRadius: 2,
+//         justifyContent: 'center',
+//         alignItems: 'center',
+//     },
+//     buttonText: {
+//         color: '#FFFFFF',
+//         fontFamily: 'LufgaRegular',
+//         fontSize: 15,
+//     },
+// });
+
 const styles = StyleSheet.create({
-    blocks: {
-        paddingLeft: 18,
-        paddingRight: 18,
-        paddingTop: 24,
-        paddingBottom: 24,
-        backgroundColor: '#ffffff0D',
-        borderRadius: 24,
-        marginBottom: 20,
+    container: {
+        flex: 1,
     },
-    supportButton: {
-        paddingVertical: 12,
-        paddingHorizontal: 24,
-        borderRadius: 9999,
-        backgroundColor: '#ffffff0D',
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.15)',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        justifyContent: 'center',
+    backgroundImage: {
+        ...StyleSheet.absoluteFillObject,
+        width: '100%',
+        height: '100%',
+    },
+    containerStyle: {
+        position: 'absolute',
+        top: 200,
+        left: 50,
+        width: 250,
+        height: 100,
+        flexDirection: 'row',
         alignItems: 'center',
+        gap: 5,
     },
-    buttonText: {
-        color: '#FFFFFF',
-        fontFamily: 'LufgaRegular',
-        fontSize: 15,
+    glass1: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+    },
+    glass2: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+    },
+    glass3: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
     },
 });

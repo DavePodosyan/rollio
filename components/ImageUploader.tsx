@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
     View,
-    TouchableOpacity,
     Image,
     Text,
     StyleSheet,
@@ -14,14 +13,11 @@ import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 // Make sure this is the beta API or standard API you intend to use
 import { Paths, File } from 'expo-file-system';
-import { Host, ContextMenu, Button as SButton, Text as SText } from '@expo/ui/swift-ui';
+import { Host, ContextMenu, Button as SButton } from '@expo/ui/swift-ui';
 
 // Icons
-import PlusIcon from '@/assets/icons/PlusIcon.svg';
-import TrashIcon from '@/assets/icons/TrashIcon.svg';
-import { GlassContainer, GlassView } from 'expo-glass-effect';
+import { GlassView } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
-import ContextMenuFilm from './ContextMenuFilm.ios';
 
 interface ImageUploaderProps {
     value: string | null;

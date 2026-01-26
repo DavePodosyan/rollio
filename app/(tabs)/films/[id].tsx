@@ -1,13 +1,11 @@
 
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback } from 'react';
-import { View, Text, Alert, ScrollView, Pressable, TouchableOpacity, useColorScheme, FlatList } from 'react-native';
+import { View, Text, Alert, Pressable, useColorScheme, FlatList } from 'react-native';
 import { useNavigation, useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { useEffect } from 'react';
 import ContextMenuFilm from '@/components/ContextMenuFilm.ios';
-// import { useFilms } from "@/hooks/useFilms";
 import { useFilm } from '@/hooks/useFilm';
-import { useHeaderHeight } from '@react-navigation/elements';
 import { SymbolView } from 'expo-symbols';
 import { getStatusColor } from '@/utils/statusColors';
 import { GlassContainer, GlassView } from 'expo-glass-effect';
@@ -79,23 +77,12 @@ export default function FilmDetailPage() {
     useEffect(() => {
         navigation.setOptions({
             title: title,
-
-            headerTintColor: colorScheme === "dark" ? "#fff" : "#100528",
-            headerTitleStyle: {
-                fontFamily: "LufgaMedium",
-                color: colorScheme === "dark" ? "#fff" : "#100528",
-            },
-            headerLargeTitleStyle: {
-                fontFamily: "LufgaMedium",
-                color: colorScheme === "dark" ? "#fff" : "#100528",
-            },
             headerRight: () => (
-                // 
                 <View style={{ width: 85, height: 35, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <View style={{ backgroundColor: 'transparent' }}>
-                        <TouchableOpacity onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, frameCount: film?.frame_count } })} style={{ width: 35, backgroundColor: 'transparent', height: 35, justifyContent: 'center', alignItems: 'center', }} >
+                        <Pressable onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, frameCount: film?.frame_count } })} style={{ width: 35, backgroundColor: 'transparent', height: 35, justifyContent: 'center', alignItems: 'center', }} >
                             <SymbolView name="plus" size={22} tintColor={colorScheme === 'dark' ? '#ffffff' : '#100528'} />
-                        </TouchableOpacity>
+                        </Pressable>
                     </View>
                     <View style={{ backgroundColor: 'transparent' }}>
                         <ContextMenuFilm onSelect={handleContextMenuSelect} />
@@ -142,25 +129,25 @@ export default function FilmDetailPage() {
                         }) : null}
                     </Text>
                 </View>
-                <GlassContainer style={{ flexDirection: 'row', gap: 12, marginTop: 8, marginBottom: 12 }}>
+                <GlassContainer spacing={10} style={{ flexDirection: 'row', gap: 12, marginTop: 8, marginBottom: 12 }}>
                     <GlassView
                         isInteractive={true}
                         glassEffectStyle="regular"
-                        tintColor='#09090b6d'
+                        tintColor={colorScheme === 'dark' ? '#09090b6d' : '#e5e0ff4d'}
                         style={{
                             paddingLeft: 16,
                             paddingRight: 16,
                             paddingTop: 6,
                             paddingBottom: 6,
                             borderRadius: 12,
-                            zIndex: 10,
+                            // zIndex: 10,
                         }}>
                         <Text
                             style={{
                                 fontSize: 12,
                                 lineHeight: 16,
                                 fontFamily: 'LufgaMedium',
-                                color: '#fff'
+                                color: colorScheme === 'dark' ? '#fff' : '#100528',
                             }}>
                             ISO: {film.iso}
                         </Text>
@@ -170,21 +157,21 @@ export default function FilmDetailPage() {
                         <GlassView
                             isInteractive={true}
                             glassEffectStyle="regular"
-                            tintColor="#09090b6d"
+                            tintColor={colorScheme === 'dark' ? '#09090b6d' : '#e5e0ff4d'}
                             style={{
                                 paddingLeft: 16,
                                 paddingRight: 16,
                                 paddingTop: 6,
                                 paddingBottom: 6,
                                 borderRadius: 12,
-                                zIndex: 10,
+                                // zIndex: 10,
                             }}>
                             <Text
                                 style={{
                                     fontSize: 12,
                                     lineHeight: 16,
                                     fontFamily: 'LufgaMedium',
-                                    color: '#fff'
+                                    color: colorScheme === 'dark' ? '#fff' : '#100528',
                                 }}>
                                 {film.push_pull < 0 ? 'Pull ' : 'Push +'}{film.push_pull}
                             </Text>
@@ -200,7 +187,7 @@ export default function FilmDetailPage() {
                             paddingTop: 6,
                             paddingBottom: 6,
                             borderRadius: 12,
-                            zIndex: 10,
+                            // zIndex: 10,
                         }}>
                         <Text
                             style={{
@@ -216,21 +203,24 @@ export default function FilmDetailPage() {
                 <GlassView
                     isInteractive={true}
                     glassEffectStyle="clear"
-                    tintColor='#09090b6d'
+                    tintColor={colorScheme === 'dark' ? '#09090b6d' : '#e5e0ff4d'}
                     style={{
                         borderRadius: 12,
                         height: 28
                     }}
                 >
-                    <GlassView tintColor={statusColor} glassEffectStyle='regular' style={{
-                        width: `${(film.frame_count / maxShots) * 100}%`,
-                        minWidth: '20%',
-                        height: '100%',
-                        borderRadius: 12,
-                        // backgroundColor: statusColor,
-                        justifyContent: 'center',
-                        paddingLeft: 10
-                    }}>
+                    <View
+                        // tintColor={statusColor}
+                        // glassEffectStyle='regular'
+                        style={{
+                            width: `${(film.frame_count / maxShots) * 100}%`,
+                            minWidth: '20%',
+                            height: '100%',
+                            borderRadius: 12,
+                            backgroundColor: statusColor,
+                            justifyContent: 'center',
+                            paddingLeft: 10
+                        }}>
                         <Text style={{
                             color: "#fff",
                             fontSize: 12,
@@ -239,7 +229,7 @@ export default function FilmDetailPage() {
                         }>
                             {film.frame_count}/{maxShots}
                         </Text>
-                    </GlassView>
+                    </View>
                 </GlassView>
             </View>
         );
@@ -264,7 +254,7 @@ export default function FilmDetailPage() {
             >
                 <FlatList
                     data={frames}
-                    key={frames.length.toString()}
+                    // key={frames.length.toString()}
                     keyExtractor={(item: Frame) => String(item.id)}
                     initialNumToRender={10}
                     maxToRenderPerBatch={8}
@@ -293,7 +283,10 @@ export default function FilmDetailPage() {
                     scrollEventThrottle={16}
                     contentContainerStyle={{ paddingLeft: 18, paddingRight: 18, paddingBottom: 50 }}
                     refreshing={false}
-                    onRefresh={() => null}
+                    onRefresh={() => {
+                        refreshFilm();
+                        refreshFrames();
+                    }}
                 // ListFooterComponent={films && films.length > 0 ? <EnjoyingRollio /> : null}
 
                 />

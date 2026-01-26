@@ -20,14 +20,14 @@ export const useFrames = (filmId: number) => {
     // 1. READ (Wrapped in useCallback so we can reuse it)
     const loadFrames = useCallback(async () => {
         if (!db) return;
-        setLoading(true);
+        // setLoading(true);
         try {
             const data = await getFramesByFilmId(db, filmId);
             setFrames(data);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load frames');
         } finally {
-            setLoading(false);
+            // setLoading(false);
         }
     }, [db, filmId]);
 

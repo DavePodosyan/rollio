@@ -8,22 +8,25 @@ export default function TabsLayout() {
   return (
     <NativeTabs
       // minimizeBehavior="onScrollDown"  // Uncomment for scroll-hide
-      iconColor="#A8A7FF"
+      iconColor={colorScheme === 'dark' ? '#fff' : '#100528'}
+      tintColor={colorScheme === 'dark' ? '#a583ef' : '#39128f'}
     // backgroundColor="#09090B"
     // disableTransparentOnScrollEdge={true}
     >
       <NativeTabs.Trigger.TabBar
         backgroundColor="red"  // Temp for testing; adjust
         iconColor="red"
+
       />
 
-      <NativeTabs.Trigger name="films" options={{ backgroundColor: colorScheme === 'dark' ? '#09090B' : '#EFF0F4', }}>
+      <NativeTabs.Trigger name="films" options={{ backgroundColor: colorScheme === 'dark' ? '#09090B' : '#EFF0F4', }} >
+        <Icon sf="film.stack.fill" />
         <Label>Films</Label>
-        <Icon sf="film.stack" />
+
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="support" options={{ backgroundColor: colorScheme === 'dark' ? '#09090B' : '#EFF0F4' }}>
-        <Icon sf="heart.fill" drawable="custom_settings_drawable" />
+        <Icon sf="heart.fill" />
         <Label>Support</Label>
       </NativeTabs.Trigger>
 

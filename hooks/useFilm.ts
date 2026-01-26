@@ -27,13 +27,13 @@ export const useFilm = (id: number) => {
     const refreshFilm = useCallback(async () => {
         if (!db) return;
         try {
-            setLoading(true);
+            // setLoading(true);
             const data = await getFilmById(db, id);
             setFilm(data);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load film');
         } finally {
-            setLoading(false);
+            // setLoading(false);
         }
     }, [db, id]);
 

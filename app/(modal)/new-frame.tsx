@@ -1,23 +1,20 @@
 
 import { CreateFrameInput } from "@/types";
 import { router, useNavigation, useLocalSearchParams } from "expo-router";
-import { Text, View, ScrollView, Animated, Keyboard, TouchableOpacity, Alert, TextInput, FlatList, Touchable, Pressable, ActivityIndicator, useColorScheme } from "react-native";
+import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme } from "react-native";
 import RulerPicker from '@/components/RulerPicker';
-import { GlassContainer, GlassView } from "expo-glass-effect";
-import { useEffect, useState, useRef, use, useCallback } from "react";
-import { ISO_OPTIONS, PUSH_PULL_OPTIONS, EXPECTED_SHOTS, SHUTTER_SPEED_OPTIONS, APERTURE_OPTIONS } from "@/utils/cameraSettings";
-import { ScreenStackHeaderRightView } from "react-native-screens";
+import { GlassView } from "expo-glass-effect";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { SHUTTER_SPEED_OPTIONS, APERTURE_OPTIONS } from "@/utils/cameraSettings";
 import { SymbolView } from "expo-symbols";
 import { LinearGradient } from "expo-linear-gradient";
-import { DateTimePicker, Host, Picker } from '@expo/ui/swift-ui';
-import { background, backgroundOverlay, cornerRadius, foregroundStyle, glassEffect, overlay, padding, tint } from '@expo/ui/swift-ui/modifiers';
+import { DateTimePicker, Host } from '@expo/ui/swift-ui';
 import * as Haptics from "expo-haptics";
-import { useFilm } from "@/hooks/useFilm";
-import { getStatusColor } from "@/utils/statusColors";
 import { useFrame } from "@/hooks/useFrame";
 import { useFrames } from "@/hooks/useFrames";
 import ImageUploader from "@/components/ImageUploader";
 import { saveFrameImage } from "@/utils/ImageService";
+import { usePreventRemove } from "@react-navigation/native";
 
 
 export default function NewFrame() {
@@ -46,6 +43,85 @@ export default function NewFrame() {
         image: null,
     });
 
+    const initialDataRef = useRef<CreateFrameInput>({
+        film_id: Number(filmId),
+        aperture: "Auto",
+        shutter_speed: "Auto",
+        frame_no: frameCount ? Number(frameCount) + 1 : 1,
+        note: null,
+        created_at: new Date().toISOString(),
+        lens: null,
+        image: null,
+    });
+
+    const hasUnsavedChanges = useCallback(() => {
+        if (!initialDataRef.current) return false;
+
+        return JSON.stringify(initialDataRef.current) !== JSON.stringify(formData);
+    }, [formData]);
+
+
+    // useEffect(() => {
+
+    //     const hasChanged = JSON.stringify(initialDataRef.current) !== JSON.stringify(formData);
+
+    //     console.log('has changed', hasChanged);
+
+    //     console.log(initialDataRef.current, formData);
+
+
+
+
+    //     navigation.getParent()?.setOptions({
+    //         gestureEnabled: !hasChanged
+    //     });
+
+    // }, [navigation, formData]);
+
+
+    usePreventRemove(hasUnsavedChanges(), ({ data }) => {
+        // ActionSheetIOS.showActionSheetWithOptions({
+        //     // title: 'Discard changes?',
+        //     message: 'Are you sure you want to discard your changes?',
+        //     options: ['Discard Changes'],
+
+        //     destructiveButtonIndex: 0,
+        // }, (buttonIndex) => {
+        //     if (buttonIndex === 0) {
+        //         // Do nothing, stay on the screen
+        //         navigation.dispatch(data.action);
+        //         return;
+        //     }
+        // });
+
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+        // Otherwise, we dispatch the action that was blocked earlier
+        Alert.alert(
+            'Discard changes?',
+            'You have unsaved changes. Discard them and leave the screen?',
+            [
+                { text: "Don't leave", style: 'cancel', onPress: () => { } },
+                {
+                    text: 'Discard',
+                    style: 'destructive',
+                    onPress: () => navigation.dispatch(data.action),
+                },
+            ],
+            {
+                cancelable: true,
+            }
+        );
+    });
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', (e) => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        });
+
+        return unsubscribe;
+    }, [navigation]);
+
     useEffect(() => {
         if (mode === 'new' && Object.keys(previousFrameData).length > 0 && !hasPrefilled.current) {
 
@@ -55,6 +131,13 @@ export default function NewFrame() {
             }));
 
             hasPrefilled.current = true;
+
+            initialDataRef.current = {
+                ...formData,
+                ...previousFrameData
+            };
+
+            console.log('Prefilled form data with previous frame data:', initialDataRef.current);
         }
     }, [previousFrameData, mode]);
 
@@ -77,6 +160,18 @@ export default function NewFrame() {
                 lens: frame.lens,
                 image: frame.image,
             });
+
+            initialDataRef.current = {
+                film_id: frame.film_id,
+                aperture: frame.aperture,
+                shutter_speed: frame.shutter_speed,
+                frame_no: frame.frame_no,
+                note: frame.note,
+                created_at: frame.created_at,
+                lens: frame.lens,
+                image: frame.image,
+            };
+
             isReady.current = true;
         }
     }, [mode, frame]);
@@ -145,6 +240,9 @@ export default function NewFrame() {
             } else {
                 await addFrame(dataToSave);
             }
+
+            initialDataRef.current = formData;
+
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             router.back();
 

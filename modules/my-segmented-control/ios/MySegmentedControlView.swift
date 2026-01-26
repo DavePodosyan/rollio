@@ -4,19 +4,22 @@ import UIKit
 class MySegmentedControlView: ExpoView {
   let segmentedControl = UISegmentedControl()
   let onValueChange = EventDispatcher()
-  
+
+  // Data
   var segmentColors: [UIColor] = []
-  
-  // New: Store text colors (Defaulting to standard iOS colors)
+
+  // Styling
   var activeTextColor: UIColor = .white
   var inactiveTextColor: UIColor = .black
+
+  // STATE: The "Source of Truth" to prevent jumping
+  var currentIndex: Int = 0
 
   required init(appContext: AppContext? = nil) {
     super.init(appContext: appContext)
     addSubview(segmentedControl)
     segmentedControl.addTarget(self, action: #selector(valueChanged), for: .valueChanged)
-    
-    // Initial Text Styling
+
     updateTextAttributes()
   }
 
@@ -25,32 +28,47 @@ class MySegmentedControlView: ExpoView {
   }
 
   @objc func valueChanged() {
+    // 1. Update source of truth immediately on tap
+    currentIndex = segmentedControl.selectedSegmentIndex
+
     updateActiveColor()
+    // 2. Send event
     onValueChange([
       "value": segmentedControl.titleForSegment(at: segmentedControl.selectedSegmentIndex) ?? "",
-      "index": segmentedControl.selectedSegmentIndex
+      "index": segmentedControl.selectedSegmentIndex,
     ])
   }
-  
+
   func updateActiveColor() {
-    let index = segmentedControl.selectedSegmentIndex
-    if index >= 0 && index < segmentColors.count {
-      segmentedControl.selectedSegmentTintColor = segmentColors[index]
+    // Use currentIndex to ensure color matches the intended selection
+    if currentIndex >= 0 && currentIndex < segmentColors.count {
+      segmentedControl.selectedSegmentTintColor = segmentColors[currentIndex]
     } else {
-      segmentedControl.selectedSegmentTintColor = .systemBlue 
+      segmentedControl.selectedSegmentTintColor = .systemBlue
     }
   }
 
-  // New: Helper to apply text styles
   func updateTextAttributes() {
     let normalAttributes: [NSAttributedString.Key: Any] = [
-        .foregroundColor: inactiveTextColor
+      .foregroundColor: inactiveTextColor
     ]
     let selectedAttributes: [NSAttributedString.Key: Any] = [
-        .foregroundColor: activeTextColor
+      .foregroundColor: activeTextColor
     ]
-    
+
     segmentedControl.setTitleTextAttributes(normalAttributes, for: .normal)
     segmentedControl.setTitleTextAttributes(selectedAttributes, for: .selected)
+  }
+
+  // HELPER: Forces the control to match our stored index
+  func enforceSelection() {
+    if segmentedControl.numberOfSegments > 0 {
+      if currentIndex >= 0 && currentIndex < segmentedControl.numberOfSegments {
+        segmentedControl.selectedSegmentIndex = currentIndex
+      } else {
+        segmentedControl.selectedSegmentIndex = UISegmentedControl.noSegment
+      }
+    }
+    updateActiveColor()
   }
 }
