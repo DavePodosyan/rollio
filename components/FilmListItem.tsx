@@ -10,7 +10,7 @@ import Animated, {
     LinearTransition,
     FadeOutLeft,
 } from 'react-native-reanimated';
-import { GlassContainer, GlassView } from 'expo-glass-effect';
+import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { getStatusColor } from '@/utils/statusColors';
 import { router } from 'expo-router';
 
@@ -22,6 +22,8 @@ interface Props {
 
 function FilmListItemBase({ film, index, onPress }: Props) {
     const colorScheme = useColorScheme();
+    const isGlassAvailable = isLiquidGlassAvailable();
+
     const scale = useSharedValue(1);
     const statusColor = getStatusColor(film.status);
     const animatedStyle = useAnimatedStyle(() => ({
@@ -29,7 +31,7 @@ function FilmListItemBase({ film, index, onPress }: Props) {
     }));
 
     const pressIn = () => {
-        scale.value = withSpring(0.97, { damping: 18, stiffness: 250, mass: 0.9 });
+        scale.value = withSpring(0.5, { damping: 18, stiffness: 250, mass: 0.9 });
     };
 
     const pressOut = () => {
@@ -61,15 +63,25 @@ function FilmListItemBase({ film, index, onPress }: Props) {
         // >
         <Pressable
             onPress={() => router.push({ pathname: '/(tabs)/films/[id]', params: { id: film.id.toString(), title: film.title } })}
-            // onPressIn={pressIn}
-            // onPressOut={pressOut}
-            style={{}}>
+            onPressIn={pressIn}
+            onPressOut={pressOut}
+
+            style={({ pressed }) => [
+                {
+                    transform: isGlassAvailable ? [] : [{ scale: pressed ? 0.97 : 1 }],
+                },
+            ]}
+        >
 
             <GlassContainer style={{ paddingLeft: 18, paddingRight: 18 }}>
                 <GlassView
                     glassEffectStyle={colorScheme === 'dark' ? 'clear' : 'regular'}
                     isInteractive={true}
-                    style={{ borderRadius: 24, padding: 20 }}
+                    style={{
+                        borderRadius: 24,
+                        padding: 20,
+                        backgroundColor: isGlassAvailable ? 'transparent' : (colorScheme === 'dark' ? '#a583ef1f' : '#ffffffcc'),
+                    }}
                 // tintColor='#a79be3ff'
                 >
                     <GlassView
@@ -86,6 +98,7 @@ function FilmListItemBase({ film, index, onPress }: Props) {
                             paddingBottom: 6,
                             borderRadius: 12,
                             zIndex: 10,
+                            backgroundColor: isGlassAvailable ? 'transparent' : statusColor,
                         }}>
                         <Text
                             style={{

@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics';
 import GlassView from 'expo-glass-effect/build/GlassView';
 
 import { useColorScheme } from 'react-native';
+import { isLiquidGlassAvailable } from 'expo-glass-effect';
 
 export type RulerPickerProps = {
   label: string;
@@ -26,6 +27,7 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
   onChange
 }) => {
   const colorScheme = useColorScheme();
+  const isGlassAvailable = isLiquidGlassAvailable();
   const flatListRef = useRef<FlatList>(null);
   const lastHapticIndex = useRef<number | null>(null);
   const scrollX = useRef(new Animated.Value(0));
@@ -176,9 +178,24 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 35,
+        backgroundColor: isGlassAvailable ? 'transparent' : colorScheme === 'dark' ? '#09090b6d' : '#ffffff90',
       }}
     >
-      <GlassView isInteractive={false} glassEffectStyle="clear" style={{ position: 'absolute', top: 17.5, left: 14, height: 35, paddingLeft: 12, paddingRight: 12, borderRadius: 36, alignItems: 'center', justifyContent: 'center' }} >
+      <GlassView
+        isInteractive={false}
+        glassEffectStyle="clear"
+        style={{
+          position: 'absolute',
+          top: 17.5,
+          left: 14,
+          height: 35,
+          paddingLeft: 12,
+          paddingRight: 12,
+          borderRadius: 36,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: isGlassAvailable ? 'transparent' : colorScheme === 'dark' ? '#09090b5d' : '#ffffff90',
+        }} >
         <Text style={{ color: colorScheme === 'dark' ? 'white' : '#100528', fontFamily: 'LufgaMedium', fontSize: 12 }}>{label}</Text>
       </GlassView>
 

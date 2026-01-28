@@ -8,7 +8,7 @@ import ContextMenuFilm from '@/components/ContextMenuFilm.ios';
 import { useFilm } from '@/hooks/useFilm';
 import { SymbolView } from 'expo-symbols';
 import { getStatusColor } from '@/utils/statusColors';
-import { GlassContainer, GlassView } from 'expo-glass-effect';
+import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { useFrames } from '@/hooks/useFrames';
 import FrameListItem from '@/components/FrameListItem';
 import { Frame } from '@/utils/types';
@@ -16,6 +16,7 @@ import { Frame } from '@/utils/types';
 export default function FilmDetailPage() {
     const { id, title } = useLocalSearchParams<{ id: string, title: string }>();
     const colorScheme = useColorScheme();
+    const isGlassAvailable = isLiquidGlassAvailable();
     const gradientColors: readonly [string, string, ...string[]] = colorScheme === 'dark'
         ? ['#09090B', '#100528', '#09090B']
         : ['#EFF0F4', '#E5E0FF', '#EFF0F4'];
@@ -140,6 +141,7 @@ export default function FilmDetailPage() {
                             paddingTop: 6,
                             paddingBottom: 6,
                             borderRadius: 12,
+                            backgroundColor: isGlassAvailable ? 'transparent' : (colorScheme === 'dark' ? '#a583ef1f' : '#fff'),
                             // zIndex: 10,
                         }}>
                         <Text
@@ -164,6 +166,7 @@ export default function FilmDetailPage() {
                                 paddingTop: 6,
                                 paddingBottom: 6,
                                 borderRadius: 12,
+                                backgroundColor: isGlassAvailable ? 'transparent' : (colorScheme === 'dark' ? '#a583ef1f' : '#fff'),
                                 // zIndex: 10,
                             }}>
                             <Text
@@ -187,6 +190,7 @@ export default function FilmDetailPage() {
                             paddingTop: 6,
                             paddingBottom: 6,
                             borderRadius: 12,
+                            backgroundColor: isGlassAvailable ? 'transparent' : statusColor,
                             // zIndex: 10,
                         }}>
                         <Text
@@ -206,7 +210,8 @@ export default function FilmDetailPage() {
                     tintColor={colorScheme === 'dark' ? '#09090b6d' : '#e5e0ff4d'}
                     style={{
                         borderRadius: 12,
-                        height: 28
+                        height: 28,
+                        backgroundColor: isGlassAvailable ? 'transparent' : (colorScheme === 'dark' ? '#09090b' : '#fff'),
                     }}
                 >
                     <View

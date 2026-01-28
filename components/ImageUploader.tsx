@@ -7,7 +7,8 @@ import {
     Alert,
     Modal,
     Pressable,
-    useColorScheme
+    useColorScheme,
+    Linking
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
@@ -16,7 +17,7 @@ import { Paths, File } from 'expo-file-system';
 import { Host, ContextMenu, Button as SButton } from '@expo/ui/swift-ui';
 
 // Icons
-import { GlassView } from 'expo-glass-effect';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
 
 interface ImageUploaderProps {
@@ -27,6 +28,7 @@ interface ImageUploaderProps {
 export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
     const [previewVisible, setPreviewVisible] = useState(false);
     const colorScheme = useColorScheme();
+    const isGlassAvailable = isLiquidGlassAvailable();
     // 1. FIX: Memoize the URI calculation to prevent performance hits on re-renders
     const displayUri = useMemo(() => {
         if (value?.startsWith('frames/rollio_')) {
@@ -59,6 +61,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
         const result = await ImagePicker.launchCameraAsync({
             allowsEditing: false,
             quality: 0.7,
+            exif: true,
         });
 
         handleImageResult(result);
@@ -68,9 +71,10 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
         // Note: Android 13+ Photo Picker usually doesn't need explicit permissions, 
         // but it's good practice to leave this check for older OS versions.
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images, // 2. FIX: Use Enum for type safety
+            mediaTypes: ['images'],
             allowsEditing: false,
             quality: 0.7,
+            exif: true,
         });
 
         handleImageResult(result);
@@ -78,6 +82,8 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
 
     const handleImageResult = (result: ImagePicker.ImagePickerResult) => {
         if (!result.canceled && result.assets?.[0]?.uri) {
+            console.log(result.assets[0].exif);
+
             onChange(result.assets[0].uri);
         }
     };
@@ -86,7 +92,19 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
         if (!displayUri) return;
 
         try {
-            await MediaLibrary.saveToLibraryAsync(displayUri);
+
+            const { status } = await MediaLibrary.requestPermissionsAsync();
+
+            if (status !== 'granted') {
+                Alert.alert(
+                    'Permission Required',
+                    'Rollio needs access to your gallery to save photos.',
+                    [{ text: 'Settings', onPress: () => Linking.openSettings() }]);
+                return;
+            }
+
+            const asset = await MediaLibrary.createAssetAsync(displayUri);
+            // await MediaLibrary.saveToLibraryAsync(displayUri);
             Alert.alert('Success', 'Image saved to your photo gallery.');
         } catch (error: any) {
             Alert.alert('Error', 'Failed to save image: ' + error.message);
@@ -117,7 +135,15 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
 
                 <GlassView isInteractive={true} glassEffectStyle='regular'
                     tintColor={colorScheme === 'dark' ? '#09090b6d' : '#ffffff'}
-                    style={{ padding: 1, borderRadius: 22, height: displayUri ? 250 : 135, marginBottom: 10, justifyContent: 'center', alignItems: 'center' }}
+                    style={{
+                        padding: 1,
+                        borderRadius: 22,
+                        height: displayUri ? 250 : 135,
+                        marginBottom: 10,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: isGlassAvailable ? 'transparent' : colorScheme === 'dark' ? '#09090b6d' : '#ffffff90',
+                    }}
                 >
 
                     {displayUri ? (
@@ -128,7 +154,9 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
                                 resizeMode="cover"
                             />
                             <GlassView isInteractive={true} glassEffectStyle='clear'
-                                style={styles.removeButton}
+                                style={[styles.removeButton, {
+                                    backgroundColor: isGlassAvailable ? 'transparent' : (colorScheme === 'dark' ? '#00000066' : '#00000066'),
+                                }]}
                             >
                                 {/* <Pressable onPress={null} style={{ justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
                                     <SymbolView name="trash" size={22} tintColor="#fff" />
@@ -140,7 +168,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
                                                 systemImage="arrow.trianglehead.2.clockwise.rotate.90"
                                                 onPress={() => handleUploadPress()}
                                             >Replace</SButton>
-                                            <SButton systemImage="square.and.arrow.down" onPress={() => handleImageSavetoGallery()}> Save to photos</SButton>
+                                            <SButton systemImage="square.and.arrow.down" onPress={() => handleImageSavetoGallery()}>Save to photos</SButton>
                                             <SButton systemImage="trash" role="destructive" onPress={() => handleRemove()}>Remove</SButton>
                                         </ContextMenu.Items>
                                         <ContextMenu.Trigger>

@@ -1,7 +1,7 @@
 import { useFilms } from "@/hooks/useFilms";
 import { CreateFilmInput, FilmStatus } from "@/types";
 import { router, useNavigation, useLocalSearchParams } from "expo-router";
-import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme } from "react-native";
+import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme, DeviceEventEmitter } from "react-native";
 import RulerPicker from '@/components/RulerPicker';
 import { GlassView } from "expo-glass-effect";
 import { useEffect, useState, useRef, use, useCallback, useMemo } from "react";
@@ -196,9 +196,11 @@ export default function NewFilm() {
         }
 
         initialDataRef.current = formData;
+        DeviceEventEmitter.emit('added_film');
 
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         router.back();
+
     }, [formData, addNewFilm]);
 
     useEffect(() => {
@@ -403,7 +405,7 @@ export default function NewFilm() {
                         values={statusValues}
                         activeColors={statusColors}
                         selectedIndex={currentStatusIndex}
-                        onValueChange={({ nativeEvent: { index } }) => {                            
+                        onValueChange={({ nativeEvent: { index } }) => {
                             setFormData(prev => ({ ...prev, status: Object.values(FilmStatus)[index] as FilmStatus }));
                         }}
                         activeTextColor="#ffffff"              // Text inside the bubble

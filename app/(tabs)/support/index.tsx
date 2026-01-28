@@ -1,41 +1,27 @@
 import {
     View,
     Text,
-    ImageBackground,
-    InteractionManager,
     ScrollView,
     StyleSheet,
-    TouchableOpacity,
     Alert,
     Platform,
     Linking,
     ActivityIndicator,
     Share,
     useColorScheme,
+    Pressable,
+    Image,
 } from 'react-native';
-import Reanimated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withSpring,
-    withTiming,
-    withDelay
-} from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import React, { useRef, useState } from 'react';
 
-import { useIAP } from 'expo-iap';
+import { useIAP, ErrorCode } from 'expo-iap';
 
-import HeartShineIcon from '@/assets/icons/HeartShine.svg';
-import StarFallIcon from '@/assets/icons/StarFall.svg';
-import ShareIcon from '@/assets/icons/Share.svg';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router, useNavigation } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
+import { SFSymbol, SymbolView } from 'expo-symbols';
 import { GlassContainer, GlassView } from 'expo-glass-effect';
-import { GlassEffectContainer, Group, Host, HStack, Image, VStack } from '@expo/ui/swift-ui';
-import { Animation, animation, frame, glassEffect, glassEffectId, onTapGesture } from '@expo/ui/swift-ui/modifiers';
+import * as HapticFeedback from 'expo-haptics';
+import * as Application from 'expo-application';
+
 const productSkus = [
     'support.1',
     'support.5',
@@ -47,167 +33,70 @@ type Operation = (typeof operations)[number];
 
 export default function Support() {
     const colorScheme = useColorScheme();
-    const navigation = useNavigation();
-    const parentNav = navigation.getParent();
 
     const gradientColors: readonly [string, string, ...string[]] = colorScheme === 'dark'
         ? ['#09090B', '#100528', '#09090B']
         : ['#EFF0F4', '#E5E0FF', '#EFF0F4'];
 
-    // useEffect(() => {
-    //     parentNav?.setOptions({
-    //         title: "Support",
 
-    //         headerRight: () => null,
-    //         // headerRight: () => (
-    //         //     <View>
-    //         //         <Pressable onPress={() => router.push('/tabs/home/new_film')} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
-    //         //             <SymbolView name="minus" size={22} />
-    //         //         </Pressable>
-    //         //     </View>
-    //         // ),
-    //     });
-    // }, []);
-
-    useFocusEffect(
-        useCallback(() => {
-            parentNav?.setOptions({
-                // title: "Support",
-                headerRight: () => null,
-                // headerRight: () => (
-                //     <View>
-                //         <Pressable onPress={() => router.push('/tabs/home/new_film')} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
-                //             <SymbolView name="minus" size={22} />
-                //         </Pressable>
-                //     </View>
-                // ),
-            });
-        }, [parentNav, colorScheme])
-    );
-
-    const [testBool, setTestBool] = useState(true);
-
-    return (
-        <View style={{ flex: 1 }}>
-
-            <LinearGradient
-                // colors={['#09090B', '#100528', '#09090B']}
-                colors={gradientColors}
-                locations={[0.1, 0.4, 0.9]}
-                // dither={false}
-                style={StyleSheet.absoluteFillObject}
-                start={{ x: 0, y: 0 }} // Optional: start from top-left
-                end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
-            >
-                <ScrollView contentInsetAdjustmentBehavior="automatic">
-
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, paddingTop: 100, paddingBottom: 100 }}>
-                        <Host matchContents>
-                            <VStack>
-                                <GlassEffectContainer>
-                                    <HStack>
-                                        <Image systemName='photo' modifiers={[
-                                            frame({ width: 80, height: 80 }),
-                                            glassEffect({
-                                                glass: {
-                                                    variant: 'clear',
-                                                    interactive: true,
-
-                                                }
-                                            }),
-                                            glassEffectId('photoIcon', 'photoIcon'),
-                                            onTapGesture(() => {
-                                                setTestBool(!testBool);
-                                                console.log('Tapped photo icon', testBool);
-                                            })
-                                        ]} />
-                                        {testBool && (
-                                            <Group modifiers={[
-
-                                                animation(Animation.easeInOut({ duration: 1 }), testBool),
-                                                glassEffect({
-                                                    glass: {
-                                                        variant: 'clear',
-                                                    }
-                                                }),
-                                                glassEffectId('buildingGroup', 'photoIcon'),
-                                            ]}>
-                                                <Image systemName='building.2' modifiers={[
-                                                    frame({ width: 80, height: 80 }),
-
-                                                ]} />
-                                                <Image systemName='camera' modifiers={[
-                                                    frame({ width: 80, height: 80 }),
-                                                ]}
-                                                />
-                                            </Group>
-                                        )}
-
-                                    </HStack>
-                                </GlassEffectContainer>
-                            </VStack>
-                        </Host>
-                    </View>
-                    {/* <View style={styles.container}>
-                        <Image
-                            style={styles.backgroundImage}
-                            source={{
-                                uri: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400&h=600&fit=crop',
-                            }}
-                        />
-                        <GlassContainer spacing={10} style={styles.containerStyle}>
-                            <GlassView style={styles.glass1} isInteractive />
-                            <GlassView style={styles.glass2} isInteractive />
-                            <GlassView style={styles.glass3} isInteractive />
-                        </GlassContainer>
-                    </View> */}
-                </ScrollView>
-            </LinearGradient>
-        </View>
-    );
-
-    const backgroundImage = require("@/assets/images/background.png");
-    const insets = useSafeAreaInsets();
-
-    const animatedValues = Array.from({ length: 4 }, () => ({
-        translateY: useSharedValue(50),
-        opacity: useSharedValue(0),
-    }));
+    const productIcons: Record<string, { name: SFSymbol; color: string }> = {
+        'support.1': {
+            name: 'sparkles',
+            color: '#A855F7',
+        },
+        'support.5': {
+            name: 'bolt.fill',
+            color: '#FFB800',
+        },
+        'support.10': {
+            name: 'heart.fill',
+            color: '#FF3B30',
+        }
+    }
 
 
-    // Helper to reset and play the enter animation
-    const playEnter = () => {
-        animatedValues.forEach((value, index) => {
-            const delay = index * 90; // snappier stagger
-            // reset to initial state before animating
-            value.translateY.value = 50;
-            value.opacity.value = 0;
+    const [purchaseInProgress, setPurchaseInProgress] = useState({
+        status: false, sku: ''
+    });
+    // Track processed transaction IDs to avoid duplicate alerts
+    const processedTransactionIdsRef = useRef(new Set());
+    const {
+        connected,
+        products,
+        fetchProducts,
+        requestPurchase,
+        finishTransaction
+    } = useIAP({
+        onPurchaseSuccess: async (purchase) => {
+            setPurchaseInProgress({ status: false, sku: '' });
+            // Only process if transactionId is new
+            if (purchase?.transactionId && !processedTransactionIdsRef.current.has(purchase.transactionId)) {
+                try {
+                    await finishTransaction({ purchase, isConsumable: true });
+                    processedTransactionIdsRef.current.add(purchase.transactionId);
+                    Alert.alert('Thank you ❤️', 'Your support is greatly appreciated!');
+                } catch (e) {
+                    console.error('Error finishing transaction:', e);
+                }
+            } else {
+                // Ignore duplicate or invalid purchases
+                console.log('Purchase already processed or invalid:', purchase?.transactionId);
+            }
+        },
+        onPurchaseError: (error) => {
+            setPurchaseInProgress({ status: false, sku: '' });
+            if (error.code !== ErrorCode.UserCancelled) {
+                console.error('Purchase failed:', error);
+            }
+        },
+    });
 
-            value.translateY.value = withDelay(
-                delay,
-                withSpring(0, {
-                    duration: 750,
-                    dampingRatio: 0.7,
-                    mass: 1,
-                })
-            );
-            value.opacity.value = withDelay(delay, withTiming(1, { duration: 500 }));
-        });
-    };
+    React.useEffect(() => {
+        if (connected) {
+            fetchProducts({ skus: productSkus, type: 'in-app' });
+        }
+    }, [connected]);
 
-    useFocusEffect(
-        React.useCallback(() => {
-            playEnter();
-            // optional: return a cleanup if you want to do something on blur
-            return () => { };
-        }, [])
-    );
-
-    const getAnimatedStyle = (index: number) =>
-        useAnimatedStyle(() => ({
-            transform: [{ translateY: animatedValues[index].translateY.value }],
-            opacity: animatedValues[index].opacity.value,
-        }));
 
     const storeURL = Platform.select({
         ios: 'itms-apps://itunes.apple.com/app/6744120369?action=write-review',
@@ -229,384 +118,257 @@ export default function Support() {
         }
     };
 
-    const [syncError, setSyncError] = useState<Error | null>(null);
-    const [isReady, setIsReady] = useState(false);
-    const [loadError, setLoadError] = useState(false);
-    const [validationResult, setValidationResult] = useState<any>(null);
-    const [loadingSku, setLoadingSku] = useState<string | null>(null);
-    const processedTransactionIds = new Set();
-
-    const {
-        connected,
-        products,
-        currentPurchase,
-        currentPurchaseError,
-        getProducts,
-        requestPurchase,
-        validateReceipt,
-        finishTransaction
-    } = useIAP({
-        onPurchaseSuccess: async (purchase) => {
-            if (processedTransactionIds.has(purchase.transactionId)) {
-                console.log('Transaction already processed:', purchase.transactionId);
-                return;
-            }
-
-            processedTransactionIds.add(purchase.transactionId);
-
-            try {
-                await finishTransaction({
-                    purchase: purchase,
-                    isConsumable: true
-                });
-
-                InteractionManager.runAfterInteractions(() => {
-                    Alert.alert('Thank you ❤️', 'Your support is greatly appreciated!');
-                    console.log('Purchase successful:');
-                });
-
-                setLoadingSku(null);
-            } catch (e) {
-                console.log('Error finishing transaction', e);
-                setLoadingSku(null);
-            }
-
-
-        },
-        onPurchaseError: (error) => {
-            InteractionManager.runAfterInteractions(() => {
-                Alert.alert('An error occured while processing your purchase. Please try again later.');
-                setLoadingSku(null);
-            });
-        },
-        onSyncError: (error) => {
-            console.log('Sync error occurred:', error);
-            setSyncError(error);
-            InteractionManager.runAfterInteractions(() => {
-                Alert.alert(
-                    'Sync Error',
-                    'Failed to synchronize with App Store. You may need to enter your password to verify subscriptions.',
-                    [{ text: 'OK', onPress: () => setSyncError(null) }],
-                );
-            });
-        },
-    });
-
-    const initializeIAP = async () => {
-        try {
-            await Promise.all([
-                getProducts(productSkus),
-            ]);
-            setIsReady(true);
-            setLoadError(false);
-        } catch (error) {
-            setLoadError(true);
-            console.error('Error initializing IAP:', error);
-        }
-    };
-
-    // Fetch products and subscriptions only when connected
-    useEffect(() => {
-        if (!connected) return;
-
-        initializeIAP();
-    }, [connected, getProducts]);
-
-    // useEffect(() => {
-    //     if (currentPurchase) {
-    //         InteractionManager.runAfterInteractions(async () => {
-    //             console.log('Current purchase:', currentPurchase);
-
-    //             try {
-    //                 await finishTransaction({
-    //                     purchase: currentPurchase,
-    //                     isConsumable: true
-    //                 });
-    //             } catch (error) {
-    //                 console.error('Error finishing transaction:', error);
-    //             }
-    //         });
-    //     }
-
-    //     if (currentPurchaseError) {
-    //         InteractionManager.runAfterInteractions(() => {
-    //             Alert.alert('Purchase error', JSON.stringify(currentPurchaseError));
-    //         });
-    //     }
-    // }, [currentPurchase, currentPurchaseError]);
-
-
     return (
-        <GestureHandlerRootView>
-            <View style={{ backgroundColor: '#09090B', flex: 1 }}>
+        <View style={{ flex: 1 }}>
 
-                <LinearGradient
-                    colors={['#09090B', '#100528', '#09090B']}
-                    locations={[0.1, 0.4, 0.9]}
-                    // dither={false}
+            <LinearGradient
+                // colors={['#09090B', '#100528', '#09090B']}
+                colors={gradientColors}
+                locations={[0.1, 0.4, 0.9]}
+                // dither={false}
+                style={StyleSheet.absoluteFillObject}
+                start={{ x: 0, y: 0 }} // Optional: start from top-left
+                end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
+            >
+                <ScrollView contentInsetAdjustmentBehavior="automatic"
                     style={{
-                        position: 'absolute',
-                        left: 0,
-                        right: 0,
-                        top: 0,
-                        height: '100%',
-                    }}
-                    start={{ x: 0, y: 0 }} // Optional: start from top-left
-                    end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
-                >
+                        paddingTop: 10,
+                        paddingLeft: 18,
+                        paddingRight: 18,
+                    }}>
 
-                    <View style={{ flex: 1, paddingTop: insets.top, paddingBottom: 0 }}>
-                        {/* <View style={{ paddingLeft: 12, paddingRight: 12, paddingTop: 8, paddingBottom: 22, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', }}>
-                            <BackButton />
-                            <Text style={{ color: '#FFFFFF', fontFamily: 'LufgaMedium', fontSize: 18, lineHeight: 24, marginLeft: 10 }}>About Rollio</Text>
-                        </View> */}
 
-                        <ScrollView
-                            contentContainerStyle={{ padding: 12, paddingBottom: insets.bottom + 32 }}
-                            keyboardShouldPersistTaps="handled"
-                            contentInsetAdjustmentBehavior="always"
-                            // contentInsetAdjustmentBehavior="automatic"
-                            showsVerticalScrollIndicator={false}
+                    <View
+                        // isInteractive={false}
+                        // glassEffectStyle='regular'
+                        style={{
+                            borderRadius: 24,
+                            // padding: 20,
+                            opacity: 0.8,
+                            marginBottom: 36,
+                        }}
+                    >
+                        <Text style={{
+                            color: colorScheme === 'dark' ? '#ffffff' : '#100528',
+                            fontFamily: 'LufgaRegular',
+                            fontSize: 15,
+                            lineHeight: 22
+                        }}>
+                            Rollio is a passion project built with love for the film photography community.
+                            If you enjoy using the app and want to show your appreciation, you can make a small contribution below.
+                        </Text>
+                    </View>
 
+                    <View style={{ marginBottom: 36 }}>
+                        <Text style={{
+                            color: colorScheme === 'dark' ? '#ffffff' : '#100528',
+                            fontFamily: 'LufgaMedium',
+                            fontSize: 18,
+                            marginBottom: 12,
+                        }}>
+                            Support the Project
+                        </Text>
+                        <GlassView
+                            isInteractive={true}
+                            glassEffectStyle='regular'
+                            style={{
+                                borderRadius: 24,
+                                padding: 20,
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                minHeight: 80,
+                            }}
                         >
-                            <Reanimated.View style={[getAnimatedStyle(0), styles.blocks]}>
-                                <Text style={{ color: '#D1D1D1', fontFamily: 'LufgaRegular', fontSize: 15, lineHeight: 22 }}>
-                                    Rollio is a passion project built with love for the film photography community. If you enjoy using the app and want to show your appreciation, you can make a small contribution below.
-                                </Text>
-                            </Reanimated.View>
+                            {(!products || products.length === 0) ? (
+                                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                                    <ActivityIndicator size="small" color={colorScheme === 'dark' ? '#ffffff' : '#100528'} />
+                                </View>
+                            ) : (
+                                products
+                                    .sort((a, b) => productSkus.indexOf(a.id) - productSkus.indexOf(b.id))
+                                    .map((product) => (
+                                        <Pressable
+                                            key={product.id}
+                                            onPress={async () => {
+                                                console.log('Pressed');
+                                                HapticFeedback.selectionAsync();
+                                                setPurchaseInProgress({ status: true, sku: product.id });
+                                                await requestPurchase({
+                                                    request: {
+                                                        ios: { sku: product.id },
+                                                        android: { skus: [product.id] }
+                                                    },
+                                                    type: 'in-app'
+                                                });
+                                            }}
+                                            disabled={purchaseInProgress.status}
+                                            style={{
+                                                padding: 10,
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                gap: 8,
+                                                width: 100,
+                                                opacity: purchaseInProgress.status ? purchaseInProgress.sku === product.id ? 1 : 0.5 : 1,
+                                            }}>
+                                            <SymbolView
+                                                name={productIcons[product.id].name}
+                                                size={52}
+                                                tintColor={productIcons[product.id].color}
+                                            />
+                                            <View style={{
+                                                height: 24,
+                                                minWidth: 60,
+                                                justifyContent: 'center',
+                                                alignItems: 'center'
+                                            }}>
+                                                {purchaseInProgress.status && purchaseInProgress.sku === product.id ? (
+                                                    <ActivityIndicator size="small" color={colorScheme === 'dark' ? '#ffffff' : '#100528'} />
+                                                ) : (
+                                                    <Text style={{
+                                                        fontFamily: 'LufgaMedium',
+                                                        fontSize: 16,
+                                                        color: colorScheme === 'dark' ? '#ffffff' : '#100528',
+                                                    }}>
+                                                        {product.displayPrice}
+                                                    </Text>
+                                                )}
+                                            </View>
+                                        </Pressable>
+                                    ))
+                            )}
+                        </GlassView>
+                    </View>
+                    <View style={{ marginBottom: 36 }}>
+                        <Text style={{
+                            color: colorScheme === 'dark' ? '#ffffff' : '#100528',
+                            fontFamily: 'LufgaMedium',
+                            fontSize: 18,
+                            marginBottom: 12,
+                        }}>
+                            Spread the Word
+                        </Text>
+                        <GlassView
+                            isInteractive={true}
+                            glassEffectStyle='regular'
+                            style={{
+                                borderRadius: 24,
+                                padding: 20,
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                            }}
+                        >
+                            <Pressable
+                                onPress={() => {
+                                    HapticFeedback.selectionAsync();
+                                    if (storeURL) {
+                                        Linking.openURL(storeURL).catch((err) => {
+                                            console.error('Failed to open store URL:', err);
+                                            Alert.alert('Error', 'Failed to open the store URL. Please try again later.');
+                                        });
+                                    }
+                                }}
 
-                            <Reanimated.View style={[getAnimatedStyle(1), styles.blocks]}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                                    <HeartShineIcon width={24} height={24} style={{ marginRight: 8 }} />
-                                    <Text style={{ color: '#FFFFFF', fontFamily: 'LufgaMedium', fontSize: 18 }}>
-                                        Support the Project
+                                style={{
+                                    padding: 10,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                }}>
+
+                                <SymbolView
+                                    name='star.fill'
+                                    size={48}
+                                    tintColor='#FFB800'
+                                />
+
+                                <View style={{
+                                    height: 24,
+                                    // minWidth: 60,
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
+                                }}>
+                                    <Text style={{
+                                        fontFamily: 'LufgaMedium',
+                                        fontSize: 16,
+                                        color: colorScheme === 'dark' ? '#ffffff' : '#100528',
+                                    }}>
+                                        Write a Review
                                     </Text>
                                 </View>
-                                <Text style={{ color: '#D1D1D1', fontFamily: 'LufgaRegular', fontSize: 14, lineHeight: 20, marginBottom: 20 }}>
-                                    The support options are completely optional and do not unlock additional features.
-                                </Text>
+                            </Pressable>
 
-                                {syncError && (
-                                    <View style={{}}>
-                                        <Text style={{}}>
-                                            Sync error: Please verify your App Store credentials
-                                        </Text>
-                                    </View>
-                                )}
+                            <Pressable
+                                onPress={() => {
+                                    HapticFeedback.selectionAsync();
+                                    handleSharing();
+                                }}
 
-                                {((!isReady && loadError) || (!connected)) && (
-                                    <View style={{}}>
-                                        <Text style={{ color: '#DC3E42', marginBottom: 10 }}>
-                                            Error loading items. Please check your internet connection and try again.
-                                        </Text>
-                                        <TouchableOpacity
-                                            style={{}}
-                                            onPress={initializeIAP}
-                                        >
-                                            <Text style={{ color: '#fff', textDecorationLine: 'underline', textDecorationColor: '#fff' }}>Retry</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
+                                style={{
+                                    padding: 10,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                }}>
 
-                                <View>
-                                    {!connected ? (
-                                        <Text style={{ color: '#D1D1D1', fontFamily: 'LufgaRegular', fontSize: 12, lineHeight: 20 }}>
-                                            Connecting to the App Store... Please wait.
-                                        </Text>
-                                    ) : (
-                                        <View style={{ gap: 20 }}>
-                                            {[...products]
-                                                .sort((a, b) => productSkus.indexOf(a.id) - productSkus.indexOf(b.id))
-                                                .map((item) => {
-                                                    if (item.platform === 'android') {
+                                <SymbolView
+                                    name='square.and.arrow.up'
+                                    size={48}
+                                    tintColor='#34C759'
+                                />
 
-                                                        return (
-                                                            <View key={item.title} style={{ gap: 0 }}>
-                                                                <TouchableOpacity
-                                                                    style={[styles.supportButton]}
-                                                                    onPress={() => {
-                                                                        setLoadingSku(item.id);
-
-                                                                        setTimeout(() => {
-                                                                            requestPurchase({
-                                                                                request: {
-                                                                                    skus: [item.id],
-                                                                                },
-                                                                            });
-                                                                        }, 1000);
-
-                                                                        setTimeout(() => {
-                                                                            setLoadingSku((prev) => prev === item.id ? null : prev);
-                                                                        }, 20000);
-                                                                    }}>
-                                                                    {loadingSku === item.id ? (
-                                                                        <ActivityIndicator color="#FFFFFF" />
-                                                                    ) : (
-                                                                        <Text style={styles.buttonText}>
-                                                                            {item.oneTimePurchaseOfferDetails?.formattedPrice} - {item.displayName}
-                                                                        </Text>
-                                                                    )}
-                                                                </TouchableOpacity>
-                                                            </View>
-                                                        );
-                                                    }
-
-                                                    if (item.platform === 'ios') {
-                                                        return (
-                                                            <View key={item.title} style={{ gap: 0 }}>
-                                                                <TouchableOpacity
-                                                                    style={[styles.supportButton]}
-                                                                    onPress={() => {
-                                                                        setLoadingSku(item.id);
-                                                                        requestPurchase({
-                                                                            request: {
-                                                                                sku: item.id,
-                                                                            },
-                                                                        });
-                                                                        setTimeout(() => {
-                                                                            setLoadingSku((prev) => prev === item.id ? null : prev);
-                                                                        }, 20000);
-                                                                    }}>
-                                                                    {loadingSku === item.id ? (
-                                                                        <ActivityIndicator color="#FFFFFF" />
-                                                                    ) : (
-                                                                        <Text style={styles.buttonText}>
-                                                                            {item.displayPrice} - {item.title}
-                                                                        </Text>
-                                                                    )}
-                                                                </TouchableOpacity>
-                                                            </View>
-                                                        );
-                                                    }
-                                                })}
-                                        </View>
-                                    )}
-                                </View>
-
-                            </Reanimated.View>
-
-                            <Reanimated.View style={[getAnimatedStyle(2), styles.blocks]}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                                    <StarFallIcon width={24} height={24} style={{ marginRight: 8 }} />
-                                    <Text style={{ color: '#FFFFFF', fontFamily: 'LufgaMedium', fontSize: 18 }}>
-                                        Leave a Review
-                                    </Text>
-
-                                </View>
-                                <Text style={{ color: '#D1D1D1', fontFamily: 'LufgaRegular', fontSize: 14, lineHeight: 20, marginBottom: 20 }}>
-                                    Love using Rollio? Let others know by leaving a review!
-                                </Text>
-
-                                <TouchableOpacity
-                                    style={[styles.supportButton, { marginBottom: 0 }]}
-                                    onPress={() => {
-                                        if (storeURL) {
-                                            Linking.openURL(storeURL).catch((err) => {
-                                                console.error('Failed to open store URL:', err);
-                                                Alert.alert('Error', 'Failed to open the store URL. Please try again later.');
-                                            });
-                                        }
-                                    }}
-                                >
-                                    <Text style={styles.buttonText}>Write a Review</Text>
-                                </TouchableOpacity>
-                            </Reanimated.View>
-
-                            <Reanimated.View style={[getAnimatedStyle(3), styles.blocks]}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                                    <ShareIcon width={24} height={24} style={{ marginRight: 8 }} />
-                                    <Text style={{ color: '#FFFFFF', fontFamily: 'LufgaMedium', fontSize: 18 }}>
-                                        Spread the Word
+                                <View style={{
+                                    height: 24,
+                                    // minWidth: 60,
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
+                                }}>
+                                    <Text style={{
+                                        fontFamily: 'LufgaMedium',
+                                        fontSize: 16,
+                                        color: colorScheme === 'dark' ? '#ffffff' : '#100528',
+                                    }}>
+                                        Share the App
                                     </Text>
                                 </View>
-                                <Text style={{ color: '#D1D1D1', fontFamily: 'LufgaRegular', fontSize: 14, lineHeight: 20, marginBottom: 20 }}>
-                                    Know someone who is into film photography? Share Rollio with them and help it reach more film lovers.
-                                </Text>
+                            </Pressable>
+                        </GlassView>
+                    </View>
 
-                                <TouchableOpacity
-                                    style={[styles.supportButton, { marginBottom: 0 }]}
-                                    onPress={handleSharing}
-                                >
-                                    <Text style={styles.buttonText}>Share Rollio</Text>
-                                </TouchableOpacity>
-                            </Reanimated.View>
-                        </ScrollView>
+                    {/* <View style={{ marginBottom: 24 }}>
+                        <Text style={{
+                            color: colorScheme === 'dark' ? '#ffffff' : '#100528',
+                            fontFamily: 'LufgaMedium',
+                            fontSize: 18,
+                            marginBottom: 12,
+                        }}>
+                            Know a Photographer?
+                        </Text>
+                    </View> */}
 
-                    </View >
+                    <View style={{ marginTop: 80, marginBottom: 36, alignItems: 'center' }}>
+                        <Image source={require('@/assets/images/splash-icon-light.png')} style={{ width: 64, height: 64 }} />
+                        <Text style={{
+                            color: colorScheme === 'dark' ? '#ffffff' : '#100528',
+                            fontFamily: 'LufgaRegular',
+                            fontSize: 18,
+                            lineHeight: 26,
+                        }}>
+                            {Application.applicationName}
+                        </Text>
+                        <Text style={{
+                            color: colorScheme === 'dark' ? '#ffffff' : '#100528',
+                            fontFamily: 'LufgaRegular',
+                            fontSize: 15,
+                            lineHeight: 22,
+                            opacity: 0.5,
+                        }}>
+                            Version {Application.nativeApplicationVersion} ({Application.nativeBuildVersion})
+                        </Text>
+                    </View>
 
-
-                </LinearGradient>
-            </View>
-
-        </GestureHandlerRootView >
-
-
+                </ScrollView>
+            </LinearGradient>
+        </View >
     );
 }
-
-// const styles = StyleSheet.create({
-//     blocks: {
-//         paddingLeft: 18,
-//         paddingRight: 18,
-//         paddingTop: 24,
-//         paddingBottom: 24,
-//         backgroundColor: '#ffffff0D',
-//         borderRadius: 24,
-//         marginBottom: 20,
-//     },
-//     supportButton: {
-//         paddingVertical: 12,
-//         paddingHorizontal: 24,
-//         borderRadius: 9999,
-//         backgroundColor: '#ffffff0D',
-//         borderWidth: 1,
-//         borderColor: 'rgba(255, 255, 255, 0.15)',
-//         shadowColor: '#000',
-//         shadowOffset: { width: 0, height: 1 },
-//         shadowOpacity: 0.2,
-//         shadowRadius: 2,
-//         justifyContent: 'center',
-//         alignItems: 'center',
-//     },
-//     buttonText: {
-//         color: '#FFFFFF',
-//         fontFamily: 'LufgaRegular',
-//         fontSize: 15,
-//     },
-// });
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    backgroundImage: {
-        ...StyleSheet.absoluteFillObject,
-        width: '100%',
-        height: '100%',
-    },
-    containerStyle: {
-        position: 'absolute',
-        top: 200,
-        left: 50,
-        width: 250,
-        height: 100,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 5,
-    },
-    glass1: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-    },
-    glass2: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-    },
-    glass3: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-    },
-});

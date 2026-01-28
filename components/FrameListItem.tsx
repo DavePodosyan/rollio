@@ -1,6 +1,6 @@
 import { View, Text, Pressable, useColorScheme } from 'react-native';
 import { Frame } from '@/types';
-import { GlassContainer, GlassView } from 'expo-glass-effect';
+import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
 import { router } from 'expo-router';
 import { memo } from 'react';
@@ -12,10 +12,25 @@ interface FrameListItemProps {
 function FrameListItem({ frame }: FrameListItemProps) {
 
     const colorScheme = useColorScheme();
+    const isGlassAvailable = isLiquidGlassAvailable();
 
     return (
-        <Pressable onPress={() => router.push({ pathname: '/(modal)/new-frame', params: { mode: 'edit', filmId: frame.film_id, frameId: frame.id } })}>
-            <GlassView isInteractive={true} glassEffectStyle={colorScheme === 'dark' ? 'clear' : 'regular'} style={{ padding: 20, borderRadius: 24 }}>
+        <Pressable
+            onPress={() => router.push({ pathname: '/(modal)/new-frame', params: { mode: 'edit', filmId: frame.film_id, frameId: frame.id } })}
+            style={({ pressed }) => [
+                {
+                    transform: isGlassAvailable ? [] : [{ scale: pressed ? 0.97 : 1 }],
+                },
+            ]}>
+            <GlassView
+                isInteractive={true}
+                glassEffectStyle={colorScheme === 'dark' ? 'clear' : 'regular'}
+                style={{
+                    padding: 20,
+                    borderRadius: 24,
+                    backgroundColor: isGlassAvailable ? 'transparent' : (colorScheme === 'dark' ? '#a583ef1f' : '#ffffffcc'),
+
+                }}>
                 <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
                     <View
                         // isInteractive={true}

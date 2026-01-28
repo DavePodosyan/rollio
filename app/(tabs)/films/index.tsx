@@ -1,4 +1,4 @@
-import { FlatList, View, Text, StyleSheet, useColorScheme } from "react-native";
+import { FlatList, View, Text, StyleSheet, useColorScheme, DeviceEventEmitter } from "react-native";
 import { useFilms } from "@/hooks/useFilms";
 import { Film } from "@/types";
 import { router, useFocusEffect, useNavigation } from "expo-router";
@@ -6,34 +6,46 @@ import FilmListItem from "@/components/FilmListItem";
 import EnjoyingRollio from "@/components/EnjoyingRollio";
 import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useState, useEffect } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as StoreReview from 'expo-store-review';
 
 export default function Home() {
     const colorScheme = useColorScheme();
     const { films, loading, error, fetchFilms } = useFilms();
     const [ready, setReady] = useState(false);
     const navigation = useNavigation();
-    const parentNav = navigation.getParent();
-
-    // useFocusEffect(
-    //     useCallback(() => {
-    //         parentNav?.setOptions({
-    //             // title: "Film Rolls",
-    //             headerRight: () => (
-    //                 <View>
-    //                     <Pressable onPress={() => router.push('/new-film')} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
-    //                         <SymbolView name="plus" size={22} tintColor={colorScheme === 'dark' ? '#fff' : '#100528'} />
-    //                     </Pressable>
-    //                 </View>
-    //             ),
-    //         });
-    //     }, [parentNav, colorScheme])
-    // );
 
     useEffect(() => {
         const frame = requestAnimationFrame(() => {
             setReady(true);
         });
         return () => cancelAnimationFrame(frame);
+    }, []);
+
+    useEffect(() => {
+        // Subscribe to the event
+        const subscription = DeviceEventEmitter.addListener('added_film', async () => {
+
+            if (films.length < 1) {
+                return;
+            }
+
+            const lastPrompt = await AsyncStorage.getItem('last_review_prompt');
+            const now = Date.now();
+            const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+
+            if (!lastPrompt || (now - parseInt(lastPrompt)) > thirtyDays) {
+
+                if (await StoreReview.hasAction()) {
+                    await StoreReview.requestReview();
+                }
+
+                await AsyncStorage.setItem('last_review_prompt', now.toString());
+            }
+
+        });
+
+        return () => subscription.remove();
     }, []);
 
     const gradientColors: readonly [string, string, ...string[]] = colorScheme === 'dark'

@@ -17,8 +17,8 @@ export default function HomeLayout() {
             headerLargeStyle: { backgroundColor: "transparent" },
             headerTitleStyle: { fontFamily: 'LufgaMedium', color: colorScheme === 'dark' ? '#fff' : '#100528' },
             headerLargeTitleStyle: { fontFamily: 'LufgaMedium', color: colorScheme === 'dark' ? '#fff' : '#100528' },
-            headerBlurEffect: isGlassAvailable ? undefined : "systemMaterialDark",
-            title: "Film Rollsss",
+            headerBlurEffect: isGlassAvailable ? undefined : colorScheme === 'dark' ? "dark" : "light",
+            title: "",
             contentStyle: { backgroundColor: "transparent" },
 
         }}> {/* Hide root header; show per-screen */}
