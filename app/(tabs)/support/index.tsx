@@ -18,7 +18,7 @@ import { useIAP, ErrorCode } from 'expo-iap';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { SFSymbol, SymbolView } from 'expo-symbols';
-import { GlassContainer, GlassView } from 'expo-glass-effect';
+import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as HapticFeedback from 'expo-haptics';
 import * as Application from 'expo-application';
 
@@ -33,6 +33,7 @@ type Operation = (typeof operations)[number];
 
 export default function Support() {
     const colorScheme = useColorScheme();
+    const isGlassAvailable = isLiquidGlassAvailable();
 
     const gradientColors: readonly [string, string, ...string[]] = colorScheme === 'dark'
         ? ['#09090B', '#100528', '#09090B']
@@ -178,6 +179,8 @@ export default function Support() {
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
                                 minHeight: 80,
+                                backgroundColor: isGlassAvailable ? 'transparent' : (colorScheme === 'dark' ? '#a583ef1f' : '#ffffffcc'),
+
                             }}
                         >
                             {(!products || products.length === 0) ? (
@@ -256,6 +259,8 @@ export default function Support() {
                                 padding: 20,
                                 flexDirection: 'row',
                                 justifyContent: 'space-between',
+                                backgroundColor: isGlassAvailable ? 'transparent' : (colorScheme === 'dark' ? '#a583ef1f' : '#ffffffcc'),
+
                             }}
                         >
                             <Pressable

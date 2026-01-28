@@ -274,10 +274,10 @@ export default function FilmDetailPage() {
                     ListEmptyComponent={() => (
                         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                             <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                                <Text style={{ color: "#fff", fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
+                                <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
                                     You don't have any film rolls yet.
                                 </Text>
-                                <Text style={{ color: "#fff", fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
+                                <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
                                     Click the + button to add one.
                                 </Text>
                             </View>
