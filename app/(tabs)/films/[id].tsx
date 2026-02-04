@@ -77,11 +77,11 @@ export default function FilmDetailPage() {
 
     useEffect(() => {
         navigation.setOptions({
-            title: title,
+            title: film?.title ?? title,
             headerRight: () => (
                 <View style={{ width: 85, height: 35, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <View style={{ backgroundColor: 'transparent' }}>
-                        <Pressable onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, frameCount: film?.frame_count } })} style={{ width: 35, backgroundColor: 'transparent', height: 35, justifyContent: 'center', alignItems: 'center', }} >
+                        <Pressable onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } })} style={{ width: 35, backgroundColor: 'transparent', height: 35, justifyContent: 'center', alignItems: 'center', }} >
                             <SymbolView name="plus" size={22} tintColor={colorScheme === 'dark' ? '#ffffff' : '#100528'} />
                         </Pressable>
                     </View>
@@ -94,7 +94,7 @@ export default function FilmDetailPage() {
     }, [film, colorScheme]);
 
     if (loading || error || !film) {
-        return null; // ✅ safe now — all hooks already called
+        return null;
     }
 
     const statusColor = getStatusColor(film.status);
@@ -268,7 +268,7 @@ export default function FilmDetailPage() {
                     ListHeaderComponent={renderHeader}
                     ListHeaderComponentStyle={{ marginBottom: 24 }}
                     // disableIntervalMomentum={true}
-                    renderItem={({ item }) => <FrameListItem frame={item} />}
+                    renderItem={({ item }) => <FrameListItem frame={item} iso={film?.iso} />}
 
                     ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
                     ListEmptyComponent={() => (

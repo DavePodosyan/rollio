@@ -15,12 +15,19 @@ import { useFrames } from "@/hooks/useFrames";
 import ImageUploader from "@/components/ImageUploader";
 import { saveFrameImage } from "@/utils/ImageService";
 import { usePreventRemove } from "@react-navigation/native";
+import FilmSettingsFromPhoto from "@/components/FilmSettingsFromPhoto";
 
 
 export default function NewFrame() {
     const colorScheme = useColorScheme();
     const navigation = useNavigation();
-    const { mode = 'new', filmId, frameCount, frameId } = useLocalSearchParams<{ mode?: 'edit', filmId?: string, frameCount?: string, frameId?: string }>();
+    const { mode = 'new', filmId, iso, frameCount, frameId } = useLocalSearchParams<{
+        mode?: 'edit',
+        filmId: string,
+        iso: string,
+        frameCount?: string,
+        frameId?: string
+    }>();
     const isReady = mode === 'edit' ? useRef(false) : useRef(true);
 
     const { addFrame, loading, lensNames, fetchUniqueLensNames, prefillFromPreviousFrame } = useFrames(Number(filmId));
@@ -30,6 +37,7 @@ export default function NewFrame() {
     const previousFrameData = prefillFromPreviousFrame();
     const hasPrefilled = useRef(false);
 
+    const scrollViewRef = useRef<ScrollView>(null);
     console.log(previousFrameData);
 
     const [formData, setFormData] = useState<CreateFrameInput>({
@@ -290,6 +298,7 @@ export default function NewFrame() {
         <View style={{ flex: 1 }}>
 
             <ScrollView
+                ref={scrollViewRef}
                 style={{ padding: 0, flex: 1 }}
                 keyboardShouldPersistTaps="handled"
                 contentInsetAdjustmentBehavior="automatic"
@@ -425,6 +434,25 @@ export default function NewFrame() {
                         setFormData(prev => ({ ...prev, image }))
                     }
                     } />
+                </View>
+                <View style={{ padding: 20 }}>
+                    <FilmSettingsFromPhoto
+                        imageUri={formData.image}
+                        filmIso={Number(iso)}
+                        // filmIso={fi}
+                        onApplySettings={(settings) => {
+                            console.log(settings);
+
+                            setFormData(prev => ({
+                                ...prev,
+                                aperture: String(settings.aperture),
+                                shutter_speed: settings.shutter_speed,
+                            }));
+
+                            // scroll to top to show the updated settings all the way at top
+                            scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+                        }}
+                    />
                 </View>
 
 

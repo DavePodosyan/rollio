@@ -199,7 +199,20 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
         <Text style={{ color: colorScheme === 'dark' ? 'white' : '#100528', fontFamily: 'LufgaMedium', fontSize: 12 }}>{label}</Text>
       </GlassView>
 
-      <Text style={{ color: values[selectedIndex] === 'Auto' ? '#4CAF50' : colorScheme === 'dark' ? 'white' : '#100528', fontFamily: 'LufgaMedium', position: 'absolute', zIndex: 1, top: 6 }}>{values[selectedIndex]}</Text>
+
+      <Text style={{ color: values[selectedIndex] === 'Auto' ? '#4CAF50' : colorScheme === 'dark' ? 'white' : '#100528', fontFamily: 'LufgaMedium', position: 'absolute', zIndex: 1, top: 6 }}>
+        {(() => {
+          const value = values[selectedIndex];
+          switch (label) {
+            case 'Aperture':
+              return value === 'Auto' ? value : `f/${value}`;
+            case 'Shutter Speed':
+              return value === 'Auto' ? value : `${value}s`;
+            default:
+              return value;
+          }
+        })()}
+      </Text>
 
       <View style={[styles.container, { height }]}>
         <Animated.FlatList

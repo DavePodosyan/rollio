@@ -7,16 +7,24 @@ import { memo } from 'react';
 
 interface FrameListItemProps {
     frame: Frame;
+    iso: number;
 }
 
-function FrameListItem({ frame }: FrameListItemProps) {
+function FrameListItem({ frame, iso }: FrameListItemProps) {
 
     const colorScheme = useColorScheme();
     const isGlassAvailable = isLiquidGlassAvailable();
 
     return (
         <Pressable
-            onPress={() => router.push({ pathname: '/(modal)/new-frame', params: { mode: 'edit', filmId: frame.film_id, frameId: frame.id } })}
+            onPress={() => router.push({
+                pathname: '/(modal)/new-frame', params: {
+                    mode: 'edit',
+                    filmId: frame.film_id,
+                    iso: iso,
+                    frameId: frame.id
+                }
+            })}
             style={({ pressed }) => [
                 {
                     transform: isGlassAvailable ? [] : [{ scale: pressed ? 0.97 : 1 }],
@@ -126,7 +134,7 @@ function FrameListItem({ frame }: FrameListItemProps) {
                                     fontFamily: 'LufgaMedium',
                                     color: colorScheme === 'dark' ? '#fff' : '#100528',
                                 }}>
-                                    {frame.shutter_speed}
+                                    {frame.shutter_speed !== 'Auto' ? `${frame.shutter_speed}s` : frame.shutter_speed}
                                 </Text>
                             </View>
                             {frame.image && (

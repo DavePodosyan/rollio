@@ -19,6 +19,7 @@ import { Host, ContextMenu, Button as SButton } from '@expo/ui/swift-ui';
 // Icons
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
+import { writeAsync } from '@lodev09/react-native-exify';
 
 interface ImageUploaderProps {
     value: string | null;
@@ -60,9 +61,14 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
 
         const result = await ImagePicker.launchCameraAsync({
             allowsEditing: false,
+            presentationStyle: ImagePicker.UIImagePickerPresentationStyle.PAGE_SHEET,
             quality: 0.7,
             exif: true,
         });
+
+        if (!result.canceled && result.assets?.[0]?.uri) {
+            const writeExifResult = await writeAsync(result.assets[0].uri, result.assets[0].exif || {});
+        }
 
         handleImageResult(result);
     };
@@ -70,10 +76,17 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
     const pickFromGallery = async () => {
         // Note: Android 13+ Photo Picker usually doesn't need explicit permissions, 
         // but it's good practice to leave this check for older OS versions.
+
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+            Alert.alert('Permission required', 'Media library permission is needed to select photos.');
+            return;
+        }
+
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing: false,
-            quality: 0.7,
+            // quality: 0.7,
             exif: true,
         });
 
@@ -82,7 +95,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
 
     const handleImageResult = (result: ImagePicker.ImagePickerResult) => {
         if (!result.canceled && result.assets?.[0]?.uri) {
-            console.log(result.assets[0].exif);
+            // console.log(result.assets[0].exif);
 
             onChange(result.assets[0].uri);
         }
