@@ -21,12 +21,15 @@ import FilmSettingsFromPhoto from "@/components/FilmSettingsFromPhoto";
 export default function NewFrame() {
     const colorScheme = useColorScheme();
     const navigation = useNavigation();
-    const { mode = 'new', filmId, iso, frameCount, frameId } = useLocalSearchParams<{
+    const { mode = 'new', filmId, iso, frameCount, frameId, aperture: initialAperture, shutterSpeed: initialShutter, image } = useLocalSearchParams<{
         mode?: 'edit',
         filmId: string,
         iso: string,
         frameCount?: string,
-        frameId?: string
+        frameId?: string,
+        aperture?: string,
+        shutterSpeed?: string,
+        image?: string,
     }>();
     const isReady = mode === 'edit' ? useRef(false) : useRef(true);
 
@@ -40,26 +43,27 @@ export default function NewFrame() {
     const scrollViewRef = useRef<ScrollView>(null);
     console.log(previousFrameData);
 
+    // Use aperture/shutterSpeed from light meter if provided, otherwise default to Auto
     const [formData, setFormData] = useState<CreateFrameInput>({
         film_id: Number(filmId),
-        aperture: "Auto",
-        shutter_speed: "Auto",
+        aperture: initialAperture || "Auto",
+        shutter_speed: initialShutter || "Auto",
         frame_no: frameCount ? Number(frameCount) + 1 : 1,
         note: null,
         created_at: new Date().toISOString(),
         lens: null,
-        image: null,
+        image: image || null,
     });
 
     const initialDataRef = useRef<CreateFrameInput>({
         film_id: Number(filmId),
-        aperture: "Auto",
-        shutter_speed: "Auto",
+        aperture: initialAperture || "Auto",
+        shutter_speed: initialShutter || "Auto",
         frame_no: frameCount ? Number(frameCount) + 1 : 1,
         note: null,
         created_at: new Date().toISOString(),
         lens: null,
-        image: null,
+        image: image || null,
     });
 
     const hasUnsavedChanges = useCallback(() => {
@@ -132,22 +136,33 @@ export default function NewFrame() {
 
     useEffect(() => {
         if (mode === 'new' && Object.keys(previousFrameData).length > 0 && !hasPrefilled.current) {
+            // If we have light meter values (aperture/shutterSpeed from params), preserve them
+            // Only prefill other fields from previous frame
+            const hasLightMeterAperture = initialAperture && initialAperture !== "Auto";
+            const hasLightMeterShutter = initialShutter && initialShutter !== "Auto";
 
             setFormData(prev => ({
                 ...prev,
-                ...previousFrameData
+                ...previousFrameData,
+                // Preserve light meter values if they were provided
+                ...(hasLightMeterAperture && { aperture: initialAperture }),
+                ...(hasLightMeterShutter && { shutter_speed: initialShutter }),
+                ...(image && { image }), // Preserve image from light meter if provided
             }));
 
             hasPrefilled.current = true;
 
             initialDataRef.current = {
                 ...formData,
-                ...previousFrameData
+                ...previousFrameData,
+                ...(hasLightMeterAperture && { aperture: initialAperture }),
+                ...(hasLightMeterShutter && { shutter_speed: initialShutter }),
+                ...(image && { image }), // Preserve image from light meter if provided
             };
 
             console.log('Prefilled form data with previous frame data:', initialDataRef.current);
         }
-    }, [previousFrameData, mode]);
+    }, [previousFrameData, mode, initialAperture, initialShutter, image]);
 
     const [focusedField, setFocusedField] = useState<'lens' | null>(null);
     const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -435,25 +450,27 @@ export default function NewFrame() {
                     }
                     } />
                 </View>
-                <View style={{ padding: 20 }}>
-                    <FilmSettingsFromPhoto
-                        imageUri={formData.image}
-                        filmIso={Number(iso)}
-                        // filmIso={fi}
-                        onApplySettings={(settings) => {
-                            console.log(settings);
+                {(!initialAperture && !initialShutter) && (
+                    <View style={{ padding: 20 }}>
+                        <FilmSettingsFromPhoto
+                            imageUri={formData.image}
+                            filmIso={Number(iso)}
+                            // filmIso={fi}
+                            onApplySettings={(settings) => {
+                                console.log(settings);
 
-                            setFormData(prev => ({
-                                ...prev,
-                                aperture: String(settings.aperture),
-                                shutter_speed: settings.shutter_speed,
-                            }));
+                                setFormData(prev => ({
+                                    ...prev,
+                                    aperture: String(settings.aperture),
+                                    shutter_speed: settings.shutter_speed,
+                                }));
 
-                            // scroll to top to show the updated settings all the way at top
-                            scrollViewRef.current?.scrollTo({ y: 0, animated: true });
-                        }}
-                    />
-                </View>
+                                // scroll to top to show the updated settings all the way at top
+                                scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+                            }}
+                        />
+                    </View>
+                )}
 
 
             </ScrollView>

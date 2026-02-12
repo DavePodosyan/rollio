@@ -1,3 +1,4 @@
+import { calculateEV100 } from "@/utils/calculations";
 import { APERTURE_OPTIONS, SHUTTER_SPEED_OPTIONS } from "@/utils/cameraSettings";
 import { ExifTags, readAsync } from "@lodev09/react-native-exify";
 import { File, Paths } from "expo-file-system";
@@ -82,11 +83,12 @@ export default function FilmSettingsFromPhoto({ filmIso, imageUri, onApplySettin
         setError(null);
 
         // 1. EV at ISO 100 (scene brightness)
+        // const ev100 = calculateEV100(FNumber, ExposureTime, phoneIso);
         const ev100 = Math.log2((FNumber ** 2) / ExposureTime)
-            + Math.log2(phoneIso / 100);   // ← note: + here (not -)
+            - Math.log2(phoneIso / 100);   // ← note: + here (not -)
 
         // 2. Effective EV to use for the film speed
-        const targetEV = ev100 - Math.log2(filmIso / 100);
+        const targetEV = ev100 + Math.log2(filmIso / 100);
         // or: ev100 + Math.log2(100 / filmIso);
 
         // 3. Generate pairs
