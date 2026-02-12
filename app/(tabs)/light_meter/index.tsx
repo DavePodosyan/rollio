@@ -133,7 +133,7 @@ export default function CameraBackgroundPage() {
 
             {!isCameraReady && (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator />
+                    <ActivityIndicator size="large" />
                 </View>
             )}
 
