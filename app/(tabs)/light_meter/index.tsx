@@ -93,7 +93,7 @@ export default function CameraBackgroundPage() {
     if (!permission.granted) {
         // Camera permissions are not granted yet
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { justifyContent: 'center' }]}>
                 <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: PlatformColor('label') }}>We need your permission to show the camera</Text>
                 {permission.canAskAgain && (
                     <Pressable onPress={requestPermission} style={({ pressed }) => [
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     container: {
         // backgroundColor: 'red',
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         paddingLeft: 10,
         paddingRight: 10,
@@ -211,7 +211,6 @@ const styles = StyleSheet.create({
         gap: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: ' green',
         zIndex: 9, // Ensure content is above the camera
         // Background must be transparent (default) to see the camera
     },
