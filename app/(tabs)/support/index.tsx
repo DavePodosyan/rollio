@@ -18,7 +18,7 @@ import { useIAP, ErrorCode } from 'expo-iap';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { SFSymbol, SymbolView } from 'expo-symbols';
-import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as HapticFeedback from 'expo-haptics';
 import * as Application from 'expo-application';
 

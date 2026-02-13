@@ -1,12 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Pressable, useWindowDimensions, PlatformColor, ActivityIndicator, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, PlatformColor, ActivityIndicator, Alert, Linking } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useIsFocused } from '@react-navigation/native';
-import { BottomSheet, Button, ColorPicker, ContextMenu, DateTimePicker, Host, Picker, Text as UIText } from '@expo/ui/swift-ui';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
-import { ISO_OPTIONS } from '@/utils/cameraSettings';
-import { router, usePathname, useNavigation } from 'expo-router';
-import { frame, glassEffect, padding } from '@expo/ui/swift-ui/modifiers';
+import { router, usePathname } from 'expo-router';
 import { calculateEV100 } from '@/utils/calculations';
 
 export default function CameraBackgroundPage() {
@@ -19,10 +16,7 @@ export default function CameraBackgroundPage() {
             pathname.includes('/new-frame'));
     const [isCameraReady, setIsCameraReady] = useState(false);
     const [loading, setLoading] = useState(false);
-    const navigation = useNavigation();
-    const { width } = useWindowDimensions();
     const [permission, requestPermission] = useCameraPermissions();
-    const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
     const cameraRef = useRef<CameraView>(null);
 
     useEffect(() => {
@@ -91,7 +85,7 @@ export default function CameraBackgroundPage() {
 
     if (!permission) {
         // Camera permissions are still loading
-        return <View />;
+        return (<View />);
 
     }
 
@@ -100,10 +94,45 @@ export default function CameraBackgroundPage() {
         // Camera permissions are not granted yet
         return (
             <View style={styles.container}>
-                <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
-                <TouchableOpacity onPress={requestPermission} style={styles.button}>
-                    <Text style={styles.text}>Grant Permission</Text>
-                </TouchableOpacity>
+                <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: PlatformColor('label') }}>We need your permission to show the camera</Text>
+                {permission.canAskAgain && (
+                    <Pressable onPress={requestPermission} style={({ pressed }) => [
+                        {
+                            transform: isGlassAvailable ? [] : [{ scale: pressed ? 0.97 : 1 }],
+                        }
+                    ]}>
+                        <GlassView isInteractive={true} tintColor='#0091ff' style={{
+                            padding: 20,
+                            marginTop: 20,
+                            borderRadius: 24,
+                            backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('systemBlue')
+                        }}>
+                            <Text style={{
+                                color: 'white',
+                                fontFamily: 'LufgaMedium',
+                                fontSize: 14,
+                            }}>Grant Permission</Text>
+                        </GlassView>
+                    </Pressable>
+                )}
+
+                {!permission.granted && permission.canAskAgain === false && (
+                    <Pressable onPress={() => Linking.openSettings()}>
+                        <GlassView isInteractive={true} tintColor='#ff3b30' style={{
+                            padding: 20,
+                            marginTop: 20,
+                            borderRadius: 24,
+                            backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('systemRed')
+                        }}>
+                            <Text style={{
+                                color: 'white',
+                                fontFamily: 'LufgaMedium',
+                                fontSize: 14,
+                            }}>Open Settings</Text>
+                        </GlassView>
+                    </Pressable>
+                )}
+
             </View>
         );
     }
@@ -169,7 +198,7 @@ const styles = StyleSheet.create({
     container: {
         // backgroundColor: 'red',
         flex: 1,
-        justifyContent: 'flex-end',
+        justifyContent: 'center',
         alignItems: 'center',
         paddingLeft: 10,
         paddingRight: 10,

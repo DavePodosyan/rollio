@@ -1,9 +1,6 @@
-import { Button, Host } from "@expo/ui/swift-ui";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
-import { Image } from "expo-image";
-import { router, Stack } from "expo-router";
-import { SymbolView } from "expo-symbols";
-import { View, StyleSheet, useColorScheme } from "react-native";
+import { Stack } from "expo-router";
+import { useColorScheme } from "react-native";
 
 export default function HomeLayout() {
     const isGlassAvailable = isLiquidGlassAvailable();

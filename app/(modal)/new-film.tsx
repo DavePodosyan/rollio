@@ -4,7 +4,7 @@ import { router, useNavigation, useLocalSearchParams } from "expo-router";
 import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme, DeviceEventEmitter } from "react-native";
 import RulerPicker from '@/components/RulerPicker';
 import { GlassView } from "expo-glass-effect";
-import { useEffect, useState, useRef, use, useCallback, useMemo } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { ISO_OPTIONS, PUSH_PULL_OPTIONS, EXPECTED_SHOTS } from "@/utils/cameraSettings";
 import { SymbolView } from "expo-symbols";
 import { LinearGradient } from "expo-linear-gradient";
