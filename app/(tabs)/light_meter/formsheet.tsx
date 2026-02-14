@@ -41,14 +41,22 @@ const shutterToSeconds = (shutter: string): number => {
 };
 
 // Find closest aperture option (returns the string option)
+// Favors wider aperture (lower f-number = more light) when between two close options
 const findClosestAperture = (targetValue: number): string => {
     const options = APERTURE_OPTIONS.filter(a => a !== "Auto");
     let closest = options[0];
     let minDiff = Math.abs(Number(closest) - targetValue);
 
     for (const opt of options) {
-        const diff = Math.abs(Number(opt) - targetValue);
-        if (diff < minDiff) {
+        const optValue = Number(opt);
+        const diff = Math.abs(optValue - targetValue);
+        // If differences are within 15% of each other, prefer wider aperture (lower f-number)
+        const threshold = minDiff * 0.15;
+        if (diff < minDiff - threshold) {
+            minDiff = diff;
+            closest = opt;
+        } else if (diff <= minDiff + threshold && optValue < Number(closest)) {
+            // Nearly equal distance - prefer the wider aperture (overexposure)
             minDiff = diff;
             closest = opt;
         }
@@ -57,16 +65,27 @@ const findClosestAperture = (targetValue: number): string => {
 };
 
 // Find closest shutter speed option (input is in seconds, returns the string option)
+// Favors slower shutter (more exposure time) when between two close options
 const findClosestShutter = (targetSeconds: number): string => {
     const options = SHUTTER_SPEED_OPTIONS.filter(s => s !== "Auto");
     let closest = options[0];
-    let minDiff = Math.abs(shutterToSeconds(closest) - targetSeconds);
+    let closestSeconds = shutterToSeconds(closest);
+    let minDiff = Math.abs(closestSeconds - targetSeconds);
 
     for (const opt of options) {
-        const diff = Math.abs(shutterToSeconds(opt) - targetSeconds);
-        if (diff < minDiff) {
+        const optSeconds = shutterToSeconds(opt);
+        const diff = Math.abs(optSeconds - targetSeconds);
+        // If differences are within 15% of each other, prefer slower shutter (more exposure)
+        const threshold = minDiff * 0.15;
+        if (diff < minDiff - threshold) {
             minDiff = diff;
             closest = opt;
+            closestSeconds = optSeconds;
+        } else if (diff <= minDiff + threshold && optSeconds > closestSeconds) {
+            // Nearly equal distance - prefer the slower shutter (overexposure)
+            minDiff = diff;
+            closest = opt;
+            closestSeconds = optSeconds;
         }
     }
     return closest;
