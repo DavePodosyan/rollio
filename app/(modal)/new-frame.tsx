@@ -433,7 +433,7 @@ export default function NewFrame() {
                         value={formData.note || ''}
                         onChangeText={(text) => setFormData(prev => ({ ...prev, note: text }))}
                         autoCapitalize="sentences"
-                        autoCorrect={false}
+                        autoCorrect={true}
                         returnKeyType="done"
                         onSubmitEditing={() => Keyboard.dismiss()}
                         multiline={true}
