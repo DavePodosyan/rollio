@@ -2,7 +2,7 @@ import { APERTURE_OPTIONS, ISO_OPTIONS, SHUTTER_SPEED_OPTIONS } from "@/utils/ca
 import { GlassContainer, GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useLayoutEffect, useMemo } from "react";
 import {
     FlatList,
     PlatformColor,
@@ -17,6 +17,8 @@ import * as Haptics from 'expo-haptics';
 import { Film } from "@/types";
 import { useFilms } from "@/hooks/useFilms";
 import { useIsFocused } from "@react-navigation/native";
+import { ContextMenu, Host, Switch } from "@expo/ui/swift-ui";
+import { useHeaderHeight } from "@react-navigation/elements";
 // ────────────────────────────────────────────────
 // Config
 // ────────────────────────────────────────────────
@@ -25,6 +27,13 @@ const ITEM_HEIGHT = 48;
 const VISIBLE_ITEMS = 3;
 const CONTAINER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 const VERTICAL_PADDING = ITEM_HEIGHT; // Padding to allow first/last items to center
+
+// Full stop shutter speeds (standard photographic stops)
+// Uses the same format as SHUTTER_SPEED_OPTIONS (0.5 = 1/2 second)
+const FULL_STOP_SHUTTER_SPEEDS = [
+    "30", "15", "8", "4", "2", "1", "0.5", "1/4", "1/8", "1/15",
+    "1/30", "1/60", "1/125", "1/250", "1/500", "1/1000", "1/2000", "1/4000", "1/8000"
+];
 
 // ────────────────────────────────────────────────
 // Normalization helpers
@@ -66,13 +75,14 @@ const findClosestAperture = (targetValue: number): string => {
 
 // Find closest shutter speed option (input is in seconds, returns the string option)
 // Favors slower shutter (more exposure time) when between two close options
-const findClosestShutter = (targetSeconds: number): string => {
-    const options = SHUTTER_SPEED_OPTIONS.filter(s => s !== "Auto");
-    let closest = options[0];
+// Accepts optional options array to support full stops only mode
+const findClosestShutter = (targetSeconds: number, options?: string[]): string => {
+    const shutterOptions = options ?? SHUTTER_SPEED_OPTIONS.filter(s => s !== "Auto");
+    let closest = shutterOptions[0];
     let closestSeconds = shutterToSeconds(closest);
     let minDiff = Math.abs(closestSeconds - targetSeconds);
 
-    for (const opt of options) {
+    for (const opt of shutterOptions) {
         const optSeconds = shutterToSeconds(opt);
         const diff = Math.abs(optSeconds - targetSeconds);
         // If differences are within 15% of each other, prefer slower shutter (more exposure)
@@ -114,11 +124,12 @@ const normalizeAperture = (rawValue: string | undefined): string => {
     return findClosestAperture(numValue);
 };
 
-const normalizeShutter = (rawValue: string | undefined): string => {
+const normalizeShutter = (rawValue: string | undefined, useFullStops: boolean = true): string => {
     if (!rawValue) return "1/125";
     const numValue = Number(rawValue);
     if (isNaN(numValue)) return "1/125";
-    return findClosestShutter(numValue);
+    // Use full stops by default since that's the initial setting
+    return findClosestShutter(numValue, useFullStops ? FULL_STOP_SHUTTER_SPEEDS : undefined);
 };
 
 const normalizeIso = (rawValue: string | undefined): number => {
@@ -163,6 +174,7 @@ export default function FormSheet() {
         }>();
 
     const navigation = useNavigation();
+    const headerHeight = useHeaderHeight();
     const isGlassAvailable = isLiquidGlassAvailable();
 
     //log the params for debugging
@@ -179,7 +191,12 @@ export default function FormSheet() {
     const [selectedShutter, setSelectedShutter] = useState(initialShutterStr);
     const [selectedIso, setSelectedIso] = useState(initialIsoNum);
 
+    console.log(selectedAperture, selectedShutter, selectedIso);
+
+
     const [isSheetExpanded, setIsSheetExpanded] = useState(false);
+    const [showFullStopsOnly, setShowFullStopsOnly] = useState(true);
+
     const { films } = useFilms();
     const isFocused = useIsFocused();
 
@@ -188,6 +205,37 @@ export default function FormSheet() {
 
     // Track if we navigated away (to reset state on return)
     const hasNavigatedAway = useRef(false);
+
+    useEffect(() => {
+
+        navigation.setOptions({
+            headerRight: () => (
+                <View style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center' }}>
+                    <Host matchContents>
+                        <ContextMenu>
+
+                            <ContextMenu.Items>
+                                <Switch
+                                    label="Show half/third stops"
+                                    value={!showFullStopsOnly}
+                                    variant="switch"
+                                    onValueChange={(value) => {
+                                        setShowFullStopsOnly(!value);
+                                        Haptics.selectionAsync().catch(() => { });
+                                    }}
+                                />
+                            </ContextMenu.Items>
+
+
+                            <ContextMenu.Trigger>
+                                <SymbolView name="gear" size={26} tintColor={PlatformColor('label')} />
+                            </ContextMenu.Trigger>
+                        </ContextMenu>
+                    </Host>
+                </View>
+            ),
+        })
+    }, [navigation, showFullStopsOnly]);
 
     // Reset state when returning from new-frame modal
     useEffect(() => {
@@ -213,6 +261,23 @@ export default function FormSheet() {
     // Target EV to maintain when adjusting values
     const targetEV = Number(ev) || 0;
 
+    // Calculate current EV from selected settings and compare to target
+    // EV = log2(N²/t) - log2(ISO/100)
+    // Positive exposureDiff = overexposed, Negative = underexposed
+    const exposureDiff = useMemo(() => {
+        const aperture = Number(selectedAperture);
+        const shutterSec = shutterToSeconds(selectedShutter);
+        const iso = selectedIso;
+
+        // Calculate the EV that the current settings would produce
+        const currentEV = Math.log2((aperture ** 2) / shutterSec) - Math.log2(iso / 100);
+
+        // Difference: negative means underexposed, positive means overexposed
+        // (if current EV is higher than target, we're letting in less light = underexposed)
+        // EV is inverse to exposure: higher EV = less light
+        return targetEV - currentEV;
+    }, [selectedAperture, selectedShutter, selectedIso, targetEV]);
+
     // Track which picker is currently being scrolled by the user
     const activePickerRef = useRef<ActivePicker>(null);
 
@@ -220,6 +285,9 @@ export default function FormSheet() {
     const lastTickedApertureIdx = useRef(-1);
     const lastTickedShutterIdx = useRef(-1);
     const lastTickedIsoIdx = useRef(-1);
+
+    // Flag to ignore scroll events during programmatic scrolling (starts true for initial render)
+    const isProgrammaticScroll = useRef(true);
 
     // FlatList refs for programmatic scrolling
     const apertureRef = useRef<FlatList>(null);
@@ -230,6 +298,41 @@ export default function FormSheet() {
     const currentAperture = useRef(initialApertureStr);
     const currentShutter = useRef(initialShutterStr);
     const currentIso = useRef(initialIsoNum);
+
+    // Clear programmatic scroll flag after initial mount
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            isProgrammaticScroll.current = false;
+            // Initialize tick refs to current positions
+            lastTickedApertureIdx.current = APERTURE_OPTIONS.filter(a => a !== "Auto").indexOf(initialApertureStr);
+            // Use full stops since that's the default
+            lastTickedShutterIdx.current = FULL_STOP_SHUTTER_SPEEDS.indexOf(initialShutterStr);
+            lastTickedIsoIdx.current = ISO_OPTIONS.indexOf(initialIsoNum);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, []);
+
+    // Scroll to center items on mount (initialScrollIndex doesn't support viewPosition)
+    useLayoutEffect(() => {
+        const timer = setTimeout(() => {
+            const apertureIdx = APERTURE_OPTIONS.filter(a => a !== "Auto").indexOf(initialApertureStr);
+            // Use the initial shutter options (full stops since that's the default)
+            const initialShutterOptions = FULL_STOP_SHUTTER_SPEEDS;
+            const shutterIdx = initialShutterOptions.indexOf(initialShutterStr);
+            const isoIdx = ISO_OPTIONS.indexOf(initialIsoNum);
+
+            if (apertureIdx >= 0 && apertureRef.current) {
+                apertureRef.current.scrollToIndex({ index: apertureIdx, animated: false, viewPosition: 0.5 });
+            }
+            if (shutterIdx >= 0 && shutterRef.current) {
+                shutterRef.current.scrollToIndex({ index: shutterIdx, animated: false, viewPosition: 0.5 });
+            }
+            if (isoIdx >= 0 && isoRef.current) {
+                isoRef.current.scrollToIndex({ index: isoIdx, animated: false, viewPosition: 0.5 });
+            }
+        }, 50);
+        return () => clearTimeout(timer);
+    }, [initialApertureStr, initialShutterStr, initialIsoNum]);
 
     // Keep refs in sync with state
     useEffect(() => { currentAperture.current = selectedAperture; }, [selectedAperture]);
@@ -277,13 +380,83 @@ export default function FormSheet() {
 
     // Get min/max values for each setting
     const apertureOptions = APERTURE_OPTIONS.filter(a => a !== "Auto");
-    const shutterOptions = SHUTTER_SPEED_OPTIONS.filter(s => s !== "Auto");
+
+    // Filter shutter options based on full stops setting
+    const shutterOptions = useMemo(() => {
+        if (showFullStopsOnly) {
+            return FULL_STOP_SHUTTER_SPEEDS;
+        }
+        return SHUTTER_SPEED_OPTIONS.filter(s => s !== "Auto");
+    }, [showFullStopsOnly]);
+
     const minAperture = Number(apertureOptions[0]); // smallest f-number (widest)
     const maxAperture = Number(apertureOptions[apertureOptions.length - 1]); // largest f-number
-    const minShutterSeconds = shutterToSeconds(shutterOptions[shutterOptions.length - 1]); // fastest (1/8000)
-    const maxShutterSeconds = shutterToSeconds(shutterOptions[0]); // slowest (30s)
+    const minShutterSeconds = useMemo(() => shutterToSeconds(shutterOptions[shutterOptions.length - 1]), [shutterOptions]); // fastest
+    const maxShutterSeconds = useMemo(() => shutterToSeconds(shutterOptions[0]), [shutterOptions]); // slowest
     const minIso = ISO_OPTIONS[0];
     const maxIso = ISO_OPTIONS[ISO_OPTIONS.length - 1];
+
+    // Track previous showFullStopsOnly value to detect changes
+    const prevShowFullStopsOnly = useRef(showFullStopsOnly);
+    // Track the shutter value before options change (to avoid stale closure issues)
+    const shutterBeforeToggle = useRef(selectedShutter);
+    
+    // Update shutterBeforeToggle only when NOT in a toggle transition
+    useEffect(() => {
+        if (prevShowFullStopsOnly.current === showFullStopsOnly) {
+            shutterBeforeToggle.current = selectedShutter;
+        }
+    }, [selectedShutter, showFullStopsOnly]);
+
+    // When full stops toggle changes, snap current shutter to nearest available option
+    useEffect(() => {
+        if (prevShowFullStopsOnly.current !== showFullStopsOnly) {
+            // IMMEDIATELY block scroll handler from updating selection
+            isProgrammaticScroll.current = true;
+            
+            // Use the value from before the toggle, not the potentially corrupted current state
+            const previousShutter = shutterBeforeToggle.current;
+            prevShowFullStopsOnly.current = showFullStopsOnly;
+
+            // Check if previous shutter is in the new options list
+            if (!shutterOptions.includes(previousShutter)) {
+                // Snap to nearest available option
+                const previousShutterSec = shutterToSeconds(previousShutter);
+                const newShutter = findClosestShutter(previousShutterSec, shutterOptions);
+                setSelectedShutter(newShutter);
+                shutterBeforeToggle.current = newShutter;
+
+                // Scroll to the new position after a brief delay to allow FlatList to update
+                setTimeout(() => {
+                    const idx = shutterOptions.indexOf(newShutter);
+                    if (idx >= 0 && shutterRef.current) {
+                        lastTickedShutterIdx.current = idx;
+                        shutterRef.current.scrollToIndex({ index: idx, animated: true, viewPosition: 0.5 });
+                        setTimeout(() => {
+                            isProgrammaticScroll.current = false;
+                        }, 350);
+                    } else {
+                        isProgrammaticScroll.current = false;
+                    }
+                }, 100);
+            } else {
+                // Current value is valid, just scroll to it in the new list
+                setSelectedShutter(previousShutter); // Ensure state matches
+                setTimeout(() => {
+                    const idx = shutterOptions.indexOf(previousShutter);
+                    if (idx >= 0 && shutterRef.current) {
+                        lastTickedShutterIdx.current = idx;
+                        shutterRef.current.scrollToIndex({ index: idx, animated: false, viewPosition: 0.5 });
+                        setTimeout(() => {
+                            isProgrammaticScroll.current = false;
+                        }, 100);
+                    } else {
+                        isProgrammaticScroll.current = false;
+                    }
+                }, 50);
+            }
+        }
+    }, [showFullStopsOnly, shutterOptions]);
 
     // Scroll a FlatList to a specific value
     const scrollToValue = useCallback((
@@ -294,8 +467,13 @@ export default function FormSheet() {
     ) => {
         const idx = options.indexOf(value);
         if (idx >= 0 && ref.current) {
+            isProgrammaticScroll.current = true;
             tickRef.current = idx; // Prevent haptic when programmatically scrolling
             ref.current.scrollToIndex({ index: idx, animated: true, viewPosition: 0.5 });
+            // Clear flag after animation completes (approximate timing)
+            setTimeout(() => {
+                isProgrammaticScroll.current = false;
+            }, 350);
         }
     }, []);
 
@@ -333,7 +511,7 @@ export default function FormSheet() {
             let idealShutterSec = calculateShutter(aperture, iso, targetEV);
             const shutterHitLimit = idealShutterSec < minShutterSeconds || idealShutterSec > maxShutterSeconds;
             const clampedShutterSec = Math.max(minShutterSeconds, Math.min(maxShutterSeconds, idealShutterSec));
-            const newShutter = findClosestShutter(clampedShutterSec);
+            const newShutter = findClosestShutter(clampedShutterSec, shutterOptions);
             const actualShutterSec = shutterToSeconds(newShutter);
 
             // If shutter was clamped and ISO is not locked, adjust ISO
@@ -433,7 +611,7 @@ export default function FormSheet() {
             let idealShutterSec = calculateShutter(Number(aperture), iso, targetEV);
             const shutterHitLimit = idealShutterSec < minShutterSeconds || idealShutterSec > maxShutterSeconds;
             const clampedShutterSec = Math.max(minShutterSeconds, Math.min(maxShutterSeconds, idealShutterSec));
-            const newShutter = findClosestShutter(clampedShutterSec);
+            const newShutter = findClosestShutter(clampedShutterSec, shutterOptions);
             const actualShutterSec = shutterToSeconds(newShutter);
 
             // If shutter was clamped and aperture is not locked, adjust aperture
@@ -482,8 +660,12 @@ export default function FormSheet() {
             isNumeric = false
         ) =>
             (event: { nativeEvent: { contentOffset: { y: number } } }) => {
+                // Ignore scroll events during programmatic scrolling
+                if (isProgrammaticScroll.current) return;
+
                 const offsetY = event.nativeEvent.contentOffset.y;
                 const currentIdx = Math.round(offsetY / ITEM_HEIGHT);
+
                 const clampedIdx = Math.max(0, Math.min(currentIdx, data.length - 1));
 
                 if (clampedIdx !== tickRef.current && clampedIdx >= 0) {
@@ -503,7 +685,7 @@ export default function FormSheet() {
     );
 
     const handleApertureScroll = createScrollHandler(lastTickedApertureIdx, APERTURE_OPTIONS.filter(a => a !== "Auto"), setSelectedAperture);
-    const handleShutterScroll = createScrollHandler(lastTickedShutterIdx, SHUTTER_SPEED_OPTIONS.filter(s => s !== "Auto"), setSelectedShutter);
+    const handleShutterScroll = useMemo(() => createScrollHandler(lastTickedShutterIdx, shutterOptions, setSelectedShutter), [shutterOptions]);
     const handleIsoScroll = createScrollHandler(lastTickedIsoIdx, ISO_OPTIONS.map(String), setSelectedIso, true);
 
     const expandSheetForm = () => {
@@ -535,7 +717,7 @@ export default function FormSheet() {
 
             const shutterHitLimit = idealShutterSec < minShutterSeconds || idealShutterSec > maxShutterSeconds;
             const clampedShutterSec = Math.max(minShutterSeconds, Math.min(maxShutterSeconds, idealShutterSec));
-            const newShutter = findClosestShutter(clampedShutterSec);
+            const newShutter = findClosestShutter(clampedShutterSec, shutterOptions);
             const actualShutterSec = shutterToSeconds(newShutter);
 
             // If shutter hit limit, adjust aperture
@@ -635,6 +817,49 @@ export default function FormSheet() {
 
     return (
         <View style={styles.container}>
+            {/* Content area wrapper - indicator is absolutely positioned within */}
+            <View style={{ flex: 1, position: 'relative' }}>
+                {/* Exposure indicator - absolutely positioned to avoid layout shifts */}
+                {Math.abs(exposureDiff) >= 0.3 && (
+                    <View style={{
+                        position: 'absolute',
+                        top: headerHeight - 18,
+                        left: 0,
+                        right: 0,
+                        zIndex: 10,
+                        alignItems: 'center'
+                    }}>
+                        <GlassView
+                            isInteractive={false}
+                            tintColor={exposureDiff > 0 ? '#ff9500' : '#007aff'}
+                            style={{
+                                // minWidth: 100,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                paddingVertical: 2,
+                                paddingHorizontal: 8,
+                                backgroundColor: exposureDiff > 0
+                                    ? 'rgba(255, 149, 0, 0.15)'
+                                    : 'rgba(0, 122, 255, 0.15)',
+                                borderRadius: 14,
+                            }}>
+                            <SymbolView
+                                name={exposureDiff > 0 ? 'sun.max.fill' : 'moon.fill'}
+                                style={{ width: 8, height: 8, marginRight: 3 }}
+                                tintColor="#ffffff"
+                            />
+                            <Text style={{
+                                fontFamily: 'LufgaMedium',
+                                fontSize: 10,
+                                color: '#ffffff'
+                            }}>
+                                {exposureDiff > 0 ? '+' : ''}{exposureDiff.toFixed(1)} EV {exposureDiff > 0 ? 'over' : 'under'}
+                            </Text>
+                        </GlassView>
+                    </View>
+                )}
+            </View>
             <GlassContainer spacing={12} style={styles.wheelsContainer}>
                 {/* Aperture */}
                 <View style={styles.wheelColumn}>
@@ -661,7 +886,7 @@ export default function FormSheet() {
                                 offset: VERTICAL_PADDING + ITEM_HEIGHT * index,
                                 index,
                             })}
-                            initialScrollIndex={APERTURE_OPTIONS.indexOf(selectedAperture) || 0}
+                            initialScrollIndex={APERTURE_OPTIONS.filter(a => a !== "Auto").indexOf(selectedAperture) || 0}
                             onScroll={handleApertureScroll}
                             onScrollBeginDrag={onApertureScrollBegin}
                             onMomentumScrollEnd={onApertureScrollEnd}
@@ -693,7 +918,7 @@ export default function FormSheet() {
                     }]} glassEffectStyle="clear" isInteractive={lockedPicker !== 'shutter'}>
                         <FlatList
                             ref={shutterRef}
-                            data={SHUTTER_SPEED_OPTIONS.filter(s => s !== "Auto")}
+                            data={shutterOptions}
                             renderItem={shutterRender}
                             keyExtractor={(item) => item}
                             snapToInterval={ITEM_HEIGHT}
@@ -706,7 +931,7 @@ export default function FormSheet() {
                                 offset: VERTICAL_PADDING + ITEM_HEIGHT * index,
                                 index,
                             })}
-                            initialScrollIndex={SHUTTER_SPEED_OPTIONS.indexOf(selectedShutter) || 0}
+                            initialScrollIndex={Math.max(0, shutterOptions.indexOf(selectedShutter))}
                             onScroll={handleShutterScroll}
                             onScrollBeginDrag={onShutterScrollBegin}
                             onMomentumScrollEnd={onShutterScrollEnd}

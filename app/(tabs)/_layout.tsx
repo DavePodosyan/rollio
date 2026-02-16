@@ -1,7 +1,7 @@
 // import { useNavigation } from 'expo-router';
 import { isLiquidGlassAvailable } from 'expo-glass-effect';
 import { NativeTabs, Icon, Label } from 'expo-router/unstable-native-tabs';
-import { useColorScheme } from 'react-native';
+import { PlatformColor, useColorScheme } from 'react-native';
 
 export default function TabsLayout() {
   // const colorScheme = useColorScheme();
@@ -11,7 +11,7 @@ export default function TabsLayout() {
     <NativeTabs
       // minimizeBehavior="onScrollDown"  // Uncomment for scroll-hide
       // iconColor={colorScheme === 'dark' ? '#fff' : '#100528'}
-      iconColor={colorScheme === 'dark' ? '#ffffff' : '#100528'}
+      iconColor={colorScheme === 'dark' ? '#ffffff' : PlatformColor('label')}
       tintColor={colorScheme === 'dark' ? '#a583ef' : '#39128f'}
       backgroundColor={colorScheme === 'dark' ? '#09090B' : '#EFF0F4'}
       disableTransparentOnScrollEdge={isGlassAvailable ? false : true}

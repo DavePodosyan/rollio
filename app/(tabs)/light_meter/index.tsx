@@ -5,6 +5,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { router, usePathname } from 'expo-router';
 import { calculateEV100 } from '@/utils/calculations';
+import * as Haptics from 'expo-haptics';
 
 export default function CameraBackgroundPage() {
     const isFocused = useIsFocused();
@@ -35,11 +36,11 @@ export default function CameraBackgroundPage() {
         // router.push({
         //     pathname: '/(tabs)/light_meter/formsheet',
         //     params: {
-        //         title: 'EV 12.34',
-        //         ev: 16.99,
-        //         aperture: 2.8,
-        //         shutterSpeed: 1 / 500,
-        //         iso: 200,
+        //         title: 'EV 13.15',
+        //         ev: 13.15,
+        //         aperture: 1.7799999713897705,
+        //         shutterSpeed: 0.00043706293706293706,
+        //         iso: 80,
         //         image: null,
         //     }
         // });
@@ -68,6 +69,18 @@ export default function CameraBackgroundPage() {
         }
 
         setLoading(false);
+        console.log({
+            params: {
+                title: `EV ${ev100.toFixed(2)}`,
+                ev: ev100.toFixed(2),
+                aperture: FNumber,
+                shutterSpeed: ExposureTime,
+                iso: phoneIso,
+                image: image?.uri
+            }
+        })
+
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
         router.push({
             pathname: '/(tabs)/light_meter/formsheet',
