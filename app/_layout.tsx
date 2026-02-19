@@ -6,6 +6,7 @@ import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -29,17 +30,20 @@ export default function RootLayout() {
     return (
         <SafeAreaProvider>
             <SQLiteProvider databaseName="rollio.db" onInit={initDatabase}>
-                <Stack screenOptions={{
-                    headerShown: false,
-                }}>
-                    <Stack.Screen name="(tabs)" />
+                <GestureHandlerRootView>
 
-                    <Stack.Screen name="(modal)" options={{
-                        presentation: "modal",
-                        gestureEnabled: true,
-                        headerShown: false
-                    }} />
-                </Stack>
+                    <Stack screenOptions={{
+                        headerShown: false,
+                    }}>
+                        <Stack.Screen name="(tabs)" />
+
+                        <Stack.Screen name="(modal)" options={{
+                            presentation: "modal",
+                            gestureEnabled: true,
+                            headerShown: false
+                        }} />
+                    </Stack>
+                </GestureHandlerRootView>
             </SQLiteProvider>
         </SafeAreaProvider>
     );
