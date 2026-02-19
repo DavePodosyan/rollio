@@ -2,7 +2,7 @@
   "expo": {
     "name": "Rollio",
     "slug": "Rollio",
-    "version": "2.1.3",
+    "version": "2.1.4",
     "orientation": "portrait",
     "icon": "./assets/images/splash-icon-light.png",
     "scheme": "myapp",
