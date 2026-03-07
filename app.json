@@ -7,7 +7,6 @@
     "icon": "./assets/images/splash-icon-light.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "icon": "./assets/images/rollio-glass.icon",
       "supportsTablet": true,
@@ -89,7 +88,8 @@
           "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera.",
           "enableLocation": false
         }
-      ]
+      ],
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true

@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, PlatformColor, ActivityIndicator, Alert, Linking, Animated } from 'react-native';
+import { View, Text, StyleSheet, Pressable, PlatformColor, ActivityIndicator, Alert, Linking, Animated, useColorScheme } from 'react-native';
 import { Camera, Point, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 import { useIsFocused } from '@react-navigation/native';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
@@ -7,14 +7,20 @@ import { router } from 'expo-router';
 import { calculateEV100 } from '@/utils/calculations';
 import * as Haptics from 'expo-haptics';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import { LinearGradient } from 'expo-linear-gradient';
 
 
 export default function CameraBackgroundPage() {
+    const colorScheme = useColorScheme();
     const isFocused = useIsFocused();
     const isGlassAvailable = isLiquidGlassAvailable();
     const [isCameraReady, setIsCameraReady] = useState(false);
     const [loading, setLoading] = useState(false);
     const [permissionRequested, setPermissionRequested] = useState(false);
+
+    const gradientColors: readonly [string, string, ...string[]] = colorScheme === 'dark'
+        ? ['#09090B', '#100528', '#09090B']
+        : ['#EFF0F4', '#E5E0FF', '#EFF0F4'];
 
     const { hasPermission, requestPermission } = useCameraPermission();
     // Use multi-camera device to enable automatic optical zoom (lens switching)
@@ -168,6 +174,15 @@ export default function CameraBackgroundPage() {
         // Camera permissions are not granted
         return (
             <View style={[styles.container, { justifyContent: 'center' }]}>
+                <LinearGradient
+                    // colors={['#09090B', '#100528', '#09090B']}
+                    colors={gradientColors}
+                    locations={[0.1, 0.4, 0.9]}
+                    // dither={false}
+                    style={StyleSheet.absoluteFill}
+                    start={{ x: 0, y: 0 }} // Optional: start from top-left
+                    end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
+                />
                 <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: PlatformColor('label') }}>We need your permission to show the camera</Text>
                 {!permissionRequested && (
                     <Pressable onPress={handleRequestPermission} style={({ pressed }) => [
@@ -206,7 +221,6 @@ export default function CameraBackgroundPage() {
                         </GlassView>
                     </Pressable>
                 )}
-
             </View>
         );
     }
@@ -214,6 +228,15 @@ export default function CameraBackgroundPage() {
     if (!device) {
         return (
             <View style={[styles.container, { justifyContent: 'center' }]}>
+                <LinearGradient
+                    // colors={['#09090B', '#100528', '#09090B']}
+                    colors={gradientColors}
+                    locations={[0.1, 0.4, 0.9]}
+                    // dither={false}
+                    style={StyleSheet.absoluteFill}
+                    start={{ x: 0, y: 0 }} // Optional: start from top-left
+                    end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
+                />
                 <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: PlatformColor('label') }}>No camera device available</Text>
             </View>
         );
@@ -303,7 +326,6 @@ export default function CameraBackgroundPage() {
                     </Pressable>
                 </GlassView>
             </Animated.View>
-
         </View >
     );
 }

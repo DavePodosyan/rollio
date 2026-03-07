@@ -2,9 +2,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback } from 'react';
 import { View, Text, Alert, Pressable, useColorScheme, FlatList } from 'react-native';
-import { useNavigation, useLocalSearchParams, router, useFocusEffect } from 'expo-router';
+import { useNavigation, useLocalSearchParams, router, useFocusEffect, Stack } from 'expo-router';
 import { useEffect } from 'react';
-import ContextMenuFilm from '@/components/ContextMenuFilm.ios';
 import { useFilm } from '@/hooks/useFilm';
 import { SymbolView } from 'expo-symbols';
 import { getStatusColor } from '@/utils/statusColors';
@@ -12,6 +11,7 @@ import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-ef
 import { useFrames } from '@/hooks/useFrames';
 import FrameListItem from '@/components/FrameListItem';
 import { Frame } from '@/utils/types';
+import { Button, ContextMenu, Host } from '@expo/ui/swift-ui';
 
 export default function FilmDetailPage() {
     const { id, title } = useLocalSearchParams<{ id: string, title: string }>();
@@ -78,18 +78,6 @@ export default function FilmDetailPage() {
     useEffect(() => {
         navigation.setOptions({
             title: film?.title ?? title,
-            headerRight: () => (
-                <View style={{ width: 85, height: 35, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <View style={{ backgroundColor: 'transparent' }}>
-                        <Pressable onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } })} style={{ width: 35, backgroundColor: 'transparent', height: 35, justifyContent: 'center', alignItems: 'center', }} >
-                            <SymbolView name="plus" size={22} tintColor={colorScheme === 'dark' ? '#ffffff' : '#100528'} />
-                        </Pressable>
-                    </View>
-                    <View style={{ backgroundColor: 'transparent' }}>
-                        <ContextMenuFilm onSelect={handleContextMenuSelect} />
-                    </View>
-                </View>
-            )
         });
     }, [film, colorScheme]);
 
@@ -242,60 +230,72 @@ export default function FilmDetailPage() {
 
 
     return (
-        <View style={{ flex: 1 }}>
-            <LinearGradient
-                colors={gradientColors}
-                locations={[0.1, 0.4, 0.9]}
-                // dither={false}
-                style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    top: 0,
-                    height: '100%',
-                }}
-                start={{ x: 0, y: 0 }} // Optional: start from top-left
-                end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
-            >
-                <FlatList
-                    data={frames}
-                    // key={frames.length.toString()}
-                    keyExtractor={(item: Frame) => String(item.id)}
-                    initialNumToRender={10}
-                    maxToRenderPerBatch={8}
-                    windowSize={8}
-                    removeClippedSubviews={true}
-                    ListHeaderComponent={renderHeader}
-                    ListHeaderComponentStyle={{ marginBottom: 24 }}
-                    // disableIntervalMomentum={true}
-                    renderItem={({ item }) => <FrameListItem frame={item} iso={film?.iso} />}
+        <>
+            <Stack.Toolbar placement="right" >
+                <Stack.Toolbar.Button icon="plus" onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } })} />
+                <Stack.Toolbar.Menu icon="ellipsis">
+                    <Stack.Toolbar.MenuAction icon="pencil" onPress={() => handleContextMenuSelect('edit')}>Edit</Stack.Toolbar.MenuAction>
+                    <Stack.Toolbar.MenuAction icon="trash" destructive onPress={() => handleContextMenuSelect('delete')}>
+                        Delete
+                    </Stack.Toolbar.MenuAction>
+                </Stack.Toolbar.Menu>
+            </Stack.Toolbar>
 
-                    ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-                    ListEmptyComponent={() => (
-                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                                <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
-                                    You don't have any film rolls yet.
-                                </Text>
-                                <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
-                                    Click the + button to add one.
-                                </Text>
-                            </View>
-
-                        </View>
-                    )}
-                    contentInsetAdjustmentBehavior="automatic"
-                    scrollEventThrottle={16}
-                    contentContainerStyle={{ paddingLeft: 18, paddingRight: 18, paddingBottom: 50 }}
-                    refreshing={false}
-                    onRefresh={() => {
-                        refreshFilm();
-                        refreshFrames();
+            <View style={{ flex: 1 }}>
+                <LinearGradient
+                    colors={gradientColors}
+                    locations={[0.1, 0.4, 0.9]}
+                    // dither={false}
+                    style={{
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        top: 0,
+                        height: '100%',
                     }}
-                // ListFooterComponent={films && films.length > 0 ? <EnjoyingRollio /> : null}
+                    start={{ x: 0, y: 0 }} // Optional: start from top-left
+                    end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
+                >
+                    <FlatList
+                        data={frames}
+                        // key={frames.length.toString()}
+                        keyExtractor={(item: Frame) => String(item.id)}
+                        initialNumToRender={10}
+                        maxToRenderPerBatch={8}
+                        windowSize={8}
+                        removeClippedSubviews={true}
+                        ListHeaderComponent={renderHeader}
+                        ListHeaderComponentStyle={{ marginBottom: 24 }}
+                        // disableIntervalMomentum={true}
+                        renderItem={({ item }) => <FrameListItem frame={item} iso={film?.iso} />}
 
-                />
-            </LinearGradient>
-        </View>
+                        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+                        ListEmptyComponent={() => (
+                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                                    <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
+                                        You don't have any film rolls yet.
+                                    </Text>
+                                    <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
+                                        Click the + button to add one.
+                                    </Text>
+                                </View>
+
+                            </View>
+                        )}
+                        contentInsetAdjustmentBehavior="automatic"
+                        scrollEventThrottle={16}
+                        contentContainerStyle={{ paddingLeft: 18, paddingRight: 18, paddingBottom: 50 }}
+                        refreshing={false}
+                        onRefresh={() => {
+                            refreshFilm();
+                            refreshFrames();
+                        }}
+                    // ListFooterComponent={films && films.length > 0 ? <EnjoyingRollio /> : null}
+
+                    />
+                </LinearGradient>
+            </View>
+        </>
     );
 }

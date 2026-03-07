@@ -17,8 +17,9 @@ import * as Haptics from 'expo-haptics';
 import { Film } from "@/types";
 import { useFilms } from "@/hooks/useFilms";
 import { useIsFocused } from "@react-navigation/native";
-import { ContextMenu, Host, Switch } from "@expo/ui/swift-ui";
+import { ContextMenu, Host, Toggle } from "@expo/ui/swift-ui";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { toggleStyle } from "@expo/ui/swift-ui/modifiers";
 // ────────────────────────────────────────────────
 // Config
 // ────────────────────────────────────────────────
@@ -209,31 +210,31 @@ export default function FormSheet() {
     useEffect(() => {
 
         navigation.setOptions({
-            headerRight: () => (
-                <View style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center' }}>
-                    <Host matchContents>
-                        <ContextMenu>
+            // headerRight: () => (
+            //     <View style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center' }}>
+            //         <Host matchContents>
+            //             <ContextMenu>
 
-                            <ContextMenu.Items>
-                                <Switch
-                                    label="Show half/third stops"
-                                    value={!showFullStopsOnly}
-                                    variant="switch"
-                                    onValueChange={(value) => {
-                                        setShowFullStopsOnly(!value);
-                                        Haptics.selectionAsync().catch(() => { });
-                                    }}
-                                />
-                            </ContextMenu.Items>
+            //                 <ContextMenu.Items>
+            //                     <Toggle
+            //                         label="Show half/third stops"
+            //                         isOn={!showFullStopsOnly}
+            //                         modifiers={[toggleStyle('switch')]}
+            //                         onIsOnChange={(value) => {
+            //                             setShowFullStopsOnly(!value);
+            //                             Haptics.selectionAsync().catch(() => { });
+            //                         }}
+            //                     />
+            //                 </ContextMenu.Items>
 
 
-                            <ContextMenu.Trigger>
-                                <SymbolView name="gear" size={26} tintColor={PlatformColor('label')} />
-                            </ContextMenu.Trigger>
-                        </ContextMenu>
-                    </Host>
-                </View>
-            ),
+            //                 <ContextMenu.Trigger>
+            //                     <SymbolView name="gear" size={26} tintColor={PlatformColor('label')} />
+            //                 </ContextMenu.Trigger>
+            //             </ContextMenu>
+            //         </Host>
+            //     </View>
+            // ),
         })
     }, [navigation, showFullStopsOnly]);
 
@@ -400,7 +401,7 @@ export default function FormSheet() {
     const prevShowFullStopsOnly = useRef(showFullStopsOnly);
     // Track the shutter value before options change (to avoid stale closure issues)
     const shutterBeforeToggle = useRef(selectedShutter);
-    
+
     // Update shutterBeforeToggle only when NOT in a toggle transition
     useEffect(() => {
         if (prevShowFullStopsOnly.current === showFullStopsOnly) {
@@ -413,7 +414,7 @@ export default function FormSheet() {
         if (prevShowFullStopsOnly.current !== showFullStopsOnly) {
             // IMMEDIATELY block scroll handler from updating selection
             isProgrammaticScroll.current = true;
-            
+
             // Use the value from before the toggle, not the potentially corrupted current state
             const previousShutter = shutterBeforeToggle.current;
             prevShowFullStopsOnly.current = showFullStopsOnly;
@@ -818,15 +819,18 @@ export default function FormSheet() {
     return (
         <View style={styles.container}>
             {/* Content area wrapper - indicator is absolutely positioned within */}
-            <View style={{ flex: 1, position: 'relative' }}>
+            <View style={{
+                flex: 1,
+                position: 'absolute',
+                top: headerHeight - 18,
+                left: 0,
+                right: 0,
+                zIndex: 10,
+            }}>
                 {/* Exposure indicator - absolutely positioned to avoid layout shifts */}
-                {Math.abs(exposureDiff) >= 0.3 && (
+                {Math.abs(exposureDiff) >= 0.1 && (
                     <View style={{
-                        position: 'absolute',
-                        top: headerHeight - 18,
-                        left: 0,
-                        right: 0,
-                        zIndex: 10,
+                        // position: 'absolute',
                         alignItems: 'center'
                     }}>
                         <GlassView

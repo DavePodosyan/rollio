@@ -1,14 +1,14 @@
 
 import { CreateFrameInput } from "@/types";
-import { router, useNavigation, useLocalSearchParams } from "expo-router";
-import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme } from "react-native";
+import { router, useNavigation, useLocalSearchParams, Stack } from "expo-router";
+import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme, PlatformColor } from "react-native";
 import RulerPicker from '@/components/RulerPicker';
 import { GlassView } from "expo-glass-effect";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { SHUTTER_SPEED_OPTIONS, APERTURE_OPTIONS } from "@/utils/cameraSettings";
 import { SymbolView } from "expo-symbols";
 import { LinearGradient } from "expo-linear-gradient";
-import { DateTimePicker, Host } from '@expo/ui/swift-ui';
+import { DatePicker, Host } from '@expo/ui/swift-ui';
 import * as Haptics from "expo-haptics";
 import { useFrame } from "@/hooks/useFrame";
 import { useFrames } from "@/hooks/useFrames";
@@ -16,6 +16,7 @@ import ImageUploader from "@/components/ImageUploader";
 import { saveFrameImage } from "@/utils/ImageService";
 import { usePreventRemove } from "@react-navigation/native";
 import FilmSettingsFromPhoto from "@/components/FilmSettingsFromPhoto";
+import { datePickerStyle } from "@expo/ui/swift-ui/modifiers";
 
 
 export default function NewFrame() {
@@ -283,11 +284,11 @@ export default function NewFrame() {
     useEffect(() => {
         navigation.setOptions({
             title: mode === 'new' ? 'Add New Frame' : 'Edit Frame',
-            headerRight: () => (
-                <Pressable onPress={handleSaveFrame} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
-                    <SymbolView name="checkmark" size={22} tintColor="#0091ff" />
-                </Pressable>
-            ),
+            // headerRight: () => (
+            //     <Pressable onPress={handleSaveFrame} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
+            //         <SymbolView name="checkmark" size={22} tintColor="#0091ff" />
+            //     </Pressable>
+            // ),
         });
     }, [mode, handleSaveFrame]);
 
@@ -310,235 +311,245 @@ export default function NewFrame() {
 
 
     return (
-        <View style={{ flex: 1 }}>
+        <>
+            <Stack.Toolbar placement="left">
+                <Stack.Toolbar.Button icon="xmark" onPress={() => router.back()} />
+            </Stack.Toolbar>
 
-            <ScrollView
-                ref={scrollViewRef}
-                style={{ padding: 0, flex: 1 }}
-                keyboardShouldPersistTaps="handled"
-                contentInsetAdjustmentBehavior="automatic"
+            <Stack.Toolbar placement="right">
+                <Stack.Toolbar.Button style={{ backgroundColor: 'red' }} tintColor={PlatformColor('systemBlue')} icon="checkmark" onPress={handleSaveFrame} />
+            </Stack.Toolbar>
 
-            >
+            <View style={{ flex: 1 }}>
 
-                <View style={{ alignItems: 'center', justifyContent: 'center', borderRadius: 32 }}>
-                    {/* <GlassView isInteractive={true} glassEffectStyle="regular" style={{  overflow: 'hidden' }}> */}
-                    <Host matchContents style={{}}>
-                        <DateTimePicker
-                            // title="Date"
-                            // color="white"
-                            onDateSelected={date => {
-                                //since we store dates as iso string, initialdate includes time, but when picking date they can't set time, so we need to set time to 00:00:00
-                                // date.setHours(0, 0, 0, 0);
-                                setFormData(prev => ({ ...prev, created_at: date.toISOString() }));
-                                // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                <ScrollView
+                    ref={scrollViewRef}
+                    style={{ padding: 0, flex: 1 }}
+                    keyboardShouldPersistTaps="handled"
+                    contentInsetAdjustmentBehavior="automatic"
+
+                >
+
+                    <View style={{ alignItems: 'center', justifyContent: 'center', borderRadius: 32 }}>
+                        {/* <GlassView isInteractive={true} glassEffectStyle="regular" style={{  overflow: 'hidden' }}> */}
+                        <Host matchContents style={{}}>
+                            <DatePicker
+                                // title="Date"
+                                // color="white"
+                                onDateChange={date => {
+                                    //since we store dates as iso string, initialdate includes time, but when picking date they can't set time, so we need to set time to 00:00:00
+                                    // date.setHours(0, 0, 0, 0);
+                                    setFormData(prev => ({ ...prev, created_at: date.toISOString() }));
+                                    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                }}
+                                displayedComponents={['date', 'hourAndMinute']}
+                                selection={new Date(formData.created_at)}
+                                modifiers={
+                                    [
+                                        datePickerStyle('compact')
+                                        // cornerRadius(16),
+                                        // background('red'),
+
+                                        // tint('red'),
+                                        // padding({ top: 6, bottom: 6, leading: 6, trailing: 6 }),
+                                        // backgroundOverlay({color: 'red'}),
+                                        // foregroundStyle('light'),
+                                        // background('red'),
+                                        // glassEffect({
+                                        //     glass: {
+                                        //         variant: 'regular',
+                                        //         interactive: true,
+                                        //         tint: colorScheme === 'dark' ? '#09090b6d' : 'transparent',
+                                        //     }
+
+                                        // }),
+                                    ]
+                                }
+                            />
+                        </Host>
+                        {/* </GlassView> */}
+                    </View>
+
+
+                    <View style={{ marginTop: 30, paddingHorizontal: 20, gap: 20 }}>
+                        <RulerPicker
+                            label="Aperture"
+                            initial={formData.aperture}
+                            values={APERTURE_OPTIONS} // Example push/pull values
+                            onChange={(value) => {
+                                console.log('Selected aperture:', value);
+                                setFormData(prev => ({ ...prev, aperture: String(value) }));
                             }}
-                            displayedComponents='dateAndTime'
-                            initialDate={formData.created_at}
-                            variant="compact"
-                            modifiers={
-                                [
-                                    // cornerRadius(16),
-                                    // background('red'),
-
-                                    // tint('red'),
-                                    // padding({ top: 6, bottom: 6, leading: 6, trailing: 6 }),
-                                    // backgroundOverlay({color: 'red'}),
-                                    // foregroundStyle('light'),
-                                    // background('red'),
-                                    // glassEffect({
-                                    //     glass: {
-                                    //         variant: 'regular',
-                                    //         interactive: true,
-                                    //         tint: colorScheme === 'dark' ? '#09090b6d' : 'transparent',
-                                    //     }
-
-                                    // }),
-                                ]
-                            }
                         />
-                    </Host>
-                    {/* </GlassView> */}
-                </View>
-
-
-                <View style={{ marginTop: 30, paddingHorizontal: 20, gap: 20 }}>
-                    <RulerPicker
-                        label="Aperture"
-                        initial={formData.aperture}
-                        values={APERTURE_OPTIONS} // Example push/pull values
-                        onChange={(value) => {
-                            console.log('Selected aperture:', value);
-                            setFormData(prev => ({ ...prev, aperture: String(value) }));
-                        }}
-                    />
-                    <RulerPicker
-                        label="Shutter Speed"
-                        initial={formData.shutter_speed}
-                        values={SHUTTER_SPEED_OPTIONS} // Example push/pull values
-                        onChange={(value) => {
-                            console.log('Selected shutter speed:', value);
-                            setFormData(prev => ({ ...prev, shutter_speed: String(value) }));
-                        }}
-                    />
-                </View>
-
-                <View style={{ marginTop: 30 }}>
-                    <TextInput
-                        style={{
-                            // borderWidth: 1,
-                            // borderColor: '#ddd',
-                            padding: 20,
-                            // borderRadius: 8,
-                            fontSize: 16,
-                            color: colorScheme === 'dark' ? '#fff' : '#100528',
-                            fontFamily: 'LufgaMedium',
-                        }}
-                        maxLength={35}
-                        placeholder="Lens (optional)"
-                        placeholderTextColor={"#8E8E93"}
-                        value={formData.lens || ''}
-                        onChangeText={(text) => setFormData(prev => ({ ...prev, lens: text }))}
-                        onFocus={() => {
-                            setFocusedField('lens');
-                            setSuggestions(lensNames);
-                        }}
-                        onBlur={() => {
-                            setFocusedField(null);
-                            setSuggestions([]);
-                        }}
-                        autoCapitalize="words"
-                        autoCorrect={false}
-                        returnKeyType="next"
-                        onSubmitEditing={() => {
-                            // Move focus to camera input
-                            notesInputRef.current?.focus();
-                        }}
-                    />
-                </View>
-
-                <View>
-                    <TextInput
-                        style={{
-                            // borderWidth: 1,
-                            // borderColor: '#ddd',
-                            padding: 20,
-                            // borderRadius: 8,
-                            fontSize: 16,
-                            color: colorScheme === 'dark' ? '#fff' : '#100528',
-                            fontFamily: 'LufgaMedium',
-                        }}
-                        // maxLength={35}
-                        placeholder="Note (optional)"
-                        placeholderTextColor={"#8E8E93"}
-                        value={formData.note || ''}
-                        onChangeText={(text) => setFormData(prev => ({ ...prev, note: text }))}
-                        autoCapitalize="sentences"
-                        autoCorrect={true}
-                        returnKeyType="done"
-                        onSubmitEditing={() => Keyboard.dismiss()}
-                        multiline={true}
-                        submitBehavior="submit"
-                        numberOfLines={3}
-                        ref={notesInputRef}
-
-                    />
-                </View>
-                <View style={{ padding: 20 }}>
-                    <ImageUploader value={formData.image} onChange={(image) => {
-                        console.log(image)
-                        setFormData(prev => ({ ...prev, image }))
-                    }
-                    } />
-                </View>
-                {(!initialAperture && !initialShutter) && (
-                    <View style={{ padding: 20 }}>
-                        <FilmSettingsFromPhoto
-                            imageUri={formData.image}
-                            filmIso={Number(iso)}
-                            // filmIso={fi}
-                            onApplySettings={(settings) => {
-                                console.log(settings);
-
-                                setFormData(prev => ({
-                                    ...prev,
-                                    aperture: String(settings.aperture),
-                                    shutter_speed: settings.shutter_speed,
-                                }));
-
-                                // scroll to top to show the updated settings all the way at top
-                                scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+                        <RulerPicker
+                            label="Shutter Speed"
+                            initial={formData.shutter_speed}
+                            values={SHUTTER_SPEED_OPTIONS} // Example push/pull values
+                            onChange={(value) => {
+                                console.log('Selected shutter speed:', value);
+                                setFormData(prev => ({ ...prev, shutter_speed: String(value) }));
                             }}
                         />
                     </View>
-                )}
+
+                    <View style={{ marginTop: 30 }}>
+                        <TextInput
+                            style={{
+                                // borderWidth: 1,
+                                // borderColor: '#ddd',
+                                padding: 20,
+                                // borderRadius: 8,
+                                fontSize: 16,
+                                color: colorScheme === 'dark' ? '#fff' : '#100528',
+                                fontFamily: 'LufgaMedium',
+                            }}
+                            maxLength={35}
+                            placeholder="Lens (optional)"
+                            placeholderTextColor={"#8E8E93"}
+                            value={formData.lens || ''}
+                            onChangeText={(text) => setFormData(prev => ({ ...prev, lens: text }))}
+                            onFocus={() => {
+                                setFocusedField('lens');
+                                setSuggestions(lensNames);
+                            }}
+                            onBlur={() => {
+                                setFocusedField(null);
+                                setSuggestions([]);
+                            }}
+                            autoCapitalize="words"
+                            autoCorrect={false}
+                            returnKeyType="next"
+                            onSubmitEditing={() => {
+                                // Move focus to camera input
+                                notesInputRef.current?.focus();
+                            }}
+                        />
+                    </View>
+
+                    <View>
+                        <TextInput
+                            style={{
+                                // borderWidth: 1,
+                                // borderColor: '#ddd',
+                                padding: 20,
+                                // borderRadius: 8,
+                                fontSize: 16,
+                                color: colorScheme === 'dark' ? '#fff' : '#100528',
+                                fontFamily: 'LufgaMedium',
+                            }}
+                            // maxLength={35}
+                            placeholder="Note (optional)"
+                            placeholderTextColor={"#8E8E93"}
+                            value={formData.note || ''}
+                            onChangeText={(text) => setFormData(prev => ({ ...prev, note: text }))}
+                            autoCapitalize="sentences"
+                            autoCorrect={true}
+                            returnKeyType="done"
+                            onSubmitEditing={() => Keyboard.dismiss()}
+                            multiline={true}
+                            submitBehavior="submit"
+                            numberOfLines={3}
+                            ref={notesInputRef}
+
+                        />
+                    </View>
+                    <View style={{ padding: 20 }}>
+                        <ImageUploader value={formData.image} onChange={(image) => {
+                            console.log(image)
+                            setFormData(prev => ({ ...prev, image }))
+                        }
+                        } />
+                    </View>
+                    {(!initialAperture && !initialShutter) && (
+                        <View style={{ padding: 20 }}>
+                            <FilmSettingsFromPhoto
+                                imageUri={formData.image}
+                                filmIso={Number(iso)}
+                                // filmIso={fi}
+                                onApplySettings={(settings) => {
+                                    console.log(settings);
+
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        aperture: String(settings.aperture),
+                                        shutter_speed: settings.shutter_speed,
+                                    }));
+
+                                    // scroll to top to show the updated settings all the way at top
+                                    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+                                }}
+                            />
+                        </View>
+                    )}
 
 
-            </ScrollView>
+                </ScrollView>
 
-            {keyboardVisible && suggestions.length > 0 && (
+                {keyboardVisible && suggestions.length > 0 && (
 
-                <Animated.View
-                    style={{
-                        position: 'absolute',
-                        bottom: keyboardHeight,
-                        left: 0,
-                        right: 0,
-                        maxHeight: 200,
-                        // backgroundColor: '#1c1c1eb8',
-                    }}
-                >
-                    <LinearGradient colors={
-                        colorScheme === 'dark'
-                            ? ['transparent', '#1c1c1e']
-                            : ['transparent', '#00000030',]
-                    }
-                        locations={[0, 1]}
+                    <Animated.View
                         style={{
-                            flex: 1,
-                            borderRadius: 20,
-                            paddingTop: 36,
-                            paddingBottom: 8,
-                        }}>
-                        <FlatList
-                            data={suggestions}
-                            keyExtractor={(item) => item}
-                            horizontal={true}
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={{ paddingVertical: 8, paddingHorizontal: 4 }}
-                            keyboardShouldPersistTaps="always"
-                            scrollEventThrottle={16}
-                            renderItem={({ item }) => (
-                                <View style={{ padding: 0 }}>
-                                    <GlassView
-                                        isInteractive={true}
-                                        glassEffectStyle="clear"
-                                        tintColor="#f0f0f0"
-                                        style={{
-                                            borderRadius: 32,
-                                            marginLeft: 4,
-                                            marginRight: 8,
-                                        }}
-                                    >
-                                        <Pressable
+                            position: 'absolute',
+                            bottom: keyboardHeight,
+                            left: 0,
+                            right: 0,
+                            maxHeight: 200,
+                            // backgroundColor: '#1c1c1eb8',
+                        }}
+                    >
+                        <LinearGradient colors={
+                            colorScheme === 'dark'
+                                ? ['transparent', '#1c1c1e']
+                                : ['transparent', '#00000030',]
+                        }
+                            locations={[0, 1]}
+                            style={{
+                                flex: 1,
+                                borderRadius: 20,
+                                paddingTop: 36,
+                                paddingBottom: 8,
+                            }}>
+                            <FlatList
+                                data={suggestions}
+                                keyExtractor={(item) => item}
+                                horizontal={true}
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={{ paddingVertical: 8, paddingHorizontal: 4 }}
+                                keyboardShouldPersistTaps="always"
+                                scrollEventThrottle={16}
+                                renderItem={({ item }) => (
+                                    <View style={{ padding: 0 }}>
+                                        <GlassView
+                                            isInteractive={true}
+                                            glassEffectStyle="clear"
+                                            tintColor="#f0f0f0"
                                             style={{
                                                 borderRadius: 32,
-                                                paddingLeft: 12,
-                                                paddingRight: 12,
-                                                paddingTop: 6,
-                                                paddingBottom: 6,
+                                                marginLeft: 4,
+                                                marginRight: 8,
                                             }}
-                                            onPress={() => selectSuggestion(item, focusedField!)}
                                         >
-                                            <Text style={{ fontSize: 12, color: '#000', fontFamily: 'LufgaRegular' }}>{item}</Text>
-                                        </Pressable>
-                                    </GlassView>
-                                </View>
-                            )}
-                        />
-                    </LinearGradient>
-                </Animated.View>
+                                            <Pressable
+                                                style={{
+                                                    borderRadius: 32,
+                                                    paddingLeft: 12,
+                                                    paddingRight: 12,
+                                                    paddingTop: 6,
+                                                    paddingBottom: 6,
+                                                }}
+                                                onPress={() => selectSuggestion(item, focusedField!)}
+                                            >
+                                                <Text style={{ fontSize: 12, color: '#000', fontFamily: 'LufgaRegular' }}>{item}</Text>
+                                            </Pressable>
+                                        </GlassView>
+                                    </View>
+                                )}
+                            />
+                        </LinearGradient>
+                    </Animated.View>
 
-            )}
-        </View>
+                )}
+            </View>
+        </>
     );
 }

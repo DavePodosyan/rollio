@@ -1,7 +1,7 @@
-import { FlatList, View, Text, StyleSheet, useColorScheme, DeviceEventEmitter } from "react-native";
+import { FlatList, View, Text, StyleSheet, useColorScheme, DeviceEventEmitter, Alert } from "react-native";
 import { useFilms } from "@/hooks/useFilms";
 import { Film } from "@/types";
-import { router, useFocusEffect, useNavigation } from "expo-router";
+import { router, Stack, useFocusEffect, useNavigation } from "expo-router";
 import FilmListItem from "@/components/FilmListItem";
 import EnjoyingRollio from "@/components/EnjoyingRollio";
 import { LinearGradient } from "expo-linear-gradient";
@@ -68,52 +68,59 @@ export default function Home() {
         return null;
     }
 
+
     return (
-        <View style={{ flex: 1 }}>
+        <>
+            <Stack.Toolbar placement="right">
+                <Stack.Toolbar.Button icon="plus" onPress={() => router.push('/new-film')} />
+            </Stack.Toolbar>
 
-            <LinearGradient
-                // colors={['#09090B', '#100528', '#09090B']}
-                colors={gradientColors}
-                locations={[0.1, 0.4, 0.9]}
-                // dither={false}
-                style={StyleSheet.absoluteFillObject}
-                start={{ x: 0, y: 0 }} // Optional: start from top-left
-                end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
-            >
-                <FlatList
-                    data={films}
-                    key={films.length.toString()} // Force re-render when length changes
-                    keyExtractor={keyExtractor}
-                    initialNumToRender={10}
-                    maxToRenderPerBatch={8}
-                    windowSize={8}
-                    removeClippedSubviews={true}
-                    // disableIntervalMomentum={true}
-                    renderItem={renderItem}
-                    ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-                    ListEmptyComponent={() => (
-                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                                <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
-                                    You don't have any film rolls yet.
-                                </Text>
-                                <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
-                                    Click the + button to add one.
-                                </Text>
+            <View style={{ flex: 1 }}>
+
+                <LinearGradient
+                    // colors={['#09090B', '#100528', '#09090B']}
+                    colors={gradientColors}
+                    locations={[0.1, 0.4, 0.9]}
+                    // dither={false}
+                    style={StyleSheet.absoluteFillObject}
+                    start={{ x: 0, y: 0 }} // Optional: start from top-left
+                    end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
+                >
+                    <FlatList
+                        data={films}
+                        key={films.length.toString()} // Force re-render when length changes
+                        keyExtractor={keyExtractor}
+                        initialNumToRender={10}
+                        maxToRenderPerBatch={8}
+                        windowSize={8}
+                        removeClippedSubviews={true}
+                        // disableIntervalMomentum={true}
+                        renderItem={renderItem}
+                        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+                        ListEmptyComponent={() => (
+                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                                    <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
+                                        You don't have any film rolls yet.
+                                    </Text>
+                                    <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
+                                        Click the + button to add one.
+                                    </Text>
+                                </View>
+
                             </View>
+                        )}
+                        contentInsetAdjustmentBehavior="automatic"
+                        scrollEventThrottle={16}
 
-                        </View>
-                    )}
-                    contentInsetAdjustmentBehavior="automatic"
-                    scrollEventThrottle={16}
+                        contentContainerStyle={{ paddingTop: 20, paddingBottom: 50 }}
+                        refreshing={false}
+                        onRefresh={fetchFilms}
+                        ListFooterComponent={films && films.length > 0 ? <EnjoyingRollio /> : null}
 
-                    contentContainerStyle={{ paddingTop: 20, paddingBottom: 50 }}
-                    refreshing={false}
-                    onRefresh={fetchFilms}
-                    ListFooterComponent={films && films.length > 0 ? <EnjoyingRollio /> : null}
-
-                />
-            </LinearGradient>
-        </View >
+                    />
+                </LinearGradient>
+            </View >
+        </>
     );
 }

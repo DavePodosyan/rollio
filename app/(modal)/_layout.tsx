@@ -15,13 +15,13 @@ export default function ModalLayout() {
             headerTintColor: colorScheme === "dark" ? "#fff" : "#100528",
             headerTitleStyle: { fontFamily: 'LufgaMedium' },
             contentStyle: { backgroundColor: colorScheme === 'dark' ? "#1c1c1e" : "#F2F2F6" },
-            headerLeft: () => (
-                <View>
-                    <Pressable onPress={() => router.back()} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
-                        <SymbolView name="xmark" size={22} tintColor={colorScheme === 'dark' ? "#ffffff" : "#100528"} />
-                    </Pressable>
-                </View>
-            ),
+            // headerLeft: () => (
+            //     <View>
+            //         <Pressable onPress={() => router.back()} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
+            //             <SymbolView name="xmark" size={22} tintColor={colorScheme === 'dark' ? "#ffffff" : "#100528"} />
+            //         </Pressable>
+            //     </View>
+            // ),
         }}>
             <Stack.Screen name="new-film" options={{
                 title: "Add New Film"
