@@ -1,5 +1,6 @@
 import { CreateFilmInput, Film, Frame, FilmStatus, CreateFrameInput } from '@/types';
 import { type SQLiteDatabase } from 'expo-sqlite';
+import { deleteFrameImage } from '@/utils/ImageService';
 
 export const initDatabase = async (db: SQLiteDatabase) => {
     console.log('Initializing database...');
@@ -185,10 +186,9 @@ export const deleteFilm = async (db: SQLiteDatabase, id: number): Promise<void> 
     //delete frames images
     const frames: Frame[] = await getFramesByFilmId(db, id);
 
-    //TODO: delete images from storage
     for (const frame of frames) {
         if (frame.image) {
-            console.log(frame.image);
+            await deleteFrameImage(frame.image);
         }
     }
 
@@ -302,7 +302,7 @@ export const deleteFrame = async (db: SQLiteDatabase, id: number): Promise<void>
     if (!frame) return;
 
     if (frame && frame.image) {
-        console.log(frame.image);
+        await deleteFrameImage(frame.image);
     }
 
     await db.runAsync(`DELETE FROM frames WHERE id = ?`, [id]);

@@ -13,7 +13,7 @@ import * as Haptics from "expo-haptics";
 import { useFrame } from "@/hooks/useFrame";
 import { useFrames } from "@/hooks/useFrames";
 import ImageUploader from "@/components/ImageUploader";
-import { saveFrameImage } from "@/utils/ImageService";
+import { saveFrameImage, deleteFrameImage } from "@/utils/ImageService";
 import { usePreventRemove } from "@react-navigation/native";
 import FilmSettingsFromPhoto from "@/components/FilmSettingsFromPhoto";
 import { datePickerStyle } from "@expo/ui/swift-ui/modifiers";
@@ -246,6 +246,14 @@ export default function NewFrame() {
 
         try {
             let dataToSave = { ...formData };
+
+            // Delete the old image if it was replaced or removed
+            if (mode === 'edit' && frame?.image) {
+                const imageChanged = dataToSave.image !== frame.image;
+                if (imageChanged) {
+                    await deleteFrameImage(frame.image);
+                }
+            }
 
             if (dataToSave.image && dataToSave.image.startsWith('file://')) {
                 //upload image to storage and get path 

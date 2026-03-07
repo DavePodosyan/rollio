@@ -1,5 +1,16 @@
 import { File, Directory, Paths } from 'expo-file-system';
 
+export const deleteFrameImage = async (relativePath: string): Promise<void> => {
+    try {
+        const file = new File(Paths.document, relativePath);
+        if (file.exists) {
+            file.delete();
+        }
+    } catch (err) {
+        console.log('Error deleting image:', err);
+    }
+};
+
 const ensureFramesDirectoryExists = async () => {
     const directory = new Directory(Paths.document, 'frames');
 
