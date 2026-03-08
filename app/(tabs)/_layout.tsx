@@ -11,7 +11,8 @@ export default function TabsLayout() {
     <NativeTabs
       // minimizeBehavior="onScrollDown"
       iconColor={PlatformColor('label')}
-      tintColor={colorScheme === 'dark' ? '#a583ef' : '#39128f'}
+      // tintColor={colorScheme === 'dark' ? '#a583ef' : '#39128f'}
+      tintColor={PlatformColor('systemIndigo')}
       backgroundColor={colorScheme === 'dark' ? '#09090B' : '#EFF0F4'}
       disableTransparentOnScrollEdge={isGlassAvailable ? false : true}
     >

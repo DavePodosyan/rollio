@@ -1,6 +1,6 @@
 import { APERTURE_OPTIONS, ISO_OPTIONS, SHUTTER_SPEED_OPTIONS } from "@/utils/cameraSettings";
 import { GlassContainer, GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useEffect, useRef, useState, useCallback, useLayoutEffect, useMemo } from "react";
 import {
@@ -206,37 +206,6 @@ export default function FormSheet() {
 
     // Track if we navigated away (to reset state on return)
     const hasNavigatedAway = useRef(false);
-
-    useEffect(() => {
-
-        navigation.setOptions({
-            // headerRight: () => (
-            //     <View style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center' }}>
-            //         <Host matchContents>
-            //             <ContextMenu>
-
-            //                 <ContextMenu.Items>
-            //                     <Toggle
-            //                         label="Show half/third stops"
-            //                         isOn={!showFullStopsOnly}
-            //                         modifiers={[toggleStyle('switch')]}
-            //                         onIsOnChange={(value) => {
-            //                             setShowFullStopsOnly(!value);
-            //                             Haptics.selectionAsync().catch(() => { });
-            //                         }}
-            //                     />
-            //                 </ContextMenu.Items>
-
-
-            //                 <ContextMenu.Trigger>
-            //                     <SymbolView name="gear" size={26} tintColor={PlatformColor('label')} />
-            //                 </ContextMenu.Trigger>
-            //             </ContextMenu>
-            //         </Host>
-            //     </View>
-            // ),
-        })
-    }, [navigation, showFullStopsOnly]);
 
     // Reset state when returning from new-frame modal
     useEffect(() => {
@@ -817,336 +786,353 @@ export default function FormSheet() {
     const isoRender = createRenderItem(selectedIso);
 
     return (
-        <View style={styles.container}>
-            {/* Content area wrapper - indicator is absolutely positioned within */}
-            <View style={{
-                flex: 1,
-                position: 'absolute',
-                top: headerHeight - 18,
-                left: 0,
-                right: 0,
-                zIndex: 10,
-            }}>
-                {/* Exposure indicator - absolutely positioned to avoid layout shifts */}
-                {Math.abs(exposureDiff) >= 0.1 && (
-                    <View style={{
-                        // position: 'absolute',
-                        alignItems: 'center'
-                    }}>
-                        <GlassView
-                            isInteractive={false}
-                            tintColor={exposureDiff > 0 ? '#ff9500' : '#007aff'}
-                            style={{
-                                // minWidth: 100,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                paddingVertical: 2,
-                                paddingHorizontal: 8,
-                                backgroundColor: exposureDiff > 0
-                                    ? 'rgba(255, 149, 0, 0.15)'
-                                    : 'rgba(0, 122, 255, 0.15)',
-                                borderRadius: 14,
-                            }}>
-                            <SymbolView
-                                name={exposureDiff > 0 ? 'sun.max.fill' : 'moon.fill'}
-                                style={{ width: 8, height: 8, marginRight: 3 }}
-                                tintColor="#ffffff"
-                            />
-                            <Text style={{
-                                fontFamily: 'LufgaMedium',
-                                fontSize: 10,
-                                color: '#ffffff'
-                            }}>
-                                {exposureDiff > 0 ? '+' : ''}{exposureDiff.toFixed(1)} EV {exposureDiff > 0 ? 'over' : 'under'}
-                            </Text>
-                        </GlassView>
-                    </View>
-                )}
-            </View>
-            <GlassContainer spacing={12} style={styles.wheelsContainer}>
-                {/* Aperture */}
-                <View style={styles.wheelColumn}>
-                    <Text style={styles.label}>Aperture</Text>
-                    <GlassView
-                        style={[styles.wheelGlass, lockedPicker === 'aperture' && styles.wheelGlassLocked, {
-                            backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill')
-                        }]}
-                        glassEffectStyle="clear"
-                        isInteractive={lockedPicker !== 'aperture'}
+        <>
+            <Stack.Toolbar placement="left">
+                <Stack.Toolbar.Button icon="xmark" onPress={() => router.back()} />
+            </Stack.Toolbar>
+
+            <Stack.Toolbar placement="right" >
+                <Stack.Toolbar.Menu icon="gear">
+                    <Stack.Toolbar.MenuAction
+                        icon={!showFullStopsOnly ? "checkmark.circle.fill" : "circle"}
+                        onPress={() => setShowFullStopsOnly(prev => !prev)}
                     >
-                        <FlatList
-                            ref={apertureRef}
-                            data={APERTURE_OPTIONS.filter(a => a !== "Auto")}
-                            renderItem={apertureRender}
-                            keyExtractor={(item) => item}
-                            snapToInterval={ITEM_HEIGHT}
-                            decelerationRate="normal"
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={lockedPicker !== 'aperture'}
-                            contentContainerStyle={{ paddingVertical: VERTICAL_PADDING }}
-                            getItemLayout={(_, index) => ({
-                                length: ITEM_HEIGHT,
-                                offset: VERTICAL_PADDING + ITEM_HEIGHT * index,
-                                index,
-                            })}
-                            initialScrollIndex={APERTURE_OPTIONS.filter(a => a !== "Auto").indexOf(selectedAperture) || 0}
-                            onScroll={handleApertureScroll}
-                            onScrollBeginDrag={onApertureScrollBegin}
-                            onMomentumScrollEnd={onApertureScrollEnd}
-                            onScrollEndDrag={(e) => {
-                                // If no momentum, trigger end immediately
-                                if (e.nativeEvent.velocity?.y === 0) onApertureScrollEnd();
-                            }}
-                            scrollEventThrottle={16}
-                            style={{ height: CONTAINER_HEIGHT }}
-                        />
-                    </GlassView>
-                    {!isFilmMode && (
-                        <Pressable onPress={() => toggleLock('aperture')} style={styles.lockButton}>
-                            <SymbolView
-                                name={lockedPicker === 'aperture' ? 'lock.fill' : 'lock.open.fill'}
-                                style={styles.lockIcon}
-                                tintColor={lockedPicker === 'aperture' ? PlatformColor('label') : PlatformColor('secondaryLabel')}
-                            />
-                        </Pressable>
-                    )}
-                </View>
+                        Show half/third stops
+                    </Stack.Toolbar.MenuAction>
+                </Stack.Toolbar.Menu>
+            </Stack.Toolbar>
 
-                {/* Shutter */}
-                <View style={styles.wheelColumn}>
-                    <Text style={styles.label}>Shutter</Text>
-                    <GlassView style={[styles.wheelGlass, lockedPicker === 'shutter' && styles.wheelGlassLocked, {
-                        backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill')
-
-                    }]} glassEffectStyle="clear" isInteractive={lockedPicker !== 'shutter'}>
-                        <FlatList
-                            ref={shutterRef}
-                            data={shutterOptions}
-                            renderItem={shutterRender}
-                            keyExtractor={(item) => item}
-                            snapToInterval={ITEM_HEIGHT}
-                            decelerationRate="normal"
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={lockedPicker !== 'shutter'}
-                            contentContainerStyle={{ paddingVertical: VERTICAL_PADDING }}
-                            getItemLayout={(_, index) => ({
-                                length: ITEM_HEIGHT,
-                                offset: VERTICAL_PADDING + ITEM_HEIGHT * index,
-                                index,
-                            })}
-                            initialScrollIndex={Math.max(0, shutterOptions.indexOf(selectedShutter))}
-                            onScroll={handleShutterScroll}
-                            onScrollBeginDrag={onShutterScrollBegin}
-                            onMomentumScrollEnd={onShutterScrollEnd}
-                            onScrollEndDrag={(e) => {
-                                if (e.nativeEvent.velocity?.y === 0) onShutterScrollEnd();
-                            }}
-                            scrollEventThrottle={16}
-                            style={{ height: CONTAINER_HEIGHT }}
-                        />
-                    </GlassView>
-                    {!isFilmMode && (
-                        <Pressable onPress={() => toggleLock('shutter')} style={styles.lockButton}>
-                            <SymbolView
-                                name={lockedPicker === 'shutter' ? 'lock.fill' : 'lock.open.fill'}
-                                style={styles.lockIcon}
-                                tintColor={lockedPicker === 'shutter' ? PlatformColor('label') : PlatformColor('secondaryLabel')}
-                            />
-                        </Pressable>
-                    )}
-                </View>
-
-                {/* ISO */}
-                <View style={styles.wheelColumn}>
-                    <Text style={styles.label}>ISO{isFilmMode ? ' (Film)' : ''}</Text>
-                    <GlassView style={[styles.wheelGlass, lockedPicker === 'iso' && styles.wheelGlassLocked, {
-                        backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill')
-
-                    }]} glassEffectStyle="clear" isInteractive={lockedPicker !== 'iso'}>
-                        <FlatList
-                            ref={isoRef}
-                            data={ISO_OPTIONS.map(String)}
-                            renderItem={isoRender}
-                            keyExtractor={(item) => item}
-                            snapToInterval={ITEM_HEIGHT}
-                            decelerationRate={"normal"}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={lockedPicker !== 'iso'}
-                            contentContainerStyle={{ paddingVertical: VERTICAL_PADDING }}
-                            getItemLayout={(_, index) => ({
-                                length: ITEM_HEIGHT,
-                                offset: VERTICAL_PADDING + ITEM_HEIGHT * index,
-                                index,
-                            })}
-                            initialScrollIndex={ISO_OPTIONS.map(String).indexOf(selectedIso.toString()) || 0}
-                            onScroll={handleIsoScroll}
-                            onScrollBeginDrag={onIsoScrollBegin}
-                            onMomentumScrollEnd={onIsoScrollEnd}
-                            onScrollEndDrag={(e) => {
-                                if (e.nativeEvent.velocity?.y === 0) onIsoScrollEnd();
-                            }}
-                            scrollEventThrottle={16}
-                            style={{ height: CONTAINER_HEIGHT }}
-                        />
-                    </GlassView>
-                    {!isFilmMode && (
-                        <Pressable onPress={() => toggleLock('iso')} style={styles.lockButton}>
-                            <SymbolView
-                                name={lockedPicker === 'iso' ? 'lock.fill' : 'lock.open.fill'}
-                                style={styles.lockIcon}
-                                tintColor={lockedPicker === 'iso' ? PlatformColor('label') : PlatformColor('secondaryLabel')}
-                            />
-                        </Pressable>
-                    )}
-                    {isFilmMode && (
-                        <View style={styles.lockButton}>
-                            <SymbolView
-                                name="lock.fill"
-                                style={styles.lockIcon}
-                                tintColor={PlatformColor('systemOrange')}
-                            />
+            <View style={styles.container}>
+                {/* Content area wrapper - indicator is absolutely positioned within */}
+                <View style={{
+                    flex: 1,
+                    position: 'absolute',
+                    top: headerHeight - 18,
+                    left: 0,
+                    right: 0,
+                    zIndex: 10,
+                }}>
+                    {/* Exposure indicator - absolutely positioned to avoid layout shifts */}
+                    {Math.abs(exposureDiff) >= 0.1 && (
+                        <View style={{
+                            // position: 'absolute',
+                            alignItems: 'center'
+                        }}>
+                            <GlassView
+                                isInteractive={false}
+                                tintColor={exposureDiff > 0 ? '#ff9500' : '#007aff'}
+                                style={{
+                                    // minWidth: 100,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    paddingVertical: 2,
+                                    paddingHorizontal: 8,
+                                    backgroundColor: exposureDiff > 0
+                                        ? 'rgba(255, 149, 0, 0.15)'
+                                        : 'rgba(0, 122, 255, 0.15)',
+                                    borderRadius: 14,
+                                }}>
+                                <SymbolView
+                                    name={exposureDiff > 0 ? 'sun.max.fill' : 'moon.fill'}
+                                    style={{ width: 8, height: 8, marginRight: 3 }}
+                                    tintColor="#ffffff"
+                                />
+                                <Text style={{
+                                    fontFamily: 'LufgaMedium',
+                                    fontSize: 10,
+                                    color: '#ffffff'
+                                }}>
+                                    {exposureDiff > 0 ? '+' : ''}{exposureDiff.toFixed(1)} EV {exposureDiff > 0 ? 'over' : 'under'}
+                                </Text>
+                            </GlassView>
                         </View>
                     )}
                 </View>
-            </GlassContainer>
-
-            {!isSheetExpanded && (
-                <View style={{ alignItems: 'center' }}>
-                    <TouchableOpacity onPress={() => expandSheetForm()}>
-                        <Text style={{ color: PlatformColor('label'), fontFamily: 'LufgaRegular', marginTop: 18 }}>
-                            Save to Frame
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            )}
-
-            {isSheetExpanded && !selectedFilm && (
-                <ScrollView
-                    style={{ marginTop: 12, flex: 1 }}
-                    contentContainerStyle={{ paddingBottom: 132 }}
-                >
-                    {films.length > 0 ? (
-                        <>
-                            <Text style={{
-                                fontFamily: 'LufgaRegular',
-                                fontSize: 13,
-                                color: PlatformColor('secondaryLabel'),
-                                marginBottom: 8,
-                                marginLeft: 4,
-                                textAlign: 'center'
-                            }}>
-                                Select a film to save this reading
-                            </Text>
-
-                            {films.map((film, index) => (
-                                <TouchableOpacity key={film.id} onPress={() => handleSelectFilm(film)}>
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        padding: 16,
-                                        borderBottomWidth: index === films.length - 1 ? 0 : 1,
-                                        borderBottomColor: PlatformColor('separator')
-                                    }}>
-                                        <View>
-                                            <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: PlatformColor('label') }}>{film.title}</Text>
-                                            <Text style={{ fontFamily: 'LufgaRegular', fontSize: 14, color: PlatformColor('secondaryLabel') }}>ISO {film.iso}</Text>
-                                        </View>
-                                        <View>
-                                            <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: PlatformColor('label') }}>{film.frame_count}/{film.expected_shots}</Text>
-                                        </View>
-                                    </View>
-                                </TouchableOpacity>
-                            ))}
-                        </>
-                    ) : (
-                        <View style={{ alignItems: 'center', paddingVertical: 32 }}>
-                            <Text style={{
-                                fontFamily: 'LufgaRegular',
-                                fontSize: 16,
-                                color: PlatformColor('secondaryLabel'),
-                                textAlign: 'center'
-                            }}>
-                                No films available.{'\n'}Create a film first to save readings.
-                            </Text>
-                        </View>
-                    )}
-
-                </ScrollView>
-            )}
-
-            {isSheetExpanded && selectedFilm && (
-                <View style={{ marginTop: 32 }}>
-                    {/* Selected film card */}
-                    <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: 20,
-                        backgroundColor: PlatformColor('tertiarySystemFill'),
-                        borderRadius: 24,
-                    }}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: PlatformColor('label') }}>
-                                {selectedFilm.title}
-                            </Text>
-                            <Text style={{ fontFamily: 'LufgaRegular', fontSize: 14, color: PlatformColor('secondaryLabel') }}>
-                                ISO {selectedFilm.iso} • Frame {selectedFilm.frame_count + 1}/{selectedFilm.expected_shots}
-                            </Text>
-                        </View>
-                        <TouchableOpacity onPress={handleClearFilmSelection} style={{}}>
-                            <SymbolView
-                                name="xmark.circle.fill"
-                                style={{ width: 24, height: 24 }}
-                                tintColor={PlatformColor('secondaryLabel')}
+                <GlassContainer spacing={12} style={styles.wheelsContainer}>
+                    {/* Aperture */}
+                    <View style={styles.wheelColumn}>
+                        <Text style={styles.label}>Aperture</Text>
+                        <GlassView
+                            style={[styles.wheelGlass, lockedPicker === 'aperture' && styles.wheelGlassLocked, {
+                                backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill')
+                            }]}
+                            glassEffectStyle="clear"
+                            isInteractive={lockedPicker !== 'aperture'}
+                        >
+                            <FlatList
+                                ref={apertureRef}
+                                data={APERTURE_OPTIONS.filter(a => a !== "Auto")}
+                                renderItem={apertureRender}
+                                keyExtractor={(item) => item}
+                                snapToInterval={ITEM_HEIGHT}
+                                decelerationRate="normal"
+                                showsVerticalScrollIndicator={false}
+                                scrollEnabled={lockedPicker !== 'aperture'}
+                                contentContainerStyle={{ paddingVertical: VERTICAL_PADDING }}
+                                getItemLayout={(_, index) => ({
+                                    length: ITEM_HEIGHT,
+                                    offset: VERTICAL_PADDING + ITEM_HEIGHT * index,
+                                    index,
+                                })}
+                                initialScrollIndex={APERTURE_OPTIONS.filter(a => a !== "Auto").indexOf(selectedAperture) || 0}
+                                onScroll={handleApertureScroll}
+                                onScrollBeginDrag={onApertureScrollBegin}
+                                onMomentumScrollEnd={onApertureScrollEnd}
+                                onScrollEndDrag={(e) => {
+                                    // If no momentum, trigger end immediately
+                                    if (e.nativeEvent.velocity?.y === 0) onApertureScrollEnd();
+                                }}
+                                scrollEventThrottle={16}
+                                style={{ height: CONTAINER_HEIGHT }}
                             />
+                        </GlassView>
+                        {!isFilmMode && (
+                            <Pressable onPress={() => toggleLock('aperture')} style={styles.lockButton}>
+                                <SymbolView
+                                    name={lockedPicker === 'aperture' ? 'lock.fill' : 'lock.open.fill'}
+                                    style={styles.lockIcon}
+                                    tintColor={lockedPicker === 'aperture' ? PlatformColor('label') : PlatformColor('secondaryLabel')}
+                                />
+                            </Pressable>
+                        )}
+                    </View>
+
+                    {/* Shutter */}
+                    <View style={styles.wheelColumn}>
+                        <Text style={styles.label}>Shutter</Text>
+                        <GlassView style={[styles.wheelGlass, lockedPicker === 'shutter' && styles.wheelGlassLocked, {
+                            backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill')
+
+                        }]} glassEffectStyle="clear" isInteractive={lockedPicker !== 'shutter'}>
+                            <FlatList
+                                ref={shutterRef}
+                                data={shutterOptions}
+                                renderItem={shutterRender}
+                                keyExtractor={(item) => item}
+                                snapToInterval={ITEM_HEIGHT}
+                                decelerationRate="normal"
+                                showsVerticalScrollIndicator={false}
+                                scrollEnabled={lockedPicker !== 'shutter'}
+                                contentContainerStyle={{ paddingVertical: VERTICAL_PADDING }}
+                                getItemLayout={(_, index) => ({
+                                    length: ITEM_HEIGHT,
+                                    offset: VERTICAL_PADDING + ITEM_HEIGHT * index,
+                                    index,
+                                })}
+                                initialScrollIndex={Math.max(0, shutterOptions.indexOf(selectedShutter))}
+                                onScroll={handleShutterScroll}
+                                onScrollBeginDrag={onShutterScrollBegin}
+                                onMomentumScrollEnd={onShutterScrollEnd}
+                                onScrollEndDrag={(e) => {
+                                    if (e.nativeEvent.velocity?.y === 0) onShutterScrollEnd();
+                                }}
+                                scrollEventThrottle={16}
+                                style={{ height: CONTAINER_HEIGHT }}
+                            />
+                        </GlassView>
+                        {!isFilmMode && (
+                            <Pressable onPress={() => toggleLock('shutter')} style={styles.lockButton}>
+                                <SymbolView
+                                    name={lockedPicker === 'shutter' ? 'lock.fill' : 'lock.open.fill'}
+                                    style={styles.lockIcon}
+                                    tintColor={lockedPicker === 'shutter' ? PlatformColor('label') : PlatformColor('secondaryLabel')}
+                                />
+                            </Pressable>
+                        )}
+                    </View>
+
+                    {/* ISO */}
+                    <View style={styles.wheelColumn}>
+                        <Text style={styles.label}>ISO{isFilmMode ? ' (Film)' : ''}</Text>
+                        <GlassView style={[styles.wheelGlass, lockedPicker === 'iso' && styles.wheelGlassLocked, {
+                            backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill')
+
+                        }]} glassEffectStyle="clear" isInteractive={lockedPicker !== 'iso'}>
+                            <FlatList
+                                ref={isoRef}
+                                data={ISO_OPTIONS.map(String)}
+                                renderItem={isoRender}
+                                keyExtractor={(item) => item}
+                                snapToInterval={ITEM_HEIGHT}
+                                decelerationRate={"normal"}
+                                showsVerticalScrollIndicator={false}
+                                scrollEnabled={lockedPicker !== 'iso'}
+                                contentContainerStyle={{ paddingVertical: VERTICAL_PADDING }}
+                                getItemLayout={(_, index) => ({
+                                    length: ITEM_HEIGHT,
+                                    offset: VERTICAL_PADDING + ITEM_HEIGHT * index,
+                                    index,
+                                })}
+                                initialScrollIndex={ISO_OPTIONS.map(String).indexOf(selectedIso.toString()) || 0}
+                                onScroll={handleIsoScroll}
+                                onScrollBeginDrag={onIsoScrollBegin}
+                                onMomentumScrollEnd={onIsoScrollEnd}
+                                onScrollEndDrag={(e) => {
+                                    if (e.nativeEvent.velocity?.y === 0) onIsoScrollEnd();
+                                }}
+                                scrollEventThrottle={16}
+                                style={{ height: CONTAINER_HEIGHT }}
+                            />
+                        </GlassView>
+                        {!isFilmMode && (
+                            <Pressable onPress={() => toggleLock('iso')} style={styles.lockButton}>
+                                <SymbolView
+                                    name={lockedPicker === 'iso' ? 'lock.fill' : 'lock.open.fill'}
+                                    style={styles.lockIcon}
+                                    tintColor={lockedPicker === 'iso' ? PlatformColor('label') : PlatformColor('secondaryLabel')}
+                                />
+                            </Pressable>
+                        )}
+                        {isFilmMode && (
+                            <View style={styles.lockButton}>
+                                <SymbolView
+                                    name="lock.fill"
+                                    style={styles.lockIcon}
+                                    tintColor={PlatformColor('systemOrange')}
+                                />
+                            </View>
+                        )}
+                    </View>
+                </GlassContainer>
+
+                {!isSheetExpanded && (
+                    <View style={{ alignItems: 'center' }}>
+                        <TouchableOpacity onPress={() => expandSheetForm()}>
+                            <Text style={{ color: PlatformColor('label'), fontFamily: 'LufgaRegular', marginTop: 18 }}>
+                                Save to Frame
+                            </Text>
                         </TouchableOpacity>
                     </View>
+                )}
 
-                    {/* Hint about adjustments */}
-                    <Text style={{
-                        fontFamily: 'LufgaRegular',
-                        fontSize: 13,
-                        color: PlatformColor('secondaryLabel'),
-                        marginTop: 12,
-                        textAlign: 'center'
-                    }}>
-                        ISO locked to film. Adjust aperture or shutter if needed.
-                    </Text>
+                {isSheetExpanded && !selectedFilm && (
+                    <ScrollView
+                        style={{ marginTop: 12, flex: 1 }}
+                        contentContainerStyle={{ paddingBottom: 132 }}
+                    >
+                        {films.length > 0 ? (
+                            <>
+                                <Text style={{
+                                    fontFamily: 'LufgaRegular',
+                                    fontSize: 13,
+                                    color: PlatformColor('secondaryLabel'),
+                                    marginBottom: 8,
+                                    marginLeft: 4,
+                                    textAlign: 'center'
+                                }}>
+                                    Select a film to save this reading
+                                </Text>
 
-                    {/* Save button */}
-                    <Pressable
-                        onPress={handleSaveFrame}
-                        style={{
-                            // padding: 16,
-                            borderRadius: 12,
-                            marginTop: 64,
+                                {films.map((film, index) => (
+                                    <TouchableOpacity key={film.id} onPress={() => handleSelectFilm(film)}>
+                                        <View style={{
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            padding: 16,
+                                            borderBottomWidth: index === films.length - 1 ? 0 : 1,
+                                            borderBottomColor: PlatformColor('separator')
+                                        }}>
+                                            <View>
+                                                <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: PlatformColor('label') }}>{film.title}</Text>
+                                                <Text style={{ fontFamily: 'LufgaRegular', fontSize: 14, color: PlatformColor('secondaryLabel') }}>ISO {film.iso}</Text>
+                                            </View>
+                                            <View>
+                                                <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: PlatformColor('label') }}>{film.frame_count}/{film.expected_shots}</Text>
+                                            </View>
+                                        </View>
+                                    </TouchableOpacity>
+                                ))}
+                            </>
+                        ) : (
+                            <View style={{ alignItems: 'center', paddingVertical: 32 }}>
+                                <Text style={{
+                                    fontFamily: 'LufgaRegular',
+                                    fontSize: 16,
+                                    color: PlatformColor('secondaryLabel'),
+                                    textAlign: 'center'
+                                }}>
+                                    No films available.{'\n'}Create a film first to save readings.
+                                </Text>
+                            </View>
+                        )}
+
+                    </ScrollView>
+                )}
+
+                {isSheetExpanded && selectedFilm && (
+                    <View style={{ marginTop: 32 }}>
+                        {/* Selected film card */}
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: 20,
+                            backgroundColor: PlatformColor('tertiarySystemFill'),
+                            borderRadius: 24,
                         }}>
-                        <GlassView
-                            isInteractive={true}
-                            tintColor='#0091ff'
+                            <View style={{ flex: 1 }}>
+                                <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: PlatformColor('label') }}>
+                                    {selectedFilm.title}
+                                </Text>
+                                <Text style={{ fontFamily: 'LufgaRegular', fontSize: 14, color: PlatformColor('secondaryLabel') }}>
+                                    ISO {selectedFilm.iso} • Frame {selectedFilm.frame_count + 1}/{selectedFilm.expected_shots}
+                                </Text>
+                            </View>
+                            <TouchableOpacity onPress={handleClearFilmSelection} style={{}}>
+                                <SymbolView
+                                    name="xmark.circle.fill"
+                                    style={{ width: 24, height: 24 }}
+                                    tintColor={PlatformColor('secondaryLabel')}
+                                />
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Hint about adjustments */}
+                        <Text style={{
+                            fontFamily: 'LufgaRegular',
+                            fontSize: 13,
+                            color: PlatformColor('secondaryLabel'),
+                            marginTop: 12,
+                            textAlign: 'center'
+                        }}>
+                            ISO locked to film. Adjust aperture or shutter if needed.
+                        </Text>
+
+                        {/* Save button */}
+                        <Pressable
+                            onPress={handleSaveFrame}
                             style={{
-                                padding: 16,
-                                borderRadius: 24,
-                                alignItems: 'center',
-                                backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill')
-
-                            }}
-                        >
-                            <Text style={{
-                                fontFamily: 'LufgaMedium',
-                                fontSize: 17,
-                                color: isGlassAvailable ? '#fff' : PlatformColor('label'),
+                                // padding: 16,
+                                borderRadius: 12,
+                                marginTop: 64,
                             }}>
-                                Save Frame
-                            </Text>
-                        </GlassView>
-                    </Pressable>
-                </View>
-            )}
+                            <GlassView
+                                isInteractive={true}
+                                tintColor='#0091ff'
+                                style={{
+                                    padding: 16,
+                                    borderRadius: 24,
+                                    alignItems: 'center',
+                                    backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill')
 
-        </View>
+                                }}
+                            >
+                                <Text style={{
+                                    fontFamily: 'LufgaMedium',
+                                    fontSize: 17,
+                                    color: isGlassAvailable ? '#fff' : PlatformColor('label'),
+                                }}>
+                                    Save Frame
+                                </Text>
+                            </GlassView>
+                        </Pressable>
+                    </View>
+                )}
+
+            </View>
+        </>
     );
 }
 

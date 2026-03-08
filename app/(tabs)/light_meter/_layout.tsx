@@ -21,13 +21,6 @@ export default function HomeLayout() {
                     headerTintColor: String(PlatformColor('label')),
                     title: '',
                     headerTitleStyle: { fontFamily: 'LufgaMedium', fontSize: 20 },
-                    headerLeft: () => (
-                        <View>
-                            <Pressable onPress={() => router.back()} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
-                                <SymbolView name="xmark" size={22} tintColor={PlatformColor('label')} />
-                            </Pressable>
-                        </View>
-                    ),
                     presentation: "formSheet",
                     gestureEnabled: false,
                     sheetGrabberVisible: false,

@@ -11,6 +11,7 @@ import {
     useColorScheme,
     Pressable,
     Image,
+    PlatformColor,
 } from 'react-native';
 import React, { useRef, useState } from 'react';
 
@@ -40,18 +41,18 @@ export default function Support() {
         : ['#EFF0F4', '#E5E0FF', '#EFF0F4'];
 
 
-    const productIcons: Record<string, { name: SFSymbol; color: string }> = {
+    const productIcons: Record<string, { name: SFSymbol; color: ReturnType<typeof PlatformColor> }> = {
         'support.1': {
             name: 'sparkles',
-            color: '#A855F7',
+            color: PlatformColor('systemPurple'),
         },
         'support.5': {
             name: 'bolt.fill',
-            color: '#FFB800',
+            color: PlatformColor('systemYellow'),
         },
         'support.10': {
             name: 'heart.fill',
-            color: '#FF3B30',
+            color: PlatformColor('systemRed'),
         }
     }
 
@@ -197,13 +198,18 @@ export default function Support() {
                                                 console.log('Pressed');
                                                 HapticFeedback.selectionAsync();
                                                 setPurchaseInProgress({ status: true, sku: product.id });
-                                                await requestPurchase({
-                                                    request: {
-                                                        ios: { sku: product.id },
-                                                        android: { skus: [product.id] }
-                                                    },
-                                                    type: 'in-app'
-                                                });
+                                                try {
+                                                    await requestPurchase({
+                                                        request: {
+                                                            ios: { sku: product.id },
+                                                            android: { skus: [product.id] }
+                                                        },
+                                                        type: 'in-app'
+                                                    });
+                                                } catch (err) {
+                                                    setPurchaseInProgress({ status: false, sku: '' });
+                                                    console.log('Purchase request failed:', err);
+                                                }
                                             }}
                                             disabled={purchaseInProgress.status}
                                             style={{
@@ -284,7 +290,7 @@ export default function Support() {
                                 <SymbolView
                                     name='star.fill'
                                     size={48}
-                                    tintColor='#FFB800'
+                                    tintColor={PlatformColor('systemYellow')}
                                 />
 
                                 <View style={{
@@ -319,7 +325,7 @@ export default function Support() {
                                 <SymbolView
                                     name='square.and.arrow.up'
                                     size={48}
-                                    tintColor='#34C759'
+                                    tintColor={PlatformColor('systemGreen')}
                                 />
 
                                 <View style={{
@@ -331,7 +337,7 @@ export default function Support() {
                                     <Text style={{
                                         fontFamily: 'LufgaMedium',
                                         fontSize: 16,
-                                        color: colorScheme === 'dark' ? '#ffffff' : '#100528',
+                                        color: PlatformColor('label'),
                                     }}>
                                         Share the App
                                     </Text>

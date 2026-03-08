@@ -11,7 +11,7 @@ import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-ef
 import { useFrames } from '@/hooks/useFrames';
 import FrameListItem from '@/components/FrameListItem';
 import { Frame } from '@/utils/types';
-import { Button, ContextMenu, Host } from '@expo/ui/swift-ui';
+import { Button, ContextMenu, Divider, Host, Section } from '@expo/ui/swift-ui';
 
 export default function FilmDetailPage() {
     const { id, title } = useLocalSearchParams<{ id: string, title: string }>();
@@ -235,6 +235,10 @@ export default function FilmDetailPage() {
                 <Stack.Toolbar.Button icon="plus" onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } })} />
                 <Stack.Toolbar.Menu icon="ellipsis">
                     <Stack.Toolbar.MenuAction icon="pencil" onPress={() => handleContextMenuSelect('edit')}>Edit</Stack.Toolbar.MenuAction>
+                    
+                    {/* <Stack.Toolbar.MenuAction icon="clock" hidden={film.status !== 'in-camera'} onPress={() => null}>Mark as Developing</Stack.Toolbar.MenuAction> */}
+                    {/* <Stack.Toolbar.MenuAction icon="archivebox" hidden={film.status !== 'developing'} onPress={() => null}>Mark as Archived</Stack.Toolbar.MenuAction> */}
+                    
                     <Stack.Toolbar.MenuAction icon="trash" destructive onPress={() => handleContextMenuSelect('delete')}>
                         Delete
                     </Stack.Toolbar.MenuAction>

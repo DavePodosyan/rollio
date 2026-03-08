@@ -108,8 +108,23 @@ export default function CameraBackgroundPage() {
         await requestPermission();
     };
 
-    const handleFormSheetOpen = async () => {
+    const handleFormSheetOpen = async (debug = false) => {
         if (loading) return; // Prevent multiple taps
+
+        if (debug) {
+            router.push({
+                pathname: '/(tabs)/light_meter/formsheet',
+                params: {
+                    title: `EV 12.34`,
+                    ev: 12.34,
+                    aperture: 2.8,
+                    shutterSpeed: '1/125',
+                    iso: 100,
+                    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+                }
+            });
+            return;
+        }
 
         setLoading(true);
 
@@ -238,6 +253,9 @@ export default function CameraBackgroundPage() {
                     end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
                 />
                 <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: PlatformColor('label') }}>No camera device available</Text>
+
+                {/* <Pressable onPress={() => handleFormSheetOpen(true)}><Text style={{ color: PlatformColor('label'), marginTop: 50 }}>Debug</Text></Pressable> */}
+
             </View>
         );
     }
@@ -313,7 +331,7 @@ export default function CameraBackgroundPage() {
                         {
                             padding: 20
                         }
-                    ]} onPress={handleFormSheetOpen}>
+                    ]} onPress={() => handleFormSheetOpen()}>
 
                         {!loading && <Text
                             style={{
