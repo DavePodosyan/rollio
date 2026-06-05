@@ -1,15 +1,18 @@
-import { View, Text, TouchableOpacity, useColorScheme, PlatformColor } from 'react-native';
+import { View, Text, TouchableOpacity, useColorScheme } from 'react-native';
 import { Link } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 
 export default function EnjoyingRollio() {
+    const colorScheme = useColorScheme();
+    const textColor = colorScheme === 'dark' ? '#ffffff' : '#100528';
+
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 2, marginBottom: 2 }}>
             <Link href="/(tabs)/support" asChild>
                 <TouchableOpacity activeOpacity={0.7}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10 }}>
-                        <SymbolView name="heart.fill" size={20} tintColor={PlatformColor('systemRed')} style={{ marginRight: 4 }} />
-                        <Text style={{ color: PlatformColor('label'), fontFamily: 'LufgaRegular', fontSize: 12, lineHeight: 24, textAlign: 'center' }}>
+                        <SymbolView name={{ ios: 'heart.fill', android: 'favorite' }} size={20} tintColor="#ff453a" style={{ marginRight: 4 }} />
+                        <Text style={{ color: textColor, fontFamily: 'LufgaRegular', fontSize: 12, lineHeight: 24, textAlign: 'center' }}>
                             Enjoying Rollio?
                         </Text>
                     </View>

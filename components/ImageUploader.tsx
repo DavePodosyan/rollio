@@ -32,6 +32,10 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
     const colorScheme = useColorScheme();
     const isGlassAvailable = isLiquidGlassAvailable();
     const isAndroid = Platform.OS === 'android';
+    const uploadBackgroundColor = isGlassAvailable && !isAndroid
+        ? 'transparent'
+        : colorScheme === 'dark' ? '#1c1c1e' : '#f6f6fa';
+    const uploadBorderColor = colorScheme === 'dark' ? '#2a2a2d' : '#e6e6ee';
     // 1. FIX: Memoize the URI calculation to prevent performance hits on re-renders
     const displayUri = useMemo(() => {
         if (value?.startsWith('frames/rollio_')) {
@@ -171,7 +175,9 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
                         marginBottom: 10,
                         justifyContent: 'center',
                         alignItems: 'center',
-                        backgroundColor: isGlassAvailable ? 'transparent' : colorScheme === 'dark' ? '#09090b6d' : '#ffffff90',
+                        borderWidth: isAndroid ? 1 : 0,
+                        borderColor: uploadBorderColor,
+                        backgroundColor: uploadBackgroundColor,
                     }}
                 >
 

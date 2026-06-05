@@ -138,7 +138,7 @@ function FrameListItem({ frame, iso }: FrameListItemProps) {
                                 </Text>
                             </View>
                             {frame.image && (
-                                <SymbolView name="paperclip" size={20} tintColor={colorScheme === 'dark' ? '#ffffff' : '#100528'} style={{ marginLeft: 'auto' }} />
+                                <SymbolView name={{ ios: 'paperclip', android: 'attach_file' }} size={20} tintColor={colorScheme === 'dark' ? '#ffffff' : '#100528'} style={{ marginLeft: 'auto' }} />
 
                             )}
                         </View>
