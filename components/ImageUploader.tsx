@@ -58,45 +58,78 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
         );
     };
 
+    const showPermissionAlert = (title: string, message: string, canAskAgain: boolean) => {
+        Alert.alert(
+            title,
+            message,
+            [
+                ...(canAskAgain ? [] : [{ text: 'Settings', onPress: () => Linking.openSettings() }]),
+                { text: 'OK', style: 'cancel' },
+            ],
+            { cancelable: true }
+        );
+    };
+
     const takePhoto = async () => {
-        const permission = await ImagePicker.requestCameraPermissionsAsync();
-        if (!permission.granted) {
-            Alert.alert('Permission required', 'Camera permission is needed to take photos.');
-            return;
+        try {
+            const permission = await ImagePicker.requestCameraPermissionsAsync();
+            if (!permission.granted) {
+                showPermissionAlert(
+                    'Camera Permission Required',
+                    'Rollio needs camera access to take photos for frames.',
+                    permission.canAskAgain
+                );
+                return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+                allowsEditing: false,
+                presentationStyle: ImagePicker.UIImagePickerPresentationStyle.PAGE_SHEET,
+                quality: 0.7,
+                exif: true,
+            });
+
+            if (!result.canceled && result.assets?.[0]?.uri) {
+                onChange(result.assets[0].uri);
+
+                try {
+                    await writeAsync(result.assets[0].uri, result.assets[0].exif || {});
+                } catch (error) {
+                    console.warn('Failed to preserve photo EXIF data', error);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to take photo', error);
+            Alert.alert('Camera Error', 'Rollio could not open the camera. Please try again.');
         }
-
-        const result = await ImagePicker.launchCameraAsync({
-            allowsEditing: false,
-            presentationStyle: ImagePicker.UIImagePickerPresentationStyle.PAGE_SHEET,
-            quality: 0.7,
-            exif: true,
-        });
-
-        if (!result.canceled && result.assets?.[0]?.uri) {
-            const writeExifResult = await writeAsync(result.assets[0].uri, result.assets[0].exif || {});
-        }
-
-        handleImageResult(result);
     };
 
     const pickFromGallery = async () => {
         // Note: Android 13+ Photo Picker usually doesn't need explicit permissions, 
         // but it's good practice to leave this check for older OS versions.
+        try {
+            const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (!permission.granted) {
+                showPermissionAlert(
+                    'Photos Permission Required',
+                    'Rollio needs photo access to attach images to frames.',
+                    permission.canAskAgain
+                );
+                return;
+            }
 
-        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!permission.granted) {
-            Alert.alert('Permission required', 'Media library permission is needed to select photos.');
-            return;
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsEditing: false,
+                // quality: 0.7,
+                exif: true,
+            });
+
+            handleImageResult(result);
+        } catch (error) {
+            console.error('Failed to pick image', error);
+            Alert.alert('Photo Picker Error', 'Rollio could not open your photo library. Please try again.');
         }
-
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            allowsEditing: false,
-            // quality: 0.7,
-            exif: true,
-        });
-
-        handleImageResult(result);
     };
 
     const handleImageResult = (result: ImagePicker.ImagePickerResult) => {
