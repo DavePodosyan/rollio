@@ -8,19 +8,19 @@ import {
     Modal,
     Pressable,
     useColorScheme,
-    Linking
+    Linking,
+    Platform
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 // Make sure this is the beta API or standard API you intend to use
 import { Paths, File } from 'expo-file-system';
-import { Host, ContextMenu, Button, Menu, Divider, Section } from '@expo/ui/swift-ui';
+import { Host, Button, Menu, Divider, Section } from '@expo/ui/swift-ui';
 
 // Icons
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
 import { writeAsync } from '@lodev09/react-native-exify';
-import { controlSize, font, frame, glassEffect, labelStyle, padding, tint } from '@expo/ui/swift-ui/modifiers';
 
 interface ImageUploaderProps {
     value: string | null;
@@ -31,6 +31,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
     const [previewVisible, setPreviewVisible] = useState(false);
     const colorScheme = useColorScheme();
     const isGlassAvailable = isLiquidGlassAvailable();
+    const isAndroid = Platform.OS === 'android';
     // 1. FIX: Memoize the URI calculation to prevent performance hits on re-renders
     const displayUri = useMemo(() => {
         if (value?.startsWith('frames/rollio_')) {
@@ -142,6 +143,20 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
         );
     };
 
+    const handleImageActionsPress = () => {
+        Alert.alert(
+            'Image',
+            undefined,
+            [
+                { text: 'Replace', onPress: handleUploadPress },
+                { text: 'Save to photos', onPress: handleImageSavetoGallery },
+                { text: 'Remove', style: 'destructive', onPress: handleRemove },
+                { text: 'Cancel', style: 'cancel' },
+            ],
+            { cancelable: true }
+        );
+    };
+
     return (
         <>
             <Pressable onPress={displayUri ? () => setPreviewVisible(false) : handleUploadPress}
@@ -172,38 +187,51 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
                                     backgroundColor: isGlassAvailable ? 'transparent' : (colorScheme === 'dark' ? '#00000066' : '#00000066'),
                                 }]}
                             >
-                                <Host matchContents>
-                                    <Menu
-                                        label={
-                                            <View style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center', }} >
-                                                <SymbolView name="ellipsis" size={24} tintColor="#fff" />
-                                            </View>
-                                        }
+                                {isAndroid ? (
+                                    <Pressable
+                                        onPress={(event) => {
+                                            event.stopPropagation();
+                                            handleImageActionsPress();
+                                        }}
+                                        style={styles.menuButton}
+                                        hitSlop={8}
                                     >
-                                        <Section>
+                                        <SymbolView name={{ ios: 'ellipsis', android: 'more_horiz' }} size={24} tintColor="#fff" />
+                                    </Pressable>
+                                ) : (
+                                    <Host matchContents>
+                                        <Menu
+                                            label={
+                                                <View style={styles.menuButton} >
+                                                    <SymbolView name={{ ios: 'ellipsis', android: 'more_horiz' }} size={24} tintColor="#fff" />
+                                                </View>
+                                            }
+                                        >
+                                            <Section>
+                                                <Button
+                                                    label='Replace'
+                                                    systemImage="arrow.trianglehead.2.clockwise.rotate.90"
+                                                    onPress={() => handleUploadPress()}
+                                                />
+                                                <Button
+                                                    label='Save to photos'
+                                                    systemImage="square.and.arrow.down"
+                                                    onPress={() => handleImageSavetoGallery()} />
+                                            </Section>
+                                            <Divider />
                                             <Button
-                                                label='Replace'
-                                                systemImage="arrow.trianglehead.2.clockwise.rotate.90"
-                                                onPress={() => handleUploadPress()}
-                                            />
-                                            <Button
-                                                label='Save to photos'
-                                                systemImage="square.and.arrow.down"
-                                                onPress={() => handleImageSavetoGallery()} />
-                                        </Section>
-                                        <Divider />
-                                        <Button
-                                            label='Remove'
-                                            systemImage="trash"
-                                            role="destructive"
-                                            onPress={() => handleRemove()} />
-                                    </Menu>
-                                </Host>
+                                                label='Remove'
+                                                systemImage="trash"
+                                                role="destructive"
+                                                onPress={() => handleRemove()} />
+                                        </Menu>
+                                    </Host>
+                                )}
                             </GlassView>
                         </>
                     ) : (
                         <View style={styles.placeholder}>
-                            <SymbolView name="paperclip" size={32} tintColor={colorScheme === 'dark' ? "#ffffff" : "#100528"} style={{ marginBottom: 8 }} />
+                            <SymbolView name={{ ios: 'paperclip', android: 'attach_file' }} size={32} tintColor={colorScheme === 'dark' ? "#ffffff" : "#100528"} style={{ marginBottom: 8 }} />
                             <Text style={[styles.uploadText, { color: colorScheme === 'dark' ? "#ffffff" : "#100528" }]}>Attach image</Text>
                         </View>
                     )}
@@ -270,6 +298,12 @@ const styles = StyleSheet.create({
         // backgroundColor: 'rgba(0,0,0,0.6)', // 5. FIX: Use rgba for better readability than hex with opacity
         borderRadius: 35,
         zIndex: 10, // Ensures it sits above the image
+    },
+    menuButton: {
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     modalOverlay: {
         flex: 1,

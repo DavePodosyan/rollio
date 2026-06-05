@@ -11,14 +11,14 @@ import {
     useColorScheme,
     Pressable,
     Image,
-    PlatformColor,
+    type ColorValue,
 } from 'react-native';
 import React, { useRef, useState } from 'react';
 
 import { useIAP, ErrorCode } from 'expo-iap';
 
 import { LinearGradient } from 'expo-linear-gradient';
-import { SFSymbol, SymbolView } from 'expo-symbols';
+import { AndroidSymbol, SFSymbol, SymbolView } from 'expo-symbols';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as HapticFeedback from 'expo-haptics';
 import * as Application from 'expo-application';
@@ -31,6 +31,10 @@ const productSkus = [
 
 const operations = ['getProducts', 'getSubscriptions', 'validateReceipt'] as const;
 type Operation = (typeof operations)[number];
+type PlatformSymbol = {
+    ios: SFSymbol;
+    android: AndroidSymbol;
+};
 
 export default function Support() {
     const colorScheme = useColorScheme();
@@ -41,18 +45,18 @@ export default function Support() {
         : ['#EFF0F4', '#E5E0FF', '#EFF0F4'];
 
 
-    const productIcons: Record<string, { name: SFSymbol; color: ReturnType<typeof PlatformColor> }> = {
+    const productIcons: Record<string, { name: PlatformSymbol; color: ColorValue }> = {
         'support.1': {
-            name: 'sparkles',
-            color: PlatformColor('systemPurple'),
+            name: { ios: 'sparkles', android: 'auto_awesome' },
+            color: '#AF52DE',
         },
         'support.5': {
-            name: 'bolt.fill',
-            color: PlatformColor('systemYellow'),
+            name: { ios: 'bolt.fill', android: 'bolt' },
+            color: '#FFCC00',
         },
         'support.10': {
-            name: 'heart.fill',
-            color: PlatformColor('systemRed'),
+            name: { ios: 'heart.fill', android: 'favorite' },
+            color: '#FF3B30',
         }
     }
 
@@ -198,6 +202,8 @@ export default function Support() {
                                                 console.log('Pressed');
                                                 HapticFeedback.selectionAsync();
                                                 setPurchaseInProgress({ status: true, sku: product.id });
+                                                //wait 2 seconds
+                                                await new Promise((resolve) => setTimeout(resolve, 500));
                                                 try {
                                                     await requestPurchase({
                                                         request: {
@@ -288,9 +294,9 @@ export default function Support() {
                                 }}>
 
                                 <SymbolView
-                                    name='star.fill'
+                                    name={{ ios: 'star.fill', android: 'star' }}
                                     size={48}
-                                    tintColor={PlatformColor('systemYellow')}
+                                    tintColor='#FFCC00'
                                 />
 
                                 <View style={{
@@ -323,9 +329,9 @@ export default function Support() {
                                 }}>
 
                                 <SymbolView
-                                    name='square.and.arrow.up'
+                                    name={{ ios: 'square.and.arrow.up', android: 'share' }}
                                     size={48}
-                                    tintColor={PlatformColor('systemGreen')}
+                                    tintColor='#34C759'
                                 />
 
                                 <View style={{
@@ -337,7 +343,7 @@ export default function Support() {
                                     <Text style={{
                                         fontFamily: 'LufgaMedium',
                                         fontSize: 16,
-                                        color: PlatformColor('label'),
+                                        color: colorScheme === 'dark' ? '#ffffff' : '#100528',
                                     }}>
                                         Share the App
                                     </Text>

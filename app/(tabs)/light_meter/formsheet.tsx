@@ -2,14 +2,18 @@ import { APERTURE_OPTIONS, ISO_OPTIONS, SHUTTER_SPEED_OPTIONS } from "@/utils/ca
 import { GlassContainer, GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import { router, Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { useEffect, useRef, useState, useCallback, useLayoutEffect, useMemo } from "react";
+import { useEffect, useRef, useState, useCallback, useLayoutEffect, useMemo, type ReactNode } from "react";
 import {
+    Alert,
     FlatList,
+    Modal,
+    Platform,
     PlatformColor,
     Pressable,
     StyleSheet,
     Text,
     TouchableOpacity,
+    useColorScheme,
     View,
     ScrollView
 } from "react-native";
@@ -17,9 +21,9 @@ import * as Haptics from 'expo-haptics';
 import { Film } from "@/types";
 import { useFilms } from "@/hooks/useFilms";
 import { useIsFocused } from "@react-navigation/native";
-import { ContextMenu, Host, Toggle } from "@expo/ui/swift-ui";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { toggleStyle } from "@expo/ui/swift-ui/modifiers";
+import { MaterialIcons } from "@expo/vector-icons";
+import { ScrollView as GestureScrollView } from "react-native-gesture-handler";
 // ────────────────────────────────────────────────
 // Config
 // ────────────────────────────────────────────────
@@ -28,6 +32,74 @@ const ITEM_HEIGHT = 48;
 const VISIBLE_ITEMS = 3;
 const CONTAINER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 const VERTICAL_PADDING = ITEM_HEIGHT; // Padding to allow first/last items to center
+const BOTTOM_SHEET_COMPACT_DETENT = 0.52;
+const NATIVE_COMPACT_DETENT = 0.45;
+const BOTTOM_SHEET_FILM_LIST_DETENT = 0.55;
+const BOTTOM_SHEET_SELECTED_FILM_DETENT = 0.8;
+const NATIVE_FILM_LIST_DETENT = 0.85;
+
+const platformColor = (iosName: string, androidName: string) => (
+    PlatformColor(Platform.OS === 'ios' ? iosName : androidName)
+);
+
+const sheetColors = {
+    label: platformColor('label', '@android:color/primary_text_light'),
+    secondaryLabel: platformColor('secondaryLabel', '@android:color/secondary_text_light'),
+    tertiarySystemFill: platformColor('tertiarySystemFill', '@android:color/darker_gray'),
+    separator: platformColor('separator', '@android:color/darker_gray'),
+    systemOrange: platformColor('systemOrange', '@android:color/holo_orange_light'),
+};
+
+const getSheetColors = (colorScheme: ReturnType<typeof useColorScheme>) => {
+    const isDark = colorScheme === 'dark';
+
+    if (Platform.OS === 'android') {
+        return {
+            label: isDark ? '#f7f7fb' : '#100528',
+            secondaryLabel: isDark ? '#a9a9b3' : '#6f6f78',
+            tertiarySystemFill: isDark ? 'rgba(28, 28, 30, 0.66)' : 'rgba(236, 236, 242, 0.72)',
+            separator: isDark ? '#3a3a3c' : '#d7d7df',
+            systemOrange: '#ffb340',
+        };
+    }
+
+    return sheetColors;
+};
+
+const materialIconNames = {
+    'xmark': 'close',
+    'gear': 'settings',
+    'lock.fill': 'lock',
+    'lock.open.fill': 'lock-open',
+    'xmark.circle.fill': 'cancel',
+    'sun.max.fill': 'wb-sunny',
+    'moon.fill': 'nightlight',
+} as const;
+
+type SheetIconName = keyof typeof materialIconNames;
+
+function SheetIcon({
+    name,
+    style,
+    tintColor,
+}: {
+    name: SheetIconName;
+    style: { width: number; height: number; marginRight?: number };
+    tintColor: string | ReturnType<typeof PlatformColor>;
+}) {
+    if (Platform.OS === 'android') {
+        return (
+            <MaterialIcons
+                name={materialIconNames[name]}
+                size={Math.max(style.width, style.height)}
+                color={tintColor}
+                style={style.marginRight ? { marginRight: style.marginRight } : undefined}
+            />
+        );
+    }
+
+    return <SymbolView name={name} style={style} tintColor={tintColor} />;
+}
 
 // Full stop shutter speeds (standard photographic stops)
 // Uses the same format as SHUTTER_SPEED_OPTIONS (0.5 = 1/2 second)
@@ -163,20 +235,56 @@ type ActivePicker = 'aperture' | 'shutter' | 'iso' | null;
 
 // ────────────────────────────────────────────────
 
-export default function FormSheet() {
-    const { title = "Light Meter Reading", ev, aperture: initialAperture, shutterSpeed: initialShutter, iso: initialIsoStr, image } =
-        useLocalSearchParams<{
-            title?: string;
-            ev?: string;
-            aperture?: string;
-            shutterSpeed?: string;
-            iso?: string;
-            image?: string;
-        }>();
+export type LightMeterReadingParams = {
+    title?: string;
+    ev?: string;
+    aperture?: string;
+    shutterSpeed?: string;
+    iso?: string;
+    image?: string;
+};
 
+type LightMeterReadingSheetProps = LightMeterReadingParams & {
+    presentation?: 'native-sheet' | 'bottom-sheet';
+    headerHeight?: number;
+    onClose?: () => void;
+    onSheetDetentChange?: (detent: number) => void;
+};
+
+const normalizeParam = (value: string | string[] | undefined): string | undefined => {
+    if (Array.isArray(value)) return value[0];
+    return value;
+};
+
+export function LightMeterReadingSheet({
+    title = "Light Meter Reading",
+    ev,
+    aperture: initialAperture,
+    shutterSpeed: initialShutter,
+    iso: initialIsoStr,
+    image,
+    presentation = 'native-sheet',
+    headerHeight = 0,
+    onClose,
+    onSheetDetentChange,
+}: LightMeterReadingSheetProps) {
     const navigation = useNavigation();
-    const headerHeight = useHeaderHeight();
+    const colorScheme = useColorScheme();
+    const dynamicSheetColors = useMemo(() => getSheetColors(colorScheme), [colorScheme]);
     const isGlassAvailable = isLiquidGlassAvailable();
+    const isBottomSheetPresentation = presentation === 'bottom-sheet';
+    const compactSheetDetent = isBottomSheetPresentation ? BOTTOM_SHEET_COMPACT_DETENT : NATIVE_COMPACT_DETENT;
+    const closeSheet = onClose ?? (() => router.back());
+    const setSheetDetent = useCallback((detent: number) => {
+        if (presentation === 'native-sheet') {
+            navigation.setOptions({
+                sheetAllowedDetents: [detent]
+            });
+            return;
+        }
+
+        onSheetDetentChange?.(detent);
+    }, [navigation, onSheetDetentChange, presentation]);
 
     //log the params for debugging
     // useEffect(() => {
@@ -214,12 +322,10 @@ export default function FormSheet() {
             setSelectedFilm(null);
             setLockedPicker(null);
             setIsSheetExpanded(false);
-            navigation.setOptions({
-                sheetAllowedDetents: [0.45]
-            });
+            setSheetDetent(compactSheetDetent);
             hasNavigatedAway.current = false;
         }
-    }, [isFocused, navigation]);
+    }, [compactSheetDetent, isFocused, setSheetDetent]);
 
     // Which picker is locked (only one can be locked at a time)
     type LockedPicker = 'aperture' | 'shutter' | 'iso' | null;
@@ -310,10 +416,12 @@ export default function FormSheet() {
     useEffect(() => { currentIso.current = selectedIso; }, [selectedIso]);
 
     useEffect(() => {
-        navigation.setOptions({
-            title: title || "Exposure Settings",
-        });
-    }, [navigation, title]);
+        if (presentation === 'native-sheet') {
+            navigation.setOptions({
+                title: title || "Exposure Settings",
+            });
+        }
+    }, [navigation, presentation, title]);
 
     // Scroll to initial values
     // useEffect(() => {
@@ -664,10 +772,36 @@ export default function FormSheet() {
 
         Haptics.selectionAsync().catch(() => { });
 
-        navigation.setOptions({
-            sheetAllowedDetents: [0.85]
-        })
+        setSheetDetent(isBottomSheetPresentation ? BOTTOM_SHEET_FILM_LIST_DETENT : NATIVE_FILM_LIST_DETENT);
     }
+
+    const closeFilmSelector = useCallback(() => {
+        setIsSheetExpanded(false);
+        setSheetDetent(compactSheetDetent);
+        Haptics.selectionAsync().catch(() => { });
+    }, [compactSheetDetent, setSheetDetent]);
+
+    const handleSettingsPress = useCallback(() => {
+        if (Platform.OS !== 'android') {
+            setShowFullStopsOnly(prev => !prev);
+            return;
+        }
+
+        Alert.alert(
+            'Settings',
+            showFullStopsOnly ? 'Currently showing full stops only.' : 'Currently showing half/third stops.',
+            [
+                {
+                    text: showFullStopsOnly ? 'Show half/third stops' : 'Show full stops only',
+                    onPress: () => {
+                        setShowFullStopsOnly(prev => !prev);
+                        Haptics.selectionAsync().catch(() => { });
+                    },
+                },
+                { text: 'Cancel', style: 'cancel' },
+            ]
+        );
+    }, [showFullStopsOnly]);
 
     // Handle selecting a film - locks ISO to film's ISO and recalculates exposure
     const handleSelectFilm = useCallback((film: Film) => {
@@ -714,9 +848,10 @@ export default function FormSheet() {
 
         // Lock ISO (it's now fixed to film ISO)
         setLockedPicker('iso');
+        setSheetDetent(isBottomSheetPresentation ? BOTTOM_SHEET_SELECTED_FILM_DETENT : NATIVE_FILM_LIST_DETENT);
     }, [selectedIso, selectedAperture, selectedShutter, targetEV, scrollToValue,
         minShutterSeconds, maxShutterSeconds, minAperture, maxAperture,
-        apertureOptions, shutterOptions]);
+        apertureOptions, isBottomSheetPresentation, setSheetDetent, shutterOptions]);
 
     // Clear selected film and go back to film list
     const handleClearFilmSelection = useCallback(() => {
@@ -725,10 +860,8 @@ export default function FormSheet() {
         setLockedPicker(null); // Unlock ISO so user can adjust again
         // Collapse the sheet and reset expanded state
         setIsSheetExpanded(false);
-        navigation.setOptions({
-            sheetAllowedDetents: [0.45]
-        });
-    }, [navigation]);
+        setSheetDetent(compactSheetDetent);
+    }, [compactSheetDetent, setSheetDetent]);
 
     // Save the frame to the selected film
     const handleSaveFrame = useCallback(() => {
@@ -736,9 +869,7 @@ export default function FormSheet() {
 
         // Mark that we're navigating away so state resets on return
         hasNavigatedAway.current = true;
-        navigation.setOptions({
-            sheetAllowedDetents: [0.65]
-        });
+        setSheetDetent(0.65);
         router.push({
             pathname: '/new-frame',
             params: {
@@ -750,7 +881,7 @@ export default function FormSheet() {
                 image: image,
             }
         });
-    }, [selectedFilm, selectedAperture, selectedShutter, image]);
+    }, [selectedFilm, selectedAperture, selectedShutter, image, setSheetDetent]);
 
     // Mark active picker on scroll start
     const onApertureScrollBegin = useCallback(() => { activePickerRef.current = 'aperture'; }, []);
@@ -768,6 +899,7 @@ export default function FormSheet() {
                         <Text
                             style={[
                                 styles.wheelText,
+                                { color: dynamicSheetColors.label },
                                 isSelected ? styles.wheelTextSelected : styles.wheelTextDimmed,
                             ]}
                         >
@@ -778,36 +910,136 @@ export default function FormSheet() {
                     </View>
                 );
             },
-        []
+        [dynamicSheetColors.label]
     );
 
     const apertureRender = createRenderItem(selectedAperture, "ƒ/");
     const shutterRender = createRenderItem(selectedShutter, "", "s");
     const isoRender = createRenderItem(selectedIso);
+    const exposureBadgeColor = exposureDiff > 0 ? '#D96C00' : '#0066CC';
+    const exposureBadgeBackground = isBottomSheetPresentation
+        ? exposureBadgeColor
+        : exposureDiff > 0
+            ? 'rgba(255, 149, 0, 0.15)'
+            : 'rgba(0, 122, 255, 0.15)';
+    const exposureBadgeTextColor = isBottomSheetPresentation ? '#FFFFFF' : '#ffffff';
+    const wheelSurfaceBackgroundColor = isBottomSheetPresentation
+        ? colorScheme === 'dark' ? '#2c2c2e' : '#ececf2'
+        : isGlassAvailable ? 'transparent' : dynamicSheetColors.tertiarySystemFill;
+    const saveFrameButtonBackground = isBottomSheetPresentation
+        ? '#0A84FF'
+        : isGlassAvailable ? 'transparent' : dynamicSheetColors.tertiarySystemFill;
+    const saveFrameButtonTextColor = isBottomSheetPresentation || isGlassAvailable
+        ? '#fff'
+        : dynamicSheetColors.label;
+    const renderWheelSurface = useCallback((isLocked: boolean, isInteractive: boolean, children: ReactNode) => {
+        const style = [
+            styles.wheelGlass,
+            isLocked && styles.wheelGlassLocked,
+            { backgroundColor: wheelSurfaceBackgroundColor },
+        ];
+
+        if (isBottomSheetPresentation) {
+            return <View style={style}>{children}</View>;
+        }
+
+        return (
+            <GlassView
+                style={style}
+                glassEffectStyle="clear"
+                isInteractive={isInteractive}
+            >
+                {children}
+            </GlassView>
+        );
+    }, [isBottomSheetPresentation, wheelSurfaceBackgroundColor]);
+    const FilmListScrollView = isBottomSheetPresentation ? GestureScrollView : ScrollView;
+    const filmSelectorHeader = (
+        <Text style={{
+            fontFamily: 'LufgaRegular',
+            fontSize: 13,
+            color: dynamicSheetColors.secondaryLabel,
+            marginBottom: 8,
+            marginLeft: 4,
+            textAlign: 'center'
+        }}>
+            Select a film to save this reading
+        </Text>
+    );
+    const filmSelectorEmpty = (
+        <View style={{ alignItems: 'center', paddingVertical: 32 }}>
+            <Text style={{
+                fontFamily: 'LufgaRegular',
+                fontSize: 16,
+                color: dynamicSheetColors.secondaryLabel,
+                textAlign: 'center'
+            }}>
+                No films available.{'\n'}Create a film first to save readings.
+            </Text>
+        </View>
+    );
+    const renderFilmSelectorRow = (film: Film, index: number) => (
+        <TouchableOpacity key={film.id} onPress={() => handleSelectFilm(film)}>
+            <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: 16,
+                borderBottomWidth: index === films.length - 1 ? 0 : 1,
+                borderBottomColor: dynamicSheetColors.separator
+            }}>
+                <View>
+                    <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: dynamicSheetColors.label }}>{film.title}</Text>
+                    <Text style={{ fontFamily: 'LufgaRegular', fontSize: 14, color: dynamicSheetColors.secondaryLabel }}>ISO {film.iso}</Text>
+                </View>
+                <View>
+                    <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: dynamicSheetColors.label }}>{film.frame_count}/{film.expected_shots}</Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
 
     return (
         <>
-            <Stack.Toolbar placement="left">
-                <Stack.Toolbar.Button icon="xmark" onPress={() => router.back()} />
-            </Stack.Toolbar>
+            {presentation === 'native-sheet' ? (
+                <>
+                    <Stack.Toolbar placement="left">
+                        <Stack.Toolbar.Button icon="xmark" onPress={closeSheet} />
+                    </Stack.Toolbar>
 
-            <Stack.Toolbar placement="right" >
-                <Stack.Toolbar.Menu icon="gear">
-                    <Stack.Toolbar.MenuAction
-                        icon={!showFullStopsOnly ? "checkmark.circle.fill" : "circle"}
-                        onPress={() => setShowFullStopsOnly(prev => !prev)}
+                    <Stack.Toolbar placement="right" >
+                        <Stack.Toolbar.Menu icon="gear">
+                            <Stack.Toolbar.MenuAction
+                                icon={!showFullStopsOnly ? "checkmark.circle.fill" : "circle"}
+                                onPress={() => setShowFullStopsOnly(prev => !prev)}
+                            >
+                                Show half/third stops
+                            </Stack.Toolbar.MenuAction>
+                        </Stack.Toolbar.Menu>
+                    </Stack.Toolbar>
+                </>
+            ) : (
+                <View style={styles.inlineHeader}>
+                    <Pressable onPress={closeSheet} hitSlop={12} style={styles.inlineHeaderButton}>
+                        <SheetIcon name="xmark" style={styles.inlineHeaderIcon} tintColor={dynamicSheetColors.label} />
+                    </Pressable>
+                    <Text style={[styles.inlineHeaderTitle, { color: dynamicSheetColors.label }]}>{title}</Text>
+                    <Pressable
+                        onPress={handleSettingsPress}
+                        hitSlop={12}
+                        style={styles.inlineHeaderButton}
                     >
-                        Show half/third stops
-                    </Stack.Toolbar.MenuAction>
-                </Stack.Toolbar.Menu>
-            </Stack.Toolbar>
+                        <SheetIcon name="gear" style={styles.inlineHeaderIcon} tintColor={dynamicSheetColors.label} />
+                    </Pressable>
+                </View>
+            )}
 
             <View style={styles.container}>
                 {/* Content area wrapper - indicator is absolutely positioned within */}
                 <View style={{
                     flex: 1,
                     position: 'absolute',
-                    top: headerHeight - 18,
+                    top: isBottomSheetPresentation ? -4 : headerHeight - 18,
                     left: 0,
                     right: 0,
                     zIndex: 10,
@@ -826,22 +1058,20 @@ export default function FormSheet() {
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
-                                    paddingVertical: 2,
-                                    paddingHorizontal: 8,
-                                    backgroundColor: exposureDiff > 0
-                                        ? 'rgba(255, 149, 0, 0.15)'
-                                        : 'rgba(0, 122, 255, 0.15)',
+                                    paddingVertical: isBottomSheetPresentation ? 4 : 2,
+                                    paddingHorizontal: isBottomSheetPresentation ? 10 : 8,
+                                    backgroundColor: exposureBadgeBackground,
                                     borderRadius: 14,
                                 }}>
-                                <SymbolView
+                                <SheetIcon
                                     name={exposureDiff > 0 ? 'sun.max.fill' : 'moon.fill'}
                                     style={{ width: 8, height: 8, marginRight: 3 }}
-                                    tintColor="#ffffff"
+                                    tintColor={exposureBadgeTextColor}
                                 />
                                 <Text style={{
                                     fontFamily: 'LufgaMedium',
-                                    fontSize: 10,
-                                    color: '#ffffff'
+                                    fontSize: isBottomSheetPresentation ? 11 : 10,
+                                    color: exposureBadgeTextColor
                                 }}>
                                     {exposureDiff > 0 ? '+' : ''}{exposureDiff.toFixed(1)} EV {exposureDiff > 0 ? 'over' : 'under'}
                                 </Text>
@@ -849,17 +1079,17 @@ export default function FormSheet() {
                         </View>
                     )}
                 </View>
-                <GlassContainer spacing={12} style={styles.wheelsContainer}>
+                <GlassContainer
+                    spacing={12}
+                    style={[
+                        styles.wheelsContainer,
+                        presentation === 'bottom-sheet' && styles.wheelsContainerCompact,
+                    ]}
+                >
                     {/* Aperture */}
                     <View style={styles.wheelColumn}>
-                        <Text style={styles.label}>Aperture</Text>
-                        <GlassView
-                            style={[styles.wheelGlass, lockedPicker === 'aperture' && styles.wheelGlassLocked, {
-                                backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill')
-                            }]}
-                            glassEffectStyle="clear"
-                            isInteractive={lockedPicker !== 'aperture'}
-                        >
+                        <Text style={[styles.label, { color: dynamicSheetColors.label }]}>Aperture</Text>
+                        {renderWheelSurface(lockedPicker === 'aperture', lockedPicker !== 'aperture',
                             <FlatList
                                 ref={apertureRef}
                                 data={APERTURE_OPTIONS.filter(a => a !== "Auto")}
@@ -886,13 +1116,13 @@ export default function FormSheet() {
                                 scrollEventThrottle={16}
                                 style={{ height: CONTAINER_HEIGHT }}
                             />
-                        </GlassView>
+                        )}
                         {!isFilmMode && (
                             <Pressable onPress={() => toggleLock('aperture')} style={styles.lockButton}>
-                                <SymbolView
+                                <SheetIcon
                                     name={lockedPicker === 'aperture' ? 'lock.fill' : 'lock.open.fill'}
                                     style={styles.lockIcon}
-                                    tintColor={lockedPicker === 'aperture' ? PlatformColor('label') : PlatformColor('secondaryLabel')}
+                                    tintColor={lockedPicker === 'aperture' ? dynamicSheetColors.label : dynamicSheetColors.secondaryLabel}
                                 />
                             </Pressable>
                         )}
@@ -900,11 +1130,8 @@ export default function FormSheet() {
 
                     {/* Shutter */}
                     <View style={styles.wheelColumn}>
-                        <Text style={styles.label}>Shutter</Text>
-                        <GlassView style={[styles.wheelGlass, lockedPicker === 'shutter' && styles.wheelGlassLocked, {
-                            backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill')
-
-                        }]} glassEffectStyle="clear" isInteractive={lockedPicker !== 'shutter'}>
+                        <Text style={[styles.label, { color: dynamicSheetColors.label }]}>Shutter</Text>
+                        {renderWheelSurface(lockedPicker === 'shutter', lockedPicker !== 'shutter',
                             <FlatList
                                 ref={shutterRef}
                                 data={shutterOptions}
@@ -930,13 +1157,13 @@ export default function FormSheet() {
                                 scrollEventThrottle={16}
                                 style={{ height: CONTAINER_HEIGHT }}
                             />
-                        </GlassView>
+                        )}
                         {!isFilmMode && (
                             <Pressable onPress={() => toggleLock('shutter')} style={styles.lockButton}>
-                                <SymbolView
+                                <SheetIcon
                                     name={lockedPicker === 'shutter' ? 'lock.fill' : 'lock.open.fill'}
                                     style={styles.lockIcon}
-                                    tintColor={lockedPicker === 'shutter' ? PlatformColor('label') : PlatformColor('secondaryLabel')}
+                                    tintColor={lockedPicker === 'shutter' ? dynamicSheetColors.label : dynamicSheetColors.secondaryLabel}
                                 />
                             </Pressable>
                         )}
@@ -944,11 +1171,8 @@ export default function FormSheet() {
 
                     {/* ISO */}
                     <View style={styles.wheelColumn}>
-                        <Text style={styles.label}>ISO{isFilmMode ? ' (Film)' : ''}</Text>
-                        <GlassView style={[styles.wheelGlass, lockedPicker === 'iso' && styles.wheelGlassLocked, {
-                            backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill')
-
-                        }]} glassEffectStyle="clear" isInteractive={lockedPicker !== 'iso'}>
+                        <Text style={[styles.label, { color: dynamicSheetColors.label }]}>ISO{isFilmMode ? ' (Film)' : ''}</Text>
+                        {renderWheelSurface(lockedPicker === 'iso', lockedPicker !== 'iso',
                             <FlatList
                                 ref={isoRef}
                                 data={ISO_OPTIONS.map(String)}
@@ -974,22 +1198,22 @@ export default function FormSheet() {
                                 scrollEventThrottle={16}
                                 style={{ height: CONTAINER_HEIGHT }}
                             />
-                        </GlassView>
+                        )}
                         {!isFilmMode && (
                             <Pressable onPress={() => toggleLock('iso')} style={styles.lockButton}>
-                                <SymbolView
+                                <SheetIcon
                                     name={lockedPicker === 'iso' ? 'lock.fill' : 'lock.open.fill'}
                                     style={styles.lockIcon}
-                                    tintColor={lockedPicker === 'iso' ? PlatformColor('label') : PlatformColor('secondaryLabel')}
+                                    tintColor={lockedPicker === 'iso' ? dynamicSheetColors.label : dynamicSheetColors.secondaryLabel}
                                 />
                             </Pressable>
                         )}
                         {isFilmMode && (
                             <View style={styles.lockButton}>
-                                <SymbolView
+                                <SheetIcon
                                     name="lock.fill"
                                     style={styles.lockIcon}
-                                    tintColor={PlatformColor('systemOrange')}
+                                    tintColor={dynamicSheetColors.systemOrange}
                                 />
                             </View>
                         )}
@@ -997,68 +1221,74 @@ export default function FormSheet() {
                 </GlassContainer>
 
                 {!isSheetExpanded && (
-                    <View style={{ alignItems: 'center' }}>
+                    <View style={[
+                        { alignItems: 'center' },
+                        isBottomSheetPresentation && styles.compactSaveAction,
+                    ]}>
                         <TouchableOpacity onPress={() => expandSheetForm()}>
-                            <Text style={{ color: PlatformColor('label'), fontFamily: 'LufgaRegular', marginTop: 18 }}>
+                            <Text style={{ color: dynamicSheetColors.label, fontFamily: 'LufgaRegular', marginTop: 18 }}>
                                 Save to Frame
                             </Text>
                         </TouchableOpacity>
                     </View>
                 )}
 
-                {isSheetExpanded && !selectedFilm && (
-                    <ScrollView
-                        style={{ marginTop: 12, flex: 1 }}
-                        contentContainerStyle={{ paddingBottom: 132 }}
+                {isSheetExpanded && !selectedFilm && isBottomSheetPresentation && (
+                    <Modal
+                        visible
+                        transparent
+                        animationType="slide"
+                        onRequestClose={closeFilmSelector}
                     >
-                        {films.length > 0 ? (
-                            <>
-                                <Text style={{
-                                    fontFamily: 'LufgaRegular',
-                                    fontSize: 13,
-                                    color: PlatformColor('secondaryLabel'),
-                                    marginBottom: 8,
-                                    marginLeft: 4,
-                                    textAlign: 'center'
-                                }}>
-                                    Select a film to save this reading
-                                </Text>
+                        <View style={styles.filmSelectorModalBackdrop}>
+                            <View style={[
+                                styles.filmSelectorModal,
+                                { backgroundColor: colorScheme === 'dark' ? '#111113' : '#f7f7fb' },
+                            ]}>
+                                <View style={styles.filmSelectorModalHeader}>
+                                    <Pressable onPress={closeFilmSelector} hitSlop={12} style={styles.inlineHeaderButton}>
+                                        <SheetIcon name="xmark" style={styles.inlineHeaderIcon} tintColor={dynamicSheetColors.label} />
+                                    </Pressable>
+                                    <Text style={[styles.filmSelectorModalTitle, { color: dynamicSheetColors.label }]}>
+                                        Select Film
+                                    </Text>
+                                    <View style={styles.inlineHeaderButton} />
+                                </View>
 
-                                {films.map((film, index) => (
-                                    <TouchableOpacity key={film.id} onPress={() => handleSelectFilm(film)}>
-                                        <View style={{
-                                            flexDirection: 'row',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            padding: 16,
-                                            borderBottomWidth: index === films.length - 1 ? 0 : 1,
-                                            borderBottomColor: PlatformColor('separator')
-                                        }}>
-                                            <View>
-                                                <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: PlatformColor('label') }}>{film.title}</Text>
-                                                <Text style={{ fontFamily: 'LufgaRegular', fontSize: 14, color: PlatformColor('secondaryLabel') }}>ISO {film.iso}</Text>
-                                            </View>
-                                            <View>
-                                                <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: PlatformColor('label') }}>{film.frame_count}/{film.expected_shots}</Text>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                ))}
-                            </>
-                        ) : (
-                            <View style={{ alignItems: 'center', paddingVertical: 32 }}>
-                                <Text style={{
-                                    fontFamily: 'LufgaRegular',
-                                    fontSize: 16,
-                                    color: PlatformColor('secondaryLabel'),
-                                    textAlign: 'center'
-                                }}>
-                                    No films available.{'\n'}Create a film first to save readings.
-                                </Text>
+                                <FlatList
+                                    data={films}
+                                    keyExtractor={(film) => String(film.id)}
+                                    renderItem={({ item, index }) => renderFilmSelectorRow(item, index)}
+                                    ListHeaderComponent={films.length > 0 ? filmSelectorHeader : null}
+                                    ListEmptyComponent={filmSelectorEmpty}
+                                    contentContainerStyle={styles.filmSelectorModalContent}
+                                    keyboardShouldPersistTaps="handled"
+                                    showsVerticalScrollIndicator
+                                />
                             </View>
-                        )}
+                        </View>
+                    </Modal>
+                )}
 
-                    </ScrollView>
+                {isSheetExpanded && !selectedFilm && !isBottomSheetPresentation && (
+                    <View style={styles.filmListViewport}>
+                        <FilmListScrollView
+                            style={styles.filmListScroll}
+                            contentContainerStyle={{ paddingBottom: 132 }}
+                            keyboardShouldPersistTaps="handled"
+                            nestedScrollEnabled
+                            scrollEnabled
+                            showsVerticalScrollIndicator
+                        >
+                            {films.length > 0 ? (
+                                <>
+                                    {filmSelectorHeader}
+                                    {films.map((film, index) => renderFilmSelectorRow(film, index))}
+                                </>
+                            ) : filmSelectorEmpty}
+
+                        </FilmListScrollView>
+                    </View>
                 )}
 
                 {isSheetExpanded && selectedFilm && (
@@ -1069,22 +1299,22 @@ export default function FormSheet() {
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             padding: 20,
-                            backgroundColor: PlatformColor('tertiarySystemFill'),
+                            backgroundColor: dynamicSheetColors.tertiarySystemFill,
                             borderRadius: 24,
                         }}>
                             <View style={{ flex: 1 }}>
-                                <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: PlatformColor('label') }}>
+                                <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: dynamicSheetColors.label }}>
                                     {selectedFilm.title}
                                 </Text>
-                                <Text style={{ fontFamily: 'LufgaRegular', fontSize: 14, color: PlatformColor('secondaryLabel') }}>
+                                <Text style={{ fontFamily: 'LufgaRegular', fontSize: 14, color: dynamicSheetColors.secondaryLabel }}>
                                     ISO {selectedFilm.iso} • Frame {selectedFilm.frame_count + 1}/{selectedFilm.expected_shots}
                                 </Text>
                             </View>
                             <TouchableOpacity onPress={handleClearFilmSelection} style={{}}>
-                                <SymbolView
+                                <SheetIcon
                                     name="xmark.circle.fill"
                                     style={{ width: 24, height: 24 }}
-                                    tintColor={PlatformColor('secondaryLabel')}
+                                    tintColor={dynamicSheetColors.secondaryLabel}
                                 />
                             </TouchableOpacity>
                         </View>
@@ -1093,7 +1323,7 @@ export default function FormSheet() {
                         <Text style={{
                             fontFamily: 'LufgaRegular',
                             fontSize: 13,
-                            color: PlatformColor('secondaryLabel'),
+                            color: dynamicSheetColors.secondaryLabel,
                             marginTop: 12,
                             textAlign: 'center'
                         }}>
@@ -1103,11 +1333,17 @@ export default function FormSheet() {
                         {/* Save button */}
                         <Pressable
                             onPress={handleSaveFrame}
-                            style={{
-                                // padding: 16,
-                                borderRadius: 12,
+                            style={({ pressed }) => ({
+                                borderRadius: 24,
                                 marginTop: 64,
-                            }}>
+                                opacity: pressed ? 0.82 : 1,
+                                transform: [{ scale: pressed ? 0.98 : 1 }],
+                            })}
+                            android_ripple={{
+                                color: 'rgba(255,255,255,0.22)',
+                                borderless: false,
+                            }}
+                        >
                             <GlassView
                                 isInteractive={true}
                                 tintColor='#0091ff'
@@ -1115,14 +1351,14 @@ export default function FormSheet() {
                                     padding: 16,
                                     borderRadius: 24,
                                     alignItems: 'center',
-                                    backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill')
-
+                                    backgroundColor: saveFrameButtonBackground,
+                                    overflow: 'hidden',
                                 }}
                             >
                                 <Text style={{
                                     fontFamily: 'LufgaMedium',
                                     fontSize: 17,
-                                    color: isGlassAvailable ? '#fff' : PlatformColor('label'),
+                                    color: saveFrameButtonTextColor,
                                 }}>
                                     Save Frame
                                 </Text>
@@ -1136,17 +1372,65 @@ export default function FormSheet() {
     );
 }
 
+export default function FormSheet() {
+    const params = useLocalSearchParams<LightMeterReadingParams>();
+    const headerHeight = useHeaderHeight();
+
+    return (
+        <LightMeterReadingSheet
+            title={normalizeParam(params.title)}
+            ev={normalizeParam(params.ev)}
+            aperture={normalizeParam(params.aperture)}
+            shutterSpeed={normalizeParam(params.shutterSpeed)}
+            iso={normalizeParam(params.iso)}
+            image={normalizeParam(params.image)}
+            presentation="native-sheet"
+            headerHeight={headerHeight}
+        />
+    );
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         // backgroundColor: "rgba(240,240,245,0.92)",
         paddingHorizontal: 20,
     },
+    inlineHeader: {
+        height: 44,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 14,
+    },
+    inlineHeaderButton: {
+        width: 44,
+        height: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    inlineHeaderIcon: {
+        width: 24,
+        height: 24,
+    },
+    inlineHeaderTitle: {
+        flex: 1,
+        textAlign: 'center',
+        color: sheetColors.label,
+        fontFamily: 'LufgaMedium',
+        fontSize: 18,
+        lineHeight: 23,
+        includeFontPadding: false,
+        textAlignVertical: 'center',
+    },
     wheelsContainer: {
         marginTop: 85,
         flexDirection: "row",
         justifyContent: "space-between",
         marginHorizontal: -4,
+    },
+    wheelsContainerCompact: {
+        marginTop: 44,
     },
     wheelColumn: {
         flex: 1,
@@ -1156,7 +1440,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontFamily: "LufgaRegular",
-        color: PlatformColor('label'),
+        color: sheetColors.label,
         marginBottom: 12,
     },
     wheelGlass: {
@@ -1181,7 +1465,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontFamily: "LufgaMedium",
         fontWeight: "500",
-        color: PlatformColor("label"),
+        color: sheetColors.label,
         includeFontPadding: false,
     },
     wheelTextSelected: {
@@ -1197,5 +1481,49 @@ const styles = StyleSheet.create({
     lockIcon: {
         width: 20,
         height: 20,
+    },
+    compactSaveAction: {
+        marginBottom: 36,
+    },
+    filmListViewport: {
+        flex: 1,
+        minHeight: 0,
+        marginTop: 12,
+        overflow: 'hidden',
+    },
+    filmListScroll: {
+        flex: 1,
+    },
+    filmSelectorModalBackdrop: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0,0,0,0.28)',
+    },
+    filmSelectorModal: {
+        height: '82%',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        overflow: 'hidden',
+    },
+    filmSelectorModalHeader: {
+        height: 56,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 14,
+    },
+    filmSelectorModalTitle: {
+        flex: 1,
+        textAlign: 'center',
+        fontFamily: 'LufgaMedium',
+        fontSize: 18,
+        lineHeight: 23,
+        includeFontPadding: false,
+        textAlignVertical: 'center',
+    },
+    filmSelectorModalContent: {
+        paddingHorizontal: 20,
+        paddingTop: 4,
+        paddingBottom: 64,
     },
 });

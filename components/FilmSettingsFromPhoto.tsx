@@ -2,13 +2,13 @@ import { calculateEV100 } from "@/utils/calculations";
 import { APERTURE_OPTIONS, SHUTTER_SPEED_OPTIONS } from "@/utils/cameraSettings";
 import { ExifTags, readAsync } from "@lodev09/react-native-exify";
 import { File, Paths } from "expo-file-system";
-import { GlassContainer, GlassView } from "expo-glass-effect";
+import { GlassContainer, GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, Text, useColorScheme, View } from "react-native";
+import { Platform, Pressable, Text, useColorScheme, View } from "react-native";
 
 interface FilmSettingsFromPhotoProps {
     filmIso: number;
-    imageUri: string | null;
+    imageUri?: string | null;
     onApplySettings: (settings: { aperture: string; shutter_speed: string }) => void;
 }
 
@@ -47,26 +47,51 @@ const findClosestShutter = (targetSeconds: number) => {
 
 export default function FilmSettingsFromPhoto({ filmIso, imageUri, onApplySettings }: FilmSettingsFromPhotoProps) {
     const colorScheme = useColorScheme();
+    const isAndroid = Platform.OS === 'android';
+    const isGlassAvailable = isLiquidGlassAvailable();
     const [suggestions, setSuggestions] = useState([] as Suggestion[]);
     const [error, setError] = useState<string | null>(null);
 
-    const asset = useMemo(() => {
-
-        if (imageUri?.startsWith('frames/rollio_')) {
-            return new File(Paths.document, imageUri);
+    const suggestionBackgroundColor = useMemo(() => {
+        if (isAndroid) {
+            return colorScheme === 'dark' ? '#2c2c2e' : '#ffffff';
         }
 
-        return imageUri ? new File(imageUri) : null;
+        return isGlassAvailable ? 'transparent' : colorScheme === 'dark' ? '#09090b5d' : '#ffffff90';
+    }, [isAndroid, colorScheme, isGlassAvailable]);
+
+    const contentBottomPadding = isAndroid ? 56 : 24;
+
+    const assetUri = useMemo(() => {
+        if (typeof imageUri !== 'string' || imageUri.trim().length === 0) {
+            return null;
+        }
+
+        const uri = imageUri.trim();
+
+        if (uri.startsWith('frames/rollio_')) {
+            return new File(Paths.document, uri).uri;
+        }
+
+        return uri;
     }, [imageUri]);
 
     useEffect(() => {
-        if (!asset || !asset.exists) {
+        if (!assetUri) {
+            setError(null);
+            setSuggestions([]);
             return;
         }
+
         (async () => {
-            calculateMatches(await readAsync(asset.uri));
+            try {
+                calculateMatches(await readAsync(assetUri));
+            } catch (error) {
+                setError("Could not read EXIF data from the attached photo.");
+                setSuggestions([]);
+            }
         })();
-    }, [asset, filmIso]);
+    }, [assetUri, filmIso]);
 
     const calculateMatches = (exif: ExifTags | undefined) => {
         const { FNumber, ExposureTime, ISOSpeedRatings } = exif || {};
@@ -120,12 +145,12 @@ export default function FilmSettingsFromPhoto({ filmIso, imageUri, onApplySettin
         setSuggestions(validPairs);
     };
 
-    if (!asset || !asset.exists) {
+    if (!assetUri) {
         return null;
     }
 
     return (
-        <View style={{}}>
+        <View style={{ paddingBottom: contentBottomPadding }}>
             <Text style={{
                 width: '100%',
                 textAlign: 'center',
@@ -175,7 +200,8 @@ export default function FilmSettingsFromPhoto({ filmIso, imageUri, onApplySettin
                                 // flexBasis: '45%',
                                 // flexGrow: 2,
                                 // flexShrink: 1,
-                                width: '45%'
+                                width: '45%',
+                                backgroundColor: suggestionBackgroundColor,
                             }}>
                             <Pressable
                                 onPress={() => onApplySettings({ aperture: item.apertureLabel, shutter_speed: item.shutterLabel })}

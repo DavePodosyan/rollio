@@ -1,30 +1,50 @@
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { router, Stack } from "expo-router";
-import { SymbolView } from "expo-symbols";
-import { View, useColorScheme, Pressable } from "react-native";
+import { Platform, useColorScheme, Pressable } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function HomeLayout() {
     const isGlassAvailable = isLiquidGlassAvailable();
     const colorScheme = useColorScheme();
+    const isAndroid = Platform.OS === "android";
+    const androidBackgroundColor = colorScheme === 'dark' ? '#09090B' : '#EFF0F4';
+
     return (
         <Stack screenOptions={{
             headerShown: true,
             headerBackVisible: true,
             headerBackButtonDisplayMode: 'minimal',
-            headerLargeTitle: true,
-            headerTransparent: true,
+            headerLargeTitle: !isAndroid,
+            headerTransparent: !isAndroid,
             headerTintColor: colorScheme === 'dark' ? '#fff' : '#100528',
-            headerLargeStyle: { backgroundColor: "transparent" },
-            headerTitleStyle: { fontFamily: 'LufgaMedium', color: colorScheme === 'dark' ? '#fff' : '#100528' },
+            headerStyle: { backgroundColor: isAndroid ? androidBackgroundColor : "transparent" },
+            headerLargeStyle: { backgroundColor: isAndroid ? androidBackgroundColor : "transparent" },
+            headerTitleStyle: {
+                fontFamily: 'LufgaMedium',
+                color: colorScheme === 'dark' ? '#fff' : '#100528',
+                fontSize: isAndroid ? 22 : undefined,
+            },
             headerLargeTitleStyle: { fontFamily: 'LufgaMedium', color: colorScheme === 'dark' ? '#fff' : '#100528' },
-            headerBlurEffect: isGlassAvailable ? undefined : colorScheme === 'dark' ? "dark" : "light",
+            headerBlurEffect: !isAndroid && !isGlassAvailable ? colorScheme === 'dark' ? "dark" : "light" : undefined,
             title: "",
-            contentStyle: { backgroundColor: "transparent" },
+            contentStyle: { backgroundColor: isAndroid ? androidBackgroundColor : "transparent" },
 
         }}>
             <Stack.Screen name="index"
                 options={{
-                    title: "Film Rolls"
+                    title: "Film Rolls",
+                    headerRight: isAndroid ? () => (
+                        <Pressable
+                            onPress={() => router.push('/new-film')}
+                            style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}
+                        >
+                            <MaterialIcons
+                                name="add"
+                                size={24}
+                                color={colorScheme === 'dark' ? '#fff' : '#100528'}
+                            />
+                        </Pressable>
+                    ) : undefined,
                 }}
             />
             <Stack.Screen name="[id]"

@@ -3,6 +3,7 @@ import { useFonts } from 'expo-font';
 import { SQLiteProvider } from 'expo-sqlite';
 import { initDatabase } from '@/services/database';
 import { Stack } from 'expo-router';
+import { setStatusBarStyle, StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
@@ -24,6 +25,10 @@ export default function RootLayout() {
         }
     }, [fontsLoaded]);
 
+    useEffect(() => {
+        setStatusBarStyle(colorScheme === 'dark' ? 'light' : 'dark', true);
+    }, [colorScheme]);
+
     if (!fontsLoaded) {
         return null; // Or splash component
     }
@@ -31,8 +36,11 @@ export default function RootLayout() {
     return (
         <SafeAreaProvider>
             <SQLiteProvider databaseName="rollio.db" onInit={initDatabase}>
-                <GestureHandlerRootView>
+                <GestureHandlerRootView style={{ flex: 1 }}>
                     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                        <StatusBar
+                            style={colorScheme === 'dark' ? 'light' : 'dark'}
+                        />
                         <Stack screenOptions={{
                             headerShown: false,
                         }}>

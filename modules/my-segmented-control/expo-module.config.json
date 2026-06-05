@@ -1,9 +1,6 @@
 {
-  "platforms": ["apple", "android"],
+  "platforms": ["apple"],
   "apple": {
     "modules": ["MySegmentedControlModule"]
-  },
-  "android": {
-    "modules": ["expo.modules.mysegmentedcontrol.MySegmentedControlModule"]
   }
 }

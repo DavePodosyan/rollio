@@ -1,11 +1,11 @@
 
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback } from 'react';
-import { View, Text, Alert, Pressable, useColorScheme, FlatList } from 'react-native';
+import { View, Text, Alert, Pressable, useColorScheme, FlatList, Platform } from 'react-native';
 import { useNavigation, useLocalSearchParams, router, useFocusEffect, Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { useFilm } from '@/hooks/useFilm';
-import { SymbolView } from 'expo-symbols';
+import { MaterialIcons } from '@expo/vector-icons';
 import { getStatusColor } from '@/utils/statusColors';
 import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { useFrames } from '@/hooks/useFrames';
@@ -16,6 +16,7 @@ import { Button, ContextMenu, Divider, Host, Section } from '@expo/ui/swift-ui';
 export default function FilmDetailPage() {
     const { id, title } = useLocalSearchParams<{ id: string, title: string }>();
     const colorScheme = useColorScheme();
+    const isAndroid = Platform.OS === 'android';
     const isGlassAvailable = isLiquidGlassAvailable();
     const gradientColors: readonly [string, string, ...string[]] = colorScheme === 'dark'
         ? ['#09090B', '#100528', '#09090B']
@@ -68,6 +69,24 @@ export default function FilmDetailPage() {
         navigation.goBack();
     }
 
+    const handleAndroidMenuPress = useCallback(() => {
+        Alert.alert('Film actions', undefined, [
+            {
+                text: 'Edit',
+                onPress: () => handleContextMenuSelect('edit'),
+            },
+            {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: () => handleContextMenuSelect('delete'),
+            },
+            {
+                text: 'Cancel',
+                style: 'cancel',
+            },
+        ]);
+    }, [film?.id]);
+
     useFocusEffect(
         useCallback(() => {
             refreshFilm();
@@ -78,8 +97,34 @@ export default function FilmDetailPage() {
     useEffect(() => {
         navigation.setOptions({
             title: film?.title ?? title,
+            headerRight: isAndroid ? () => (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                    <Pressable
+                        onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } })}
+                        style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}
+                        hitSlop={8}
+                    >
+                        <MaterialIcons
+                            name="add"
+                            size={24}
+                            color={colorScheme === 'dark' ? '#fff' : '#100528'}
+                        />
+                    </Pressable>
+                    <Pressable
+                        onPress={handleAndroidMenuPress}
+                        style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}
+                        hitSlop={8}
+                    >
+                        <MaterialIcons
+                            name="more-horiz"
+                            size={24}
+                            color={colorScheme === 'dark' ? '#fff' : '#100528'}
+                        />
+                    </Pressable>
+                </View>
+            ) : undefined,
         });
-    }, [film, colorScheme]);
+    }, [film, colorScheme, isAndroid, handleAndroidMenuPress, title]);
 
     if (loading || error || !film) {
         return null;
@@ -289,7 +334,7 @@ export default function FilmDetailPage() {
                         )}
                         contentInsetAdjustmentBehavior="automatic"
                         scrollEventThrottle={16}
-                        contentContainerStyle={{ paddingLeft: 18, paddingRight: 18, paddingBottom: 50 }}
+                        contentContainerStyle={{ paddingTop: Platform.OS === 'android' ? 24 : 20, paddingLeft: 18, paddingRight: 18, paddingBottom: 50 }}
                         refreshing={false}
                         onRefresh={() => {
                             refreshFilm();

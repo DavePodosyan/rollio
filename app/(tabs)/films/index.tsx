@@ -1,4 +1,4 @@
-import { FlatList, View, Text, StyleSheet, useColorScheme, DeviceEventEmitter, Alert } from "react-native";
+import { FlatList, View, Text, StyleSheet, useColorScheme, DeviceEventEmitter, Alert, Platform } from "react-native";
 import { useFilms } from "@/hooks/useFilms";
 import { Film } from "@/types";
 import { router, Stack, useFocusEffect, useNavigation } from "expo-router";
@@ -113,7 +113,7 @@ export default function Home() {
                         contentInsetAdjustmentBehavior="automatic"
                         scrollEventThrottle={16}
 
-                        contentContainerStyle={{ paddingTop: 20, paddingBottom: 50 }}
+                        contentContainerStyle={{ flexGrow: 1, paddingTop: Platform.OS === 'android' ? 24 : 20, paddingBottom: 50 }}
                         refreshing={false}
                         onRefresh={fetchFilms}
                         ListFooterComponent={films && films.length > 0 ? <EnjoyingRollio /> : null}

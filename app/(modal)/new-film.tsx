@@ -1,23 +1,29 @@
 import { useFilms } from "@/hooks/useFilms";
 import { CreateFilmInput, FilmStatus } from "@/types";
 import { router, useNavigation, useLocalSearchParams, Stack } from "expo-router";
-import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme, DeviceEventEmitter, PlatformColor } from "react-native";
+import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme, DeviceEventEmitter, Platform, PlatformColor } from "react-native";
 import RulerPicker from '@/components/RulerPicker';
-import { GlassView } from "expo-glass-effect";
+import AdaptiveDatePicker from '@/components/AdaptiveDatePicker';
+import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { ISO_OPTIONS, PUSH_PULL_OPTIONS, EXPECTED_SHOTS } from "@/utils/cameraSettings";
 import { SymbolView } from "expo-symbols";
 import { LinearGradient } from "expo-linear-gradient";
-import { DatePicker, Host } from '@expo/ui/swift-ui';
 import * as Haptics from "expo-haptics";
 import { useFilm } from "@/hooks/useFilm";
 import { getStatusColor } from "@/utils/statusColors";
 import MySegmentedControl from "@/modules/my-segmented-control";
 import { usePreventRemove } from "@react-navigation/native";
-import { datePickerStyle } from "@expo/ui/swift-ui/modifiers";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function NewFilm() {
     const colorScheme = useColorScheme();
+    const isAndroid = Platform.OS === 'android';
+    const isGlassAvailable = isLiquidGlassAvailable();
+    const suggestionPillBackground = isGlassAvailable && !isAndroid
+        ? 'transparent'
+        : colorScheme === 'dark' ? 'rgba(44, 44, 46, 0.96)' : 'rgba(255, 255, 255, 0.96)';
+    const suggestionPillTextColor = colorScheme === 'dark' ? '#fff' : '#100528';
     const navigation = useNavigation();
     const { mode = 'new', id } = useLocalSearchParams<{ mode?: 'edit', id?: string }>();
     const isReady = mode === 'edit' ? useRef(false) : useRef(true);
@@ -64,6 +70,7 @@ export default function NewFilm() {
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
+    const rootViewRef = useRef<View>(null);
     const slideAnim = useRef(new Animated.Value(0)).current; // For smooth slide in/out
 
     usePreventRemove(hasUnsavedChanges(), ({ data }) => {
@@ -154,13 +161,23 @@ export default function NewFilm() {
     useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
             setKeyboardVisible(true);
-            setKeyboardHeight(e.endCoordinates.height);
+
+            if (Platform.OS === 'android') {
+                rootViewRef.current?.measureInWindow((_x, pageY, _width, height) => {
+                    const rootBottom = pageY + height;
+                    setKeyboardHeight(Math.max(0, rootBottom - e.endCoordinates.screenY));
+                });
+            } else {
+                setKeyboardHeight(e.endCoordinates.height);
+            }
+
             console.log('show keyboard');
 
         });
 
         const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
             setKeyboardVisible(false);
+            setKeyboardHeight(0);
             console.log('hide keyboard');
 
             // setSuggestions([]);
@@ -212,13 +229,32 @@ export default function NewFilm() {
     useEffect(() => {
         navigation.setOptions({
             title: mode === 'new' ? 'Add New Film' : 'Edit Film',
-            // headerRight: () => (
-            //     <Pressable onPress={handleSaveFilm} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >
-            //         <SymbolView name="checkmark" size={22} tintColor="#0091ff" />
-            //     </Pressable>
-            // ),
+            headerLeft: isAndroid ? () => (
+                <Pressable
+                    onPress={() => router.back()}
+                    style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}
+                >
+                    <MaterialIcons
+                        name="close"
+                        size={24}
+                        color={colorScheme === 'dark' ? '#fff' : '#100528'}
+                    />
+                </Pressable>
+            ) : undefined,
+            headerRight: isAndroid ? () => (
+                <Pressable
+                    onPress={handleSaveFilm}
+                    style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}
+                >
+                    <MaterialIcons
+                        name="check"
+                        size={24}
+                        color='#0A84FF'
+                    />
+                </Pressable>
+            ) : undefined,
         });
-    }, [mode, handleSaveFilm]);
+    }, [mode, handleSaveFilm, isAndroid, colorScheme]);
 
 
     const cameraInputRef = useRef<TextInput>(null);
@@ -250,14 +286,18 @@ export default function NewFilm() {
 
     return (
         <>
-            <Stack.Toolbar placement="left">
-                <Stack.Toolbar.Button icon="xmark" onPress={() => router.back()} />
-            </Stack.Toolbar>
-            <Stack.Toolbar placement="right">
-                <Stack.Toolbar.Button style={{ backgroundColor: 'red' }} tintColor={PlatformColor('systemBlue')} icon="checkmark" onPress={handleSaveFilm} />
-            </Stack.Toolbar>
+            {!isAndroid && (
+                <>
+                    <Stack.Toolbar placement="left">
+                        <Stack.Toolbar.Button icon="xmark" onPress={() => router.back()} />
+                    </Stack.Toolbar>
+                    <Stack.Toolbar placement="right">
+                        <Stack.Toolbar.Button style={{ backgroundColor: 'red' }} tintColor={PlatformColor('systemBlue')} icon="checkmark" onPress={handleSaveFilm} />
+                    </Stack.Toolbar>
+                </>
+            )}
 
-            <View style={{ flex: 1 }}>
+            <View ref={rootViewRef} style={{ flex: 1 }}>
 
                 <ScrollView
                     style={{ padding: 0, flex: 1 }}
@@ -267,40 +307,11 @@ export default function NewFilm() {
                 >
 
                     <View style={{ alignItems: 'center', justifyContent: 'center', borderRadius: 32 }}>
-                        {/* <GlassView isInteractive={true} glassEffectStyle="regular" style={{  overflow: 'hidden' }}> */}
-                        <Host matchContents style={{}}>
-                            <DatePicker
-                                // title="Date"
-                                // color="white"
-                                onDateChange={date => {
-                                    //since we store dates as iso string, initialdate includes time, but when picking date they can't set time, so we need to set time to 00:00:00
-                                    // date.setHours(0, 0, 0, 0);
-                                    setFormData(prev => ({ ...prev, created_at: date.toISOString() }));
-                                    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                }}
-                                displayedComponents={['date']}
-                                selection={new Date(formData.created_at)}
-                                modifiers={
-                                    [
-                                        datePickerStyle('compact')
-                                        // padding({ top: 6, bottom: 6, leading: 6, trailing: 6 }),
-                                        // cornerRadius(16),
-                                        // tint('red'),
-                                        // backgroundOverlay({color: 'red'}),
-                                        // foregroundStyle('light'),
-                                        // glassEffect({
-                                        //     // shape: 'rectangle',
-                                        //     glass: {
-                                        //         variant: 'regular',
-                                        //         interactive: true,
-                                        //         tint: colorScheme === 'dark' ? '#09090b6d' : 'transparent',
-                                        //     }
-                                        // }),
-                                    ]
-                                }
-                            />
-                        </Host>
-                        {/* </GlassView> */}
+                        <AdaptiveDatePicker
+                            value={formData.created_at}
+                            onChange={(created_at) => setFormData(prev => ({ ...prev, created_at }))}
+                            mode="date"
+                        />
                     </View>
 
 
@@ -434,7 +445,9 @@ export default function NewFilm() {
                             bottom: keyboardHeight,
                             left: 0,
                             right: 0,
-                            maxHeight: 200,
+                            height: 96,
+                            zIndex: 20,
+                            elevation: 20,
                             // backgroundColor: '#1c1c1eb8',
                         }}
                     >
@@ -447,8 +460,8 @@ export default function NewFilm() {
                             locations={[0, 1]}
                             style={{
                                 flex: 1,
+                                justifyContent: 'flex-end',
                                 borderRadius: 20,
-                                paddingTop: 36,
                                 paddingBottom: 8,
                             }}
                         >
@@ -457,7 +470,7 @@ export default function NewFilm() {
                                 keyExtractor={(item) => item}
                                 horizontal={true}
                                 showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={{ paddingVertical: 8, paddingHorizontal: 4 }}
+                                contentContainerStyle={{ paddingHorizontal: 4 }}
                                 keyboardShouldPersistTaps="always"
                                 scrollEventThrottle={16}
                                 renderItem={({ item }) => (
@@ -470,19 +483,27 @@ export default function NewFilm() {
                                                 borderRadius: 32,
                                                 marginLeft: 4,
                                                 marginRight: 8,
+                                                overflow: 'hidden',
                                             }}
                                         >
                                             <Pressable
-                                                style={{
+                                                style={({ pressed }) => ({
                                                     borderRadius: 32,
+                                                    backgroundColor: suggestionPillBackground,
                                                     paddingLeft: 12,
                                                     paddingRight: 12,
                                                     paddingTop: 6,
                                                     paddingBottom: 6,
+                                                    opacity: pressed ? 0.78 : 1,
+                                                    transform: [{ scale: pressed ? 0.96 : 1 }],
+                                                })}
+                                                android_ripple={{
+                                                    color: colorScheme === 'dark' ? 'rgba(255,255,255,0.16)' : 'rgba(16,5,40,0.08)',
+                                                    borderless: false,
                                                 }}
                                                 onPress={() => selectSuggestion(item, focusedField!)}
                                             >
-                                                <Text style={{ fontSize: 12, color: '#000', fontFamily: 'LufgaRegular' }}>{item}</Text>
+                                                <Text style={{ fontSize: 12, color: suggestionPillTextColor, fontFamily: 'LufgaRegular' }}>{item}</Text>
                                             </Pressable>
                                         </GlassView>
                                     </View>

@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
-import { Dimensions, View, Text, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, Animated, FlatList } from 'react-native';
+import { Dimensions, View, Text, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, Animated, FlatList, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import GlassView from 'expo-glass-effect/build/GlassView';
 
@@ -28,6 +28,7 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
 }) => {
   const colorScheme = useColorScheme();
   const isGlassAvailable = isLiquidGlassAvailable();
+  const isAndroid = Platform.OS === 'android';
   const flatListRef = useRef<FlatList>(null);
   const lastHapticIndex = useRef<number | null>(null);
   const scrollX = useRef(new Animated.Value(0));
@@ -168,6 +169,22 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
 
   const keyExtractor = useCallback((item: number | string, index: number) => `${item}-${index}`, []);
 
+  const containerBackgroundColor = useMemo(() => {
+    if (isAndroid) {
+      return colorScheme === 'dark' ? '#1c1c1e' : '#f6f6fa';
+    }
+
+    return isGlassAvailable ? 'transparent' : colorScheme === 'dark' ? '#09090b6d' : '#ffffff90';
+  }, [isAndroid, colorScheme, isGlassAvailable]);
+
+  const labelBackgroundColor = useMemo(() => {
+    if (isAndroid) {
+      return colorScheme === 'dark' ? '#2c2c2e' : '#ffffff';
+    }
+
+    return isGlassAvailable ? 'transparent' : colorScheme === 'dark' ? '#09090b5d' : '#ffffff90';
+  }, [isAndroid, colorScheme, isGlassAvailable]);
+
   return (
     <GlassView
       isInteractive={true}
@@ -178,7 +195,7 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 35,
-        backgroundColor: isGlassAvailable ? 'transparent' : colorScheme === 'dark' ? '#09090b6d' : '#ffffff90',
+        backgroundColor: containerBackgroundColor,
       }}
     >
       <GlassView
@@ -194,7 +211,7 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
           borderRadius: 36,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: isGlassAvailable ? 'transparent' : colorScheme === 'dark' ? '#09090b5d' : '#ffffff90',
+          backgroundColor: labelBackgroundColor,
         }} >
         <Text style={{ color: colorScheme === 'dark' ? 'white' : '#100528', fontFamily: 'LufgaMedium', fontSize: 12 }}>{label}</Text>
       </GlassView>

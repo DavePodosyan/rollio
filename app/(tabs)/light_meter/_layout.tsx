@@ -1,7 +1,16 @@
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { router, Stack } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { View, Pressable, PlatformColor } from "react-native";
+import { View, Pressable, Platform, PlatformColor } from "react-native";
+
+const platformColor = (iosName: string, androidName: string) => (
+    PlatformColor(Platform.OS === 'ios' ? iosName : androidName)
+);
+
+const lightMeterLayoutColors = {
+    label: platformColor('label', '?android:attr/textColorPrimary'),
+    systemBackground: platformColor('systemBackground', '?android:attr/windowBackground'),
+};
 
 export default function HomeLayout() {
     const isGlassAvailable = isLiquidGlassAvailable();
@@ -18,13 +27,13 @@ export default function HomeLayout() {
                 options={{
                     headerShown: true,
                     headerTransparent: true,
-                    headerTintColor: String(PlatformColor('label')),
+                    headerTintColor: String(lightMeterLayoutColors.label),
                     title: '',
                     headerTitleStyle: { fontFamily: 'LufgaMedium', fontSize: 20 },
                     presentation: "formSheet",
                     gestureEnabled: false,
                     sheetGrabberVisible: false,
-                    contentStyle: { backgroundColor: isGlassAvailable ? "transparent" : PlatformColor('systemBackground') },
+                    contentStyle: { backgroundColor: isGlassAvailable ? "transparent" : lightMeterLayoutColors.systemBackground },
                     sheetAllowedDetents: [0.45],
                     sheetExpandsWhenScrolledToEdge: false,
                     sheetInitialDetentIndex: 0,

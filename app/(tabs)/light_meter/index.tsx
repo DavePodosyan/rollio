@@ -1,5 +1,5 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, PlatformColor, ActivityIndicator, Alert, Linking, Animated, useColorScheme } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Pressable, Platform, PlatformColor, ActivityIndicator, Alert, Linking, Animated, useColorScheme, useWindowDimensions } from 'react-native';
 import { Camera, Point, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 import { useIsFocused } from '@react-navigation/native';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
@@ -8,15 +8,120 @@ import { calculateEV100 } from '@/utils/calculations';
 import * as Haptics from 'expo-haptics';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { LinearGradient } from 'expo-linear-gradient';
+import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
+import { LightMeterReadingParams, LightMeterReadingSheet } from './formsheet';
+import { useSharedValue } from 'react-native-reanimated';
+import { ExifTags, readAsync } from '@lodev09/react-native-exify';
+import { Image as ExpoImage } from 'expo-image';
 
+const platformColor = (iosName: string, androidName: string) => (
+    PlatformColor(Platform.OS === 'ios' ? iosName : androidName)
+);
+
+const lightMeterColors = {
+    label: platformColor('label', '?android:attr/textColorPrimary'),
+    tertiaryLabel: platformColor('tertiaryLabel', '?android:attr/textColorTertiary'),
+    tertiarySystemFill: platformColor('tertiarySystemFill', '?android:attr/colorControlHighlight'),
+    systemBackground: platformColor('systemBackground', '?android:attr/windowBackground'),
+    systemBlue: platformColor('systemBlue', '?android:attr/colorAccent'),
+    systemRed: platformColor('systemRed', '@android:color/holo_red_light'),
+};
+
+const getPhotoUri = (path: string) => path.startsWith('file://') ? path : `file://${path}`;
+
+const toNumber = (value: unknown): number | undefined => {
+    if (Array.isArray(value)) {
+        return toNumber(value[0]);
+    }
+
+    if (typeof value === 'number' && Number.isFinite(value)) {
+        return value;
+    }
+
+    if (typeof value === 'string') {
+        const rationalParts = value.split('/');
+
+        if (rationalParts.length === 2) {
+            const numerator = Number(rationalParts[0]);
+            const denominator = Number(rationalParts[1]);
+
+            if (Number.isFinite(numerator) && Number.isFinite(denominator) && denominator !== 0) {
+                return numerator / denominator;
+            }
+        }
+
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : undefined;
+    }
+
+    return undefined;
+};
+
+const getExposureSettings = (exif: Record<string, unknown> | undefined) => {
+    if (!exif) {
+        return null;
+    }
+
+    const fNumber = toNumber(exif.FNumber)
+        ?? (toNumber(exif.ApertureValue) !== undefined ? Math.pow(2, toNumber(exif.ApertureValue)! / 2) : undefined);
+    const exposureTime = toNumber(exif.ExposureTime)
+        ?? (toNumber(exif.ShutterSpeedValue) !== undefined ? 1 / Math.pow(2, toNumber(exif.ShutterSpeedValue)!) : undefined);
+    const iso = toNumber(exif.ISOSpeedRatings) ?? toNumber(exif.ISO);
+
+    if (!fNumber || !exposureTime || !iso) {
+        return null;
+    }
+
+    return { fNumber, exposureTime, iso };
+};
+
+const readPhotoExposureSettings = async (path: string, metadata?: Record<string, unknown>) => {
+    const metadataExif = (metadata?.['{Exif}'] as Record<string, unknown> | undefined) ?? metadata;
+    const metadataSettings = getExposureSettings(metadataExif);
+
+    if (metadataSettings) {
+        return metadataSettings;
+    }
+
+    const fileExif = await readAsync(getPhotoUri(path));
+    return getExposureSettings(fileExif as ExifTags | undefined);
+};
+
+const ANDROID_READING_SHEET_COLLAPSED_DETENT = 0.52;
 
 export default function CameraBackgroundPage() {
     const colorScheme = useColorScheme();
+    const { height: windowHeight } = useWindowDimensions();
     const isFocused = useIsFocused();
     const isGlassAvailable = isLiquidGlassAvailable();
+    const isAndroid = Platform.OS === 'android';
+    const androidFallbackButtonTextColor = colorScheme === 'dark' ? '#F7F8FF' : '#100528';
+    const androidFallbackButtonBackground = colorScheme === 'dark'
+        ? 'rgba(22, 30, 46, 0.72)'
+        : 'rgba(247, 247, 251, 0.76)';
+    const androidFallbackButtonBorder = colorScheme === 'dark'
+        ? 'rgba(229, 224, 255, 0.35)'
+        : 'rgba(16, 5, 40, 0.18)';
+    const androidSheetBackground = colorScheme === 'dark'
+        ? 'rgba(5, 5, 7, 0.80)'
+        : 'rgba(247, 247, 251, 0.89)';
+    const androidSheetHandleColor = colorScheme === 'dark' ? '#5f5f66' : '#c7c7cc';
     const [isCameraReady, setIsCameraReady] = useState(false);
     const [loading, setLoading] = useState(false);
     const [permissionRequested, setPermissionRequested] = useState(false);
+    const [reading, setReading] = useState<LightMeterReadingParams | null>(null);
+    const [androidSheetDetent, setAndroidSheetDetent] = useState(ANDROID_READING_SHEET_COLLAPSED_DETENT);
+    const bottomSheetRef = useRef<BottomSheet>(null);
+    const shouldFreezeCameraPreview = isAndroid && reading?.image;
+    const androidSheetContainerLayout = useSharedValue({
+        height: windowHeight,
+        offset: {
+            top: 0,
+            bottom: 0,
+            right: 0,
+            left: 0,
+        },
+    });
 
     const gradientColors: readonly [string, string, ...string[]] = colorScheme === 'dark'
         ? ['#09090B', '#100528', '#09090B']
@@ -33,6 +138,10 @@ export default function CameraBackgroundPage() {
     });
     const cameraRef = useRef<Camera>(null);
     const buttonRotation = useRef(new Animated.Value(0)).current;
+    const androidSheetSnapPoints = useMemo(
+        () => [`${Math.round(androidSheetDetent * 100)}%`],
+        [androidSheetDetent]
+    );
 
     // Focus indicator state and animations
     const [focusPoint, setFocusPoint] = useState<Point | null>(null);
@@ -90,6 +199,30 @@ export default function CameraBackgroundPage() {
             focusAndExpose({ x, y });
         })
 
+    useEffect(() => {
+        androidSheetContainerLayout.value = {
+            height: windowHeight,
+            offset: {
+                top: 0,
+                bottom: 0,
+                right: 0,
+                left: 0,
+            },
+        };
+    }, [androidSheetContainerLayout, windowHeight]);
+
+    const renderSheetBackdrop = useCallback(
+        (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
+            <BottomSheetBackdrop
+                {...props}
+                appearsOnIndex={0}
+                disappearsOnIndex={-1}
+                pressBehavior="none"
+            />
+        ),
+        []
+    );
+
     const handleUIRotationChanged = (rotation: number) => {
         // rotation is in degrees: 0, 90, 180, 270
         // Use positive rotation to keep text upright
@@ -112,17 +245,24 @@ export default function CameraBackgroundPage() {
         if (loading) return; // Prevent multiple taps
 
         if (debug) {
-            router.push({
-                pathname: '/(tabs)/light_meter/formsheet',
-                params: {
-                    title: `EV 12.34`,
-                    ev: 12.34,
-                    aperture: 2.8,
-                    shutterSpeed: '1/125',
-                    iso: 100,
-                    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-                }
-            });
+            const debugReading = {
+                title: `EV 12.34`,
+                ev: '12.34',
+                aperture: '2.8',
+                shutterSpeed: '1/125',
+                iso: '100',
+                image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+            };
+
+            if (isAndroid) {
+                setAndroidSheetDetent(ANDROID_READING_SHEET_COLLAPSED_DETENT);
+                setReading(debugReading);
+            } else {
+                router.push({
+                    pathname: '/(tabs)/light_meter/formsheet',
+                    params: debugReading
+                });
+            }
             return;
         }
 
@@ -139,46 +279,51 @@ export default function CameraBackgroundPage() {
 
             console.log('Photo captured:', photo);
 
-            // Extract EXIF data from metadata (iOS uses {Exif} key)
-            const exif = (photo.metadata as Record<string, any>)?.['{Exif}'];
-            const FNumber = exif?.FNumber;
-            const ExposureTime = exif?.ExposureTime;
-            const ISOSpeedRatings = exif?.ISOSpeedRatings;
+            const exposureSettings = await readPhotoExposureSettings(photo.path, photo.metadata as Record<string, unknown> | undefined);
 
-            const phoneIso = Array.isArray(ISOSpeedRatings) ? ISOSpeedRatings[0] : ISOSpeedRatings;
-            const ev100 = calculateEV100(FNumber, ExposureTime, phoneIso);
-
-            if (ev100 === undefined || isNaN(ev100)) {
+            if (!exposureSettings) {
                 setLoading(false);
+                console.log('Invalid EXIF data: missing aperture, shutter speed, or ISO');
+                console.log('Full metadata:', photo.metadata);
                 Alert.alert("Error", "Failed to read camera data. Please try again.");
                 return;
             }
+
+            const { fNumber, exposureTime, iso: phoneIso } = exposureSettings;
+            const ev100 = calculateEV100(fNumber, exposureTime, phoneIso);
 
             setLoading(false);
             console.log({
                 params: {
                     title: `EV ${ev100.toFixed(2)}`,
                     ev: ev100.toFixed(2),
-                    aperture: FNumber,
-                    shutterSpeed: ExposureTime,
+                    aperture: fNumber,
+                    shutterSpeed: exposureTime,
                     iso: phoneIso,
-                    image: photo.path?.startsWith('file://') ? photo.path : `file://${photo.path}`
+                    image: getPhotoUri(photo.path)
                 }
             });
 
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-            router.push({
-                pathname: '/(tabs)/light_meter/formsheet',
-                params: {
-                    title: `EV ${ev100.toFixed(2)}`,
-                    ev: ev100.toFixed(2),
-                    aperture: FNumber,
-                    shutterSpeed: ExposureTime,
-                    iso: phoneIso,
-                    image: photo.path?.startsWith('file://') ? photo.path : `file://${photo.path}`
-                }
-            });
+            const readingParams = {
+                title: `EV ${ev100.toFixed(2)}`,
+                ev: ev100.toFixed(2),
+                aperture: String(fNumber),
+                shutterSpeed: String(exposureTime),
+                iso: String(phoneIso),
+                image: getPhotoUri(photo.path)
+            };
+
+            if (isAndroid) {
+                setAndroidSheetDetent(ANDROID_READING_SHEET_COLLAPSED_DETENT);
+                setReading(readingParams);
+            } else {
+                router.push({
+                    pathname: '/(tabs)/light_meter/formsheet',
+                    params: readingParams
+                });
+            }
         } catch (error) {
             setLoading(false);
             Alert.alert("Error", "Failed to capture image. Please try again.");
@@ -198,7 +343,7 @@ export default function CameraBackgroundPage() {
                     start={{ x: 0, y: 0 }} // Optional: start from top-left
                     end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
                 />
-                <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: PlatformColor('label') }}>We need your permission to show the camera</Text>
+                <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: lightMeterColors.label }}>We need your permission to show the camera</Text>
                 {!permissionRequested && (
                     <Pressable onPress={handleRequestPermission} style={({ pressed }) => [
                         {
@@ -209,7 +354,7 @@ export default function CameraBackgroundPage() {
                             padding: 20,
                             marginTop: 20,
                             borderRadius: 24,
-                            backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('systemBlue')
+                            backgroundColor: isGlassAvailable ? 'transparent' : isAndroid ? '#0A84FF' : lightMeterColors.systemBlue
                         }}>
                             <Text style={{
                                 color: 'white',
@@ -226,7 +371,7 @@ export default function CameraBackgroundPage() {
                             padding: 20,
                             marginTop: 20,
                             borderRadius: 24,
-                            backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('systemRed')
+                            backgroundColor: isGlassAvailable ? 'transparent' : isAndroid ? '#FF3B30' : lightMeterColors.systemRed
                         }}>
                             <Text style={{
                                 color: 'white',
@@ -252,9 +397,10 @@ export default function CameraBackgroundPage() {
                     start={{ x: 0, y: 0 }} // Optional: start from top-left
                     end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
                 />
-                <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: PlatformColor('label') }}>No camera device available</Text>
+                <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: lightMeterColors.label }}>No camera device available</Text>
 
-                {/* <Pressable onPress={() => handleFormSheetOpen(true)}><Text style={{ color: PlatformColor('label'), marginTop: 50 }}>Debug</Text></Pressable> */}
+                <Pressable onPress={() => handleFormSheetOpen(true)}><Text style={{ color: PlatformColor('label'), marginTop: 50 }}>Debug</Text></Pressable>
+
 
             </View>
         );
@@ -271,7 +417,7 @@ export default function CameraBackgroundPage() {
                     ref={cameraRef}
                     style={StyleSheet.absoluteFillObject}
                     device={device}
-                    isActive={isFocused}
+                    isActive={isFocused && !shouldFreezeCameraPreview}
                     zoom={device.neutralZoom}
                     photo={true}
                     onInitialized={() => setIsCameraReady(true)}
@@ -279,6 +425,15 @@ export default function CameraBackgroundPage() {
                     onUIRotationChanged={handleUIRotationChanged}
                 />
             </GestureDetector>
+
+            {shouldFreezeCameraPreview && (
+                <ExpoImage
+                    source={{ uri: reading.image }}
+                    style={StyleSheet.absoluteFillObject}
+                    contentFit="cover"
+                    pointerEvents="none"
+                />
+            )}
 
             {/* Focus indicator - iOS Camera style */}
             {focusPoint && (
@@ -302,48 +457,94 @@ export default function CameraBackgroundPage() {
                 </View>
             )}
 
-            <Animated.View style={{
-                transform: [
-                    {
-                        rotate: buttonRotation.interpolate({
-                            inputRange: [0, 90, 180, 270],
-                            outputRange: ['0deg', '90deg', '180deg', '270deg'],
-                        })
-                    },
-                    {
-                        translateX: buttonRotation.interpolate({
-                            inputRange: [0, 90, 180, 270],
-                            outputRange: [0, -40, 0, 40],
-                        })
-                    }
-                ]
-            }}>
-                <GlassView isInteractive={true} glassEffectStyle='regular' style={{
-                    borderRadius: 24,
-                    zIndex: 9,
-                    backgroundColor: isGlassAvailable ? 'transparent' : PlatformColor('tertiarySystemFill'),
-                }}>
-
-                    <Pressable style={({ pressed }) => [
+            {!reading && (
+                <Animated.View style={{
+                    transform: [
                         {
-                            transform: isGlassAvailable ? [] : [{ scale: pressed ? 0.97 : 1 }],
+                            rotate: buttonRotation.interpolate({
+                                inputRange: [0, 90, 180, 270],
+                                outputRange: ['0deg', '90deg', '180deg', '270deg'],
+                            })
                         },
                         {
-                            padding: 20
+                            translateX: buttonRotation.interpolate({
+                                inputRange: [0, 90, 180, 270],
+                                outputRange: [0, -40, 0, 40],
+                            })
                         }
-                    ]} onPress={() => handleFormSheetOpen()}>
+                    ]
+                }}>
+                    <GlassView isInteractive={true} glassEffectStyle='regular' style={{
+                        borderRadius: 30,
+                        zIndex: 9,
+                        backgroundColor: isGlassAvailable ? 'transparent' : isAndroid ? androidFallbackButtonBackground : lightMeterColors.tertiarySystemFill,
+                        borderWidth: isAndroid && !isGlassAvailable ? 1 : 0,
+                        borderColor: isAndroid && !isGlassAvailable ? androidFallbackButtonBorder : 'transparent',
+                        shadowColor: '#000',
+                        shadowOpacity: isAndroid ? 0.28 : 0.2,
+                        shadowRadius: 14,
+                        shadowOffset: { width: 0, height: 8 },
+                        elevation: isAndroid ? 8 : 0,
+                        overflow: 'hidden',
+                    }}>
 
-                        {!loading && <Text
-                            style={{
-                                color: PlatformColor('label'),
-                                fontFamily: 'LufgaRegular',
-                                fontSize: 14,
-                            }}>Take a reading</Text>}
-                        {loading && <ActivityIndicator />}
+                        <Pressable style={({ pressed }) => [
+                            {
+                                transform: isGlassAvailable ? [] : [{ scale: pressed ? 0.97 : 1 }],
+                            },
+                            {
+                                minHeight: isAndroid ? 60 : 56,
+                                paddingHorizontal: isAndroid ? 30 : 24,
+                                paddingVertical: isAndroid ? 16 : 14,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }
+                        ]} onPress={() => handleFormSheetOpen()} android_ripple={{ color: colorScheme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(16,5,40,0.08)', borderless: false }}>
 
-                    </Pressable>
-                </GlassView>
-            </Animated.View>
+                            {!loading && <Text
+                                style={{
+                                    color: isAndroid && !isGlassAvailable ? androidFallbackButtonTextColor : lightMeterColors.label,
+                                    fontFamily: 'LufgaMedium',
+                                    fontSize: isAndroid ? 16 : 14,
+                                    lineHeight: isAndroid ? 21 : 18,
+                                    includeFontPadding: false,
+                                    textAlignVertical: 'center',
+                                    letterSpacing: 0.25,
+                                }}>Take a reading</Text>}
+                            {loading && <ActivityIndicator />}
+
+                        </Pressable>
+                    </GlassView>
+                </Animated.View>
+            )}
+            {isAndroid && reading && (
+                <BottomSheet
+                    ref={bottomSheetRef}
+                    index={0}
+                    snapPoints={androidSheetSnapPoints}
+                    containerLayoutState={androidSheetContainerLayout}
+                    enableDynamicSizing={false}
+                    enableContentPanningGesture={false}
+                    enableHandlePanningGesture={false}
+                    enableOverDrag={false}
+                    enablePanDownToClose={false}
+                    backdropComponent={renderSheetBackdrop}
+                    backgroundStyle={{ backgroundColor: isAndroid ? androidSheetBackground : lightMeterColors.systemBackground }}
+                    handleComponent={null}
+                    handleStyle={styles.sheetHandle}
+                    handleIndicatorStyle={{ backgroundColor: isAndroid ? androidSheetHandleColor : lightMeterColors.tertiaryLabel }}
+                    onClose={() => setReading(null)}
+                >
+                    <BottomSheetView style={styles.sheetContent}>
+                        <LightMeterReadingSheet
+                            {...reading}
+                            presentation="bottom-sheet"
+                            onClose={() => bottomSheetRef.current?.close()}
+                            onSheetDetentChange={setAndroidSheetDetent}
+                        />
+                    </BottomSheetView>
+                </BottomSheet>
+            )}
         </View >
     );
 }
@@ -356,7 +557,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingLeft: 10,
         paddingRight: 10,
-        paddingBottom: 100,
+        paddingBottom: 76,
         // No background color here! Let the camera show through.
     },
     focusIndicator: {
@@ -403,5 +604,12 @@ const styles = StyleSheet.create({
     },
     text: {
         color: 'white'
+    },
+    sheetContent: {
+        flex: 1,
+    },
+    sheetHandle: {
+        paddingTop: 0,
+        paddingBottom: 0,
     }
 });
