@@ -399,7 +399,7 @@ export default function CameraBackgroundPage() {
                 />
                 <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: lightMeterColors.label }}>No camera device available</Text>
 
-                <Pressable onPress={() => handleFormSheetOpen(true)}><Text style={{ color: PlatformColor('label'), marginTop: 50 }}>Debug</Text></Pressable>
+                {/* <Pressable onPress={() => handleFormSheetOpen(true)}><Text style={{ color: PlatformColor('label'), marginTop: 50 }}>Debug</Text></Pressable> */}
 
 
             </View>
@@ -475,7 +475,7 @@ export default function CameraBackgroundPage() {
                     ]
                 }}>
                     <GlassView isInteractive={true} glassEffectStyle='regular' style={{
-                        borderRadius: 30,
+                        borderRadius: 22,
                         zIndex: 9,
                         backgroundColor: isGlassAvailable ? 'transparent' : isAndroid ? androidFallbackButtonBackground : lightMeterColors.tertiarySystemFill,
                         borderWidth: isAndroid && !isGlassAvailable ? 1 : 0,
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingLeft: 10,
         paddingRight: 10,
-        paddingBottom: 76,
+        paddingBottom: Platform.OS === 'ios' ? 100 : 40,
         // No background color here! Let the camera show through.
     },
     focusIndicator: {

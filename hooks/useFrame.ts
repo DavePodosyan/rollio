@@ -48,6 +48,7 @@ export const useFrame = (id: number) => {
             setFrame(null); // optionally clear local state after delete
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to delete frame');
+            throw err;
         } finally {
             setLoading(false);
         }

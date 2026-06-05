@@ -308,8 +308,16 @@ export const deleteFrame = async (db: SQLiteDatabase, id: number): Promise<void>
     await db.runAsync(`DELETE FROM frames WHERE id = ?`, [id]);
 
     await db.runAsync(
-        `UPDATE films SET frame_count = MAX(0, frame_count - 1) WHERE id = ?`,
-        [frame.film_id]
+        `
+            UPDATE films
+            SET frame_count = (
+                SELECT COUNT(*)
+                FROM frames
+                WHERE film_id = ?
+            )
+            WHERE id = ?
+        `,
+        [frame.film_id, frame.film_id]
     );
 
 
@@ -344,4 +352,3 @@ export const getUniqueLensNames = async (db: SQLiteDatabase): Promise<string[]> 
 
     return results.map(r => r.lens);
 }
-

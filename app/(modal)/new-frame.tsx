@@ -40,7 +40,7 @@ export default function NewFrame() {
     }>();
     const isReady = mode === 'edit' ? useRef(false) : useRef(true);
 
-    const { addFrame, loading, lensNames, fetchUniqueLensNames, prefillFromPreviousFrame } = useFrames(Number(filmId));
+    const { frames, addFrame, loading, lensNames, fetchUniqueLensNames, prefillFromPreviousFrame } = useFrames(Number(filmId));
 
     const { frame, loading: frameLoading, updateFrame, destroyFrame } = mode === 'edit' ? useFrame(Number(frameId)) : {};
 
@@ -338,6 +338,38 @@ export default function NewFrame() {
 
 
     const notesInputRef = useRef<TextInput>(null);
+    const lastFrame = frames.length > 0 ? frames[frames.length - 1] : null;
+    const isLastFrame = mode === 'edit' && !!frame && lastFrame?.id === frame.id;
+
+    const handleDeleteFrame = useCallback(() => {
+        if (!frame || !destroyFrame) return;
+
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+        Alert.alert(
+            'Delete Frame',
+            'Are you sure you want to delete this frame?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await destroyFrame();
+                            initialDataRef.current = formData;
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.back();
+                        } catch (error) {
+                            console.error('Failed to delete frame', error);
+                            Alert.alert('Error', 'Could not delete the frame.');
+                        }
+                    },
+                },
+            ],
+            { cancelable: true }
+        );
+    }, [destroyFrame, formData, frame]);
 
     const renderCount = useRef(0);
     renderCount.current++;
@@ -496,6 +528,30 @@ export default function NewFrame() {
                                 }}
                             />
                         </View>
+                    )}
+
+                    {isLastFrame && (
+                        <Pressable
+                            onPress={handleDeleteFrame}
+                            style={({ pressed }) => ({
+                                paddingTop: 24,
+                                paddingBottom: 40,
+                                paddingHorizontal: 20,
+                                alignItems: 'center',
+                                opacity: pressed ? 0.65 : 1,
+                            })}
+                        >
+                            <Text
+                                style={{
+                                    color: '#FF3B30',
+                                    fontFamily: 'LufgaMedium',
+                                    fontSize: 16,
+                                    lineHeight: 22,
+                                }}
+                            >
+                                Delete Frame
+                            </Text>
+                        </Pressable>
                     )}
 
 
