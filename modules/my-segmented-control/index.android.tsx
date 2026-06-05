@@ -1,4 +1,4 @@
-import { Host, Picker } from '@expo/ui/jetpack-compose';
+import { Host, SegmentedButton, SingleChoiceSegmentedButtonRow, Text } from '@expo/ui/jetpack-compose';
 import React, { useMemo } from 'react';
 import { ColorValue, ViewProps } from 'react-native';
 
@@ -36,21 +36,27 @@ export default function MySegmentedControl({
 
   return (
     <Host style={style}>
-      <Picker
-        options={values}
-        selectedIndex={selectedIndex}
-        variant="segmented"
-        color={activeColor}
-        elementColors={elementColors}
-        onOptionSelected={({ nativeEvent }) => {
-          onValueChange?.({
-            nativeEvent: {
-              value: nativeEvent.label,
-              index: nativeEvent.index,
-            },
-          });
-        }}
-      />
+      <SingleChoiceSegmentedButtonRow>
+        {values.map((value, index) => (
+          <SegmentedButton
+            key={value}
+            selected={index === selectedIndex}
+            colors={elementColors}
+            onClick={() => {
+              onValueChange?.({
+                nativeEvent: {
+                  value,
+                  index,
+                },
+              });
+            }}
+          >
+            <SegmentedButton.Label>
+              <Text>{value}</Text>
+            </SegmentedButton.Label>
+          </SegmentedButton>
+        ))}
+      </SingleChoiceSegmentedButtonRow>
     </Host>
   );
 }

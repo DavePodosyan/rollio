@@ -1,4 +1,4 @@
-import { requireNativeViewManager } from 'expo-modules-core';
+import { requireNativeView } from 'expo';
 import React from 'react';
 import { ViewProps } from 'react-native';
 
@@ -16,7 +16,7 @@ export type MySegmentedControlProps = {
 } & ViewProps;
 
 const NativeView: React.ComponentType<MySegmentedControlProps> =
-  requireNativeViewManager('MySegmentedControl');
+  requireNativeView('MySegmentedControl');
 
 export default function MySegmentedControl(props: MySegmentedControlProps) {
   return <NativeView {...props} />;
