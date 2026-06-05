@@ -24,6 +24,7 @@ export default function NewFilm() {
         ? 'transparent'
         : colorScheme === 'dark' ? 'rgba(44, 44, 46, 0.96)' : 'rgba(255, 255, 255, 0.96)';
     const suggestionPillTextColor = colorScheme === 'dark' ? '#fff' : '#100528';
+    const glassSuggestionFallbackColor = colorScheme === 'dark' ? '#2C2C2E' : '#F2F2F7';
     const navigation = useNavigation();
     const { mode = 'new', id } = useLocalSearchParams<{ mode?: 'edit', id?: string }>();
     const isReady = mode === 'edit' ? useRef(false) : useRef(true);
@@ -445,9 +446,10 @@ export default function NewFilm() {
                             bottom: keyboardHeight,
                             left: 0,
                             right: 0,
-                            height: 96,
-                            zIndex: 20,
-                            elevation: 20,
+                            height: isAndroid ? 136 : undefined,
+                            maxHeight: isAndroid ? undefined : 200,
+                            zIndex: isAndroid ? 20 : undefined,
+                            elevation: isAndroid ? 20 : undefined,
                             // backgroundColor: '#1c1c1eb8',
                         }}
                     >
@@ -460,8 +462,9 @@ export default function NewFilm() {
                             locations={[0, 1]}
                             style={{
                                 flex: 1,
-                                justifyContent: 'flex-end',
+                                justifyContent: isAndroid ? 'flex-end' : undefined,
                                 borderRadius: 20,
+                                paddingTop: 36,
                                 paddingBottom: 8,
                             }}
                         >
@@ -470,7 +473,7 @@ export default function NewFilm() {
                                 keyExtractor={(item) => item}
                                 horizontal={true}
                                 showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={{ paddingHorizontal: 4 }}
+                                contentContainerStyle={isAndroid ? { paddingTop: 10, paddingHorizontal: 4 } : { paddingVertical: 8, paddingHorizontal: 4 }}
                                 keyboardShouldPersistTaps="always"
                                 scrollEventThrottle={16}
                                 renderItem={({ item }) => (
@@ -483,11 +486,12 @@ export default function NewFilm() {
                                                 borderRadius: 32,
                                                 marginLeft: 4,
                                                 marginRight: 8,
-                                                overflow: 'hidden',
+                                                overflow: isAndroid ? 'hidden' : undefined,
+                                                backgroundColor: glassSuggestionFallbackColor,
                                             }}
                                         >
                                             <Pressable
-                                                style={({ pressed }) => ({
+                                                style={isAndroid ? ({ pressed }) => ({
                                                     borderRadius: 32,
                                                     backgroundColor: suggestionPillBackground,
                                                     paddingLeft: 12,
@@ -496,14 +500,20 @@ export default function NewFilm() {
                                                     paddingBottom: 6,
                                                     opacity: pressed ? 0.78 : 1,
                                                     transform: [{ scale: pressed ? 0.96 : 1 }],
-                                                })}
-                                                android_ripple={{
+                                                }) : {
+                                                    borderRadius: 32,
+                                                    paddingLeft: 12,
+                                                    paddingRight: 12,
+                                                    paddingTop: 6,
+                                                    paddingBottom: 6,
+                                                }}
+                                                android_ripple={isAndroid ? {
                                                     color: colorScheme === 'dark' ? 'rgba(255,255,255,0.16)' : 'rgba(16,5,40,0.08)',
                                                     borderless: false,
-                                                }}
+                                                } : undefined}
                                                 onPress={() => selectSuggestion(item, focusedField!)}
                                             >
-                                                <Text style={{ fontSize: 12, color: suggestionPillTextColor, fontFamily: 'LufgaRegular' }}>{item}</Text>
+                                                <Text style={{ fontSize: 12, color: isAndroid ? suggestionPillTextColor : '#000', fontFamily: 'LufgaRegular' }}>{item}</Text>
                                             </Pressable>
                                         </GlassView>
                                     </View>
