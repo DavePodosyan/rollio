@@ -72,14 +72,6 @@
       "expo-font",
       "expo-web-browser",
       [
-        "expo-image-picker",
-        {
-          "photosPermission": "Allow Rollio to access your photos so you can attach images to frames.",
-          "cameraPermission": "Allow Rollio to open the camera so you can take photos for frames.",
-          "microphonePermission": false
-        }
-      ],
-      [
         "expo-media-library",
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
