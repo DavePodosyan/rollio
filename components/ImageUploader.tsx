@@ -105,17 +105,17 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
     };
 
     const pickFromGallery = async () => {
-        // Note: Android 13+ Photo Picker usually doesn't need explicit permissions, 
-        // but it's good practice to leave this check for older OS versions.
         try {
-            const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (!permission.granted) {
-                showPermissionAlert(
-                    'Photos Permission Required',
-                    'Rollio needs photo access to attach images to frames.',
-                    permission.canAskAgain
-                );
-                return;
+            if (!isAndroid) {
+                const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                if (!permission.granted) {
+                    showPermissionAlert(
+                        'Photos Permission Required',
+                        'Rollio needs photo access to attach images to frames.',
+                        permission.canAskAgain
+                    );
+                    return;
+                }
             }
 
             const result = await ImagePicker.launchImageLibraryAsync({
@@ -145,7 +145,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
 
         try {
 
-            const { status } = await MediaLibrary.requestPermissionsAsync();
+            const { status } = await MediaLibrary.requestPermissionsAsync(true);
 
             if (status !== 'granted') {
                 Alert.alert(
@@ -155,8 +155,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
                 return;
             }
 
-            const asset = await MediaLibrary.createAssetAsync(displayUri);
-            // await MediaLibrary.saveToLibraryAsync(displayUri);
+            await MediaLibrary.saveToLibraryAsync(displayUri);
             Alert.alert('Success', 'Image saved to your photo gallery.');
         } catch (error: any) {
             Alert.alert('Error', 'Failed to save image: ' + error.message);
