@@ -13,6 +13,7 @@ import { LightMeterReadingParams, LightMeterReadingSheet } from './formsheet';
 import { useSharedValue } from 'react-native-reanimated';
 import { ExifTags, readAsync } from '@lodev09/react-native-exify';
 import { Image as ExpoImage } from 'expo-image';
+import * as FileSystem from 'expo-file-system/legacy';
 
 const platformColor = (iosName: string, androidName: string) => (
     PlatformColor(Platform.OS === 'ios' ? iosName : androidName)
@@ -30,7 +31,7 @@ const lightMeterColors = {
 const getPhotoUri = (path: string) => path.startsWith('file://') ? path : `file://${path}`;
 
 const toNumber = (value: unknown): number | undefined => {
-    if (Array.isArray(value)) {
+    if (Array.isArray(value) && value.length === 1) {
         return toNumber(value[0]);
     }
 
@@ -57,7 +58,150 @@ const toNumber = (value: unknown): number | undefined => {
     return undefined;
 };
 
-const getExposureSettings = (exif: Record<string, unknown> | undefined) => {
+const calculateIsoForEV100 = (fNumber: number, exposureTime: number, ev100: number) => (
+    100 * ((fNumber ** 2) / exposureTime) / Math.pow(2, ev100)
+);
+
+const getSettingsEV100 = (fNumber: number, exposureTime: number, iso: number) => (
+    calculateEV100(fNumber, exposureTime, iso)
+);
+
+const decodeBase64 = (base64: string) => {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    const bytes: number[] = [];
+    let buffer = 0;
+    let bits = 0;
+
+    for (const char of base64.replace(/=+$/, '')) {
+        const value = alphabet.indexOf(char);
+
+        if (value < 0) {
+            continue;
+        }
+
+        buffer = (buffer << 6) | value;
+        bits += 6;
+
+        if (bits >= 8) {
+            bits -= 8;
+            bytes.push((buffer >> bits) & 0xff);
+        }
+    }
+
+    return bytes;
+};
+
+const readJpegExifIso = async (path: string) => {
+    try {
+        const bytes = decodeBase64(await FileSystem.readAsStringAsync(getPhotoUri(path), {
+            encoding: FileSystem.EncodingType.Base64,
+            length: 65536,
+            position: 0,
+        }));
+
+        const u16be = (offset: number) => (bytes[offset] << 8) | bytes[offset + 1];
+        let offset = 2;
+        let tiffOffset = -1;
+
+        while (offset + 10 < bytes.length && bytes[offset] === 0xff) {
+            const marker = bytes[offset + 1];
+            const segmentLength = u16be(offset + 2);
+
+            if (marker === 0xda) {
+                break;
+            }
+
+            if (
+                marker === 0xe1 &&
+                bytes[offset + 4] === 0x45 &&
+                bytes[offset + 5] === 0x78 &&
+                bytes[offset + 6] === 0x69 &&
+                bytes[offset + 7] === 0x66 &&
+                bytes[offset + 8] === 0 &&
+                bytes[offset + 9] === 0
+            ) {
+                tiffOffset = offset + 10;
+                break;
+            }
+
+            offset += 2 + segmentLength;
+        }
+
+        if (tiffOffset < 0) {
+            return undefined;
+        }
+
+        const littleEndian = bytes[tiffOffset] === 0x49 && bytes[tiffOffset + 1] === 0x49;
+        const read16 = (absoluteOffset: number) => littleEndian
+            ? bytes[absoluteOffset] | (bytes[absoluteOffset + 1] << 8)
+            : (bytes[absoluteOffset] << 8) | bytes[absoluteOffset + 1];
+        const read32 = (absoluteOffset: number) => littleEndian
+            ? bytes[absoluteOffset] | (bytes[absoluteOffset + 1] << 8) | (bytes[absoluteOffset + 2] << 16) | (bytes[absoluteOffset + 3] << 24)
+            : (bytes[absoluteOffset] << 24) | (bytes[absoluteOffset + 1] << 16) | (bytes[absoluteOffset + 2] << 8) | bytes[absoluteOffset + 3];
+        const readIFDEntries = (relativeOffset: number) => {
+            const directoryOffset = tiffOffset + relativeOffset;
+            const entryCount = read16(directoryOffset);
+
+            return Array.from({ length: entryCount }, (_, index) => directoryOffset + 2 + (index * 12));
+        };
+        const readShortValue = (entryOffset: number, count: number) => {
+            if (count === 1) {
+                return read16(entryOffset + 8);
+            }
+
+            const valuesOffset = tiffOffset + read32(entryOffset + 8);
+            return read16(valuesOffset);
+        };
+
+        const ifd0Entries = readIFDEntries(read32(tiffOffset + 4));
+        const exifEntry = ifd0Entries.find(entryOffset => read16(entryOffset) === 0x8769);
+        const exifIFDOffset = exifEntry ? read32(exifEntry + 8) : undefined;
+
+        if (!exifIFDOffset) {
+            return undefined;
+        }
+
+        const isoEntry = readIFDEntries(exifIFDOffset).find(entryOffset => read16(entryOffset) === 0x8827);
+
+        if (!isoEntry || read16(isoEntry + 2) !== 3) {
+            return undefined;
+        }
+
+        return readShortValue(isoEntry, read32(isoEntry + 4));
+    } catch (error) {
+        console.log('Raw EXIF ISO read failed:', error);
+        return undefined;
+    }
+};
+
+const getExposureDebugTags = (exif: Record<string, unknown> | undefined) => {
+    if (!exif) {
+        return undefined;
+    }
+
+    return {
+        Make: exif.Make,
+        Model: exif.Model,
+        FNumber: exif.FNumber,
+        ApertureValue: exif.ApertureValue,
+        ExposureTime: exif.ExposureTime,
+        ShutterSpeedValue: exif.ShutterSpeedValue,
+        ISOSpeedRatings: exif.ISOSpeedRatings,
+        ISO: exif.ISO,
+        ExposureIndex: exif.ExposureIndex,
+        BrightnessValue: exif.BrightnessValue,
+        ExposureBiasValue: exif.ExposureBiasValue,
+        ExposureMode: exif.ExposureMode,
+        ExposureProgram: exif.ExposureProgram,
+        MeteringMode: exif.MeteringMode,
+        FocalLength: exif.FocalLength,
+        FocalLengthIn35mmFilm: exif.FocalLengthIn35mmFilm ?? exif.FocalLenIn35mmFilm,
+        PixelXDimension: exif.PixelXDimension,
+        PixelYDimension: exif.PixelYDimension,
+    };
+};
+
+const getExposureSettings = (exif: Record<string, unknown> | undefined, isoOverride?: number) => {
     if (!exif) {
         return null;
     }
@@ -66,13 +210,34 @@ const getExposureSettings = (exif: Record<string, unknown> | undefined) => {
         ?? (toNumber(exif.ApertureValue) !== undefined ? Math.pow(2, toNumber(exif.ApertureValue)! / 2) : undefined);
     const exposureTime = toNumber(exif.ExposureTime)
         ?? (toNumber(exif.ShutterSpeedValue) !== undefined ? 1 / Math.pow(2, toNumber(exif.ShutterSpeedValue)!) : undefined);
-    const iso = toNumber(exif.ISOSpeedRatings) ?? toNumber(exif.ISO);
+    const brightnessValue = toNumber(exif.BrightnessValue);
+    const brightnessEV100 = brightnessValue !== undefined
+        ? brightnessValue + 5
+        : undefined;
+    const derivedIsoFromBrightness = fNumber && exposureTime && brightnessEV100 !== undefined
+        ? calculateIsoForEV100(fNumber, exposureTime, brightnessEV100)
+        : undefined;
+    const iso = isoOverride
+        ?? toNumber(exif.ISOSpeedRatings)
+        ?? toNumber(exif.ISO)
+        ?? derivedIsoFromBrightness;
 
     if (!fNumber || !exposureTime || !iso) {
         return null;
     }
 
-    return { fNumber, exposureTime, iso };
+    const settingsEV100 = getSettingsEV100(fNumber, exposureTime, iso);
+
+    return {
+        fNumber,
+        exposureTime,
+        iso,
+        ev100: settingsEV100,
+        settingsEV100,
+        brightnessEV100,
+        derivedIsoFromBrightness,
+        debugTags: getExposureDebugTags(exif),
+    };
 };
 
 const readPhotoExposureSettings = async (path: string, metadata?: Record<string, unknown>) => {
@@ -80,11 +245,25 @@ const readPhotoExposureSettings = async (path: string, metadata?: Record<string,
     const metadataSettings = getExposureSettings(metadataExif);
 
     if (metadataSettings) {
-        return metadataSettings;
+        return {
+            ...metadataSettings,
+            source: 'photo.metadata' as const,
+        };
     }
 
+    const rawJpegIso = await readJpegExifIso(path);
     const fileExif = await readAsync(getPhotoUri(path));
-    return getExposureSettings(fileExif as ExifTags | undefined);
+    const fileSettings = getExposureSettings(fileExif as ExifTags | undefined, rawJpegIso);
+
+    if (!fileSettings) {
+        return null;
+    }
+
+    return {
+        ...fileSettings,
+        rawJpegIso,
+        source: 'file-exif' as const,
+    };
 };
 
 const ANDROID_READING_SHEET_COLLAPSED_DETENT = 0.52;
@@ -142,6 +321,40 @@ export default function CameraBackgroundPage() {
         () => [`${Math.round(androidSheetDetent * 100)}%`],
         [androidSheetDetent]
     );
+    const cameraDiagnostics = useMemo(() => {
+        if (!device) {
+            return null;
+        }
+
+        return {
+            platform: Platform.OS,
+            device: {
+                id: device.id,
+                name: device.name,
+                position: device.position,
+                physicalDevices: device.physicalDevices,
+                neutralZoom: device.neutralZoom,
+                minZoom: device.minZoom,
+                maxZoom: device.maxZoom,
+                minExposure: device.minExposure,
+                maxExposure: device.maxExposure,
+                supportsLowLightBoost: device.supportsLowLightBoost,
+            },
+            firstListedFormat: device.formats?.[0] ? {
+                photoWidth: device.formats[0].photoWidth,
+                photoHeight: device.formats[0].photoHeight,
+                videoWidth: device.formats[0].videoWidth,
+                videoHeight: device.formats[0].videoHeight,
+                minISO: device.formats[0].minISO,
+                maxISO: device.formats[0].maxISO,
+                minFps: device.formats[0].minFps,
+                maxFps: device.formats[0].maxFps,
+                fieldOfView: device.formats[0].fieldOfView,
+                supportsPhotoHdr: device.formats[0].supportsPhotoHdr,
+                supportsVideoHdr: device.formats[0].supportsVideoHdr,
+            } : null,
+        };
+    }, [device]);
 
     // Focus indicator state and animations
     const [focusPoint, setFocusPoint] = useState<Point | null>(null);
@@ -278,9 +491,13 @@ export default function CameraBackgroundPage() {
             }
 
             console.log('Photo captured:', photo);
+            console.log('Photo metadata:', photo.metadata);
 
             const exposureSettings = await readPhotoExposureSettings(photo.path, photo.metadata as Record<string, unknown> | undefined);
-
+            console.log('Extracted exposure settings:', exposureSettings);
+            console.log('Exposure settings source:', exposureSettings?.source);
+            console.log('Exposure EXIF tags:', exposureSettings?.debugTags);
+            
             if (!exposureSettings) {
                 setLoading(false);
                 console.log('Invalid EXIF data: missing aperture, shutter speed, or ISO');
@@ -290,9 +507,32 @@ export default function CameraBackgroundPage() {
             }
 
             const { fNumber, exposureTime, iso: phoneIso } = exposureSettings;
-            const ev100 = calculateEV100(fNumber, exposureTime, phoneIso);
+            const ev100 = exposureSettings.ev100;
 
             setLoading(false);
+            console.log('Light meter diagnostics:', {
+                camera: cameraDiagnostics,
+                photo: {
+                    width: photo.width,
+                    height: photo.height,
+                    orientation: photo.orientation,
+                    isMirrored: photo.isMirrored,
+                    path: photo.path,
+                },
+                exposure: {
+                    selectedEV100: ev100,
+                    settingsEV100: exposureSettings.settingsEV100,
+                    brightnessEV100: exposureSettings.brightnessEV100,
+                    settingsMinusBrightnessEV: exposureSettings.brightnessEV100 !== undefined
+                        ? exposureSettings.settingsEV100 - exposureSettings.brightnessEV100
+                        : undefined,
+                    fNumber,
+                    exposureTime,
+                    iso: phoneIso,
+                    rawJpegIso: 'rawJpegIso' in exposureSettings ? exposureSettings.rawJpegIso : undefined,
+                    derivedIsoFromBrightness: exposureSettings.derivedIsoFromBrightness,
+                },
+            });
             console.log({
                 params: {
                     title: `EV ${ev100.toFixed(2)}`,
