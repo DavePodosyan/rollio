@@ -1,0 +1,7 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "$(PRODUCT_NAME)이(가) 노출 측정 및 프레임 촬영을 위해 카메라를 사용합니다.",
+    "NSPhotoLibraryUsageDescription": "$(PRODUCT_NAME)이(가) 프레임에 이미지를 첨부하기 위해 사진 라이브러리에 접근합니다.",
+    "NSPhotoLibraryAddUsageDescription": "$(PRODUCT_NAME)이(가) 이미지를 사진 라이브러리에 저장합니다."
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "shared": {
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "ok": "확인",
+    "settings": "설정",
+    "error": "오류",
+    "success": "성공",
+    "iso": "ISO",
+    "aperture": "조리개",
+    "noRollsYet": {
+      "title": "아직 필름 롤이 없습니다.",
+      "subtitle": "+ 버튼을 클릭하여 추가하세요."
+    },
+    "discardChanges": {
+      "title": "변경 사항을 버리시겠습니까?",
+      "message": "저장하지 않은 변경 사항이 있습니다. 버리고 화면을 나가시겠습니까?",
+      "discard": "버리기",
+      "dontLeave": "머무르기"
+    }
+  },
+  "tabs": {
+    "films": "필름",
+    "lightMeter": "노출계",
+    "support": "지원"
+  },
+  "filmStatus": {
+    "inCamera": "카메라 내부",
+    "developing": "현상 중",
+    "archived": "보관됨"
+  },
+  "cameraSettings": {
+    "auto": "Auto",
+    "apertureFormat": "f/{{value}}",
+    "shutterSpeedFormat": "{{value}}s"
+  },
+  "rollList": {
+    "title": "필름 롤"
+  },
+  "rollDetail": {
+    "deleteFilm": {
+      "title": "필름 삭제",
+      "message": "이 필름을 삭제하시겠습니까?"
+    },
+    "filmActionsTitle": "필름 작업",
+    "noFramesYet": {
+      "title": "아직 프레임이 없습니다.",
+      "subtitle": "+ 버튼을 클릭하여 추가하세요."
+    },
+    "isoLabel": "ISO: {{iso}}",
+    "pushPull": {
+      "push": "푸시 +{{stops}}",
+      "pull": "풀 {{stops}}"
+    }
+  },
+  "newFilm": {
+    "addTitle": "새 필름 추가",
+    "editTitle": "필름 편집",
+    "missingName": {
+      "title": "필름 이름 누락",
+      "message": "필름 롤의 이름을 입력하세요."
+    },
+    "filmNamePlaceholder": "필름 이름",
+    "cameraPlaceholder": "카메라 (선택 사항)",
+    "pushPullLabel": "푸시/풀",
+    "expectedShotsLabel": "예상 촬영 컷수"
+  },
+  "newFrame": {
+    "addTitle": "새 프레임 추가",
+    "editTitle": "프레임 편집",
+    "saveErrorMessage": "프레임을 저장할 수 없습니다.",
+    "deleteErrorMessage": "프레임을 삭제할 수 없습니다.",
+    "deleteFrame": {
+      "message": "이 프레임을 삭제하시겠습니까?",
+      "button": "프레임 삭제"
+    },
+    "shutterSpeedLabel": "셔터 스피드",
+    "lensPlaceholder": "렌즈 (선택 사항)",
+    "notePlaceholder": "메모 (선택 사항)"
+  },
+  "lightMeter": {
+    "cameraPermissionMessage": "카메라를 표시하기 위한 권한이 필요합니다.",
+    "grantPermission": "권한 부여",
+    "openSettings": "설정 열기",
+    "noDeviceMessage": "사용 가능한 카메라 장치가 없습니다.",
+    "takeReading": "노출 측정하기",
+    "takePhotoErrorMessage": "사진 촬영에 실패했습니다. 다시 시도해 주세요.",
+    "readCameraDataErrorMessage": "카메라 데이터를 읽지 못했습니다. 다시 시도해 주세요.",
+    "captureErrorMessage": "이미지 캡처에 실패했습니다. 다시 시도해 주세요."
+  },
+  "lightMeterSheet": {
+    "defaultTitle": "노출계 측정값",
+    "fallbackTitle": "노출 설정",
+    "stopsToggle": {
+      "fullStopsOnlyMessage": "현재 1스탑 단위로만 표시 중입니다.",
+      "halfThirdStopsMessage": "현재 1/2, 1/3스탑 단위로 표시 중입니다.",
+      "showHalfThird": "1/2, 1/3스탑 표시",
+      "showFullStopsOnly": "1스탑 단위로만 표시"
+    },
+    "selectFilmPrompt": "이 측정값을 저장할 필름을 선택하세요",
+    "noFilmsAvailable": "사용 가능한 필름이 없습니다.\n측정값을 저장하려면 먼저 필름을 생성하세요.",
+    "columnLabels": {
+      "shutter": "셔터",
+      "isoFilmSuffix": " (필름)"
+    },
+    "saveToFrame": "프레임에 저장",
+    "selectFilmTitle": "필름 선택",
+    "isoLockedHint": "ISO가 필름에 고정되어 있습니다. 필요한 경우 조리개나 셔터 스피드를 조절하세요.",
+    "saveFrame": "프레임 저장",
+    "filmRowIso": "ISO {{iso}}",
+    "selectedFilmSummary": "ISO {{iso}} • 프레임 {{frameNumber}}/{{totalFrames}}",
+    "exposureDiff": {
+      "over": "+{{diff}} EV 오버",
+      "under": "{{diff}} EV 언더"
+    },
+    "apertureWheelPrefix": "ƒ/",
+    "shutterWheelSuffix": "s"
+  },
+  "support": {
+    "thankYou": {
+      "title": "감사합니다 ❤️",
+      "message": "귀하의 지원에 깊이 감사드립니다!"
+    },
+    "shareMessage": "필름 사진 애호가들을 위한 앱, Rollio를 확인해 보세요!\n\nhttps://rollio.davitp.dev/app-link",
+    "shareDialogTitle": "Rollio 공유",
+    "shareSubject": "Rollio - 필름 사진 앱",
+    "shareErrorMessage": "앱을 공유하지 못했습니다. 나중에 다시 시도해 주세요.",
+    "aboutTitle": "Rollio 정보",
+    "passionProjectBody": "Rollio는 필름 사진 커뮤니티에 대한 애정을 담아 만든 열정 프로젝트입니다. 앱 사용이 즐거우셨고 감사의 마음을 표현하고 싶으시다면 아래에서 소액 후원을 부탁드립니다.",
+    "supportHeading": "프로젝트 후원하기",
+    "spreadWordHeading": "널리 알리기",
+    "storeUrlErrorMessage": "스토어 URL을 열 수 없습니다. 나중에 다시 시도해 주세요.",
+    "writeReview": "리뷰 작성",
+    "shareApp": "앱 공유",
+    "version": "버전 {{version}} ({{build}})"
+  },
+  "enjoyingRollio": {
+    "cta": "Rollio가 마음에 드시나요?"
+  },
+  "filmSettingsFromPhoto": {
+    "exifReadErrorMessage": "첨부된 사진에서 EXIF 데이터를 읽을 수 없습니다.",
+    "missingExifMessage": "첨부된 사진에 필요한 EXIF 데이터가 없습니다.",
+    "suggestedSettingsHeading": "추천 설정",
+    "suggestionIntro": "첨부된 사진의 EXIF 데이터와 필름의 ISO ({{filmIso}})를 바탕으로, 비슷한 노출을 얻기 위해 추천되는 조리개와 셔터 스피드 조합은 다음과 같습니다."
+  },
+  "imageUploader": {
+    "selectImage": {
+      "title": "이미지 선택",
+      "message": "옵션을 선택하세요",
+      "takePhoto": "사진 촬영",
+      "pickFromPhotos": "사진에서 선택"
+    },
+    "cameraPermission": {
+      "title": "카메라 권한 필요",
+      "message": "Rollio에서 프레임용 사진을 촬영하려면 카메라 접근 권한이 필요합니다."
+    },
+    "cameraError": {
+      "title": "카메라 오류",
+      "message": "Rollio가 카메라를 열 수 없습니다. 다시 시도해 주세요."
+    },
+    "photosPermission": {
+      "title": "사진 권한 필요",
+      "message": "Rollio에서 프레임에 이미지를 첨부하려면 사진 접근 권한이 필요합니다."
+    },
+    "photoPickerError": {
+      "title": "사진 선택기 오류",
+      "message": "Rollio가 사진 라이브러리를 열 수 없습니다. 다시 시도해 주세요."
+    },
+    "galleryPermission": {
+      "title": "권한 필요",
+      "message": "Rollio에서 사진을 저장하려면 갤러리 접근 권한이 필요합니다."
+    },
+    "saveSuccessMessage": "이미지가 사진 갤러리에 저장되었습니다.",
+    "saveImageError": "이미지 저장 실패: {{message}}",
+    "removeImage": {
+      "title": "이미지 삭제",
+      "message": "이미지를 삭제하시겠습니까?",
+      "confirm": "삭제"
+    },
+    "imageMenu": {
+      "title": "이미지",
+      "replace": "교체",
+      "saveToPhotos": "사진에 저장"
+    },
+    "attachImage": "이미지 첨부"
+  }
+}

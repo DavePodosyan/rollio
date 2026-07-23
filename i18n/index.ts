@@ -7,10 +7,12 @@ import 'intl-pluralrules';
 
 import en from './locales/en.json';
 import ja from './locales/ja.json';
+import ko from './locales/ko.json';
 
 const resources = {
   en: { translation: en },
   ja: { translation: ja },
+  ko: { translation: ko }
 } as const;
 
 const SUPPORTED_LANGUAGES = Object.keys(resources);

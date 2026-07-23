@@ -36,7 +36,8 @@
     },
     "locales": {
       "en": "./native-locales/en.json",
-      "ja": "./native-locales/ja.json"
+      "ja": "./native-locales/ja.json",
+      "ko": "./native-locales/ko.json"
     },
     "plugins": [
       "expo-router",
@@ -103,7 +104,7 @@
       [
         "expo-localization",
         {
-          "supportedLocales": ["en", "ja"]
+          "supportedLocales": ["en", "ja", "ko"]
         }
       ]
     ],
