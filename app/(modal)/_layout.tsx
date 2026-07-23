@@ -1,11 +1,13 @@
 // app/(modal)/_layout.tsx
 import { Stack } from "expo-router";
 import { Platform, useColorScheme } from "react-native";
+import { useTranslation } from "react-i18next";
 
 export default function ModalLayout() {
 
     const colorScheme = useColorScheme();
     const isAndroid = Platform.OS === 'android';
+    const { t } = useTranslation();
     const androidBackgroundColor = colorScheme === 'dark' ? '#09090B' : '#EFF0F4';
 
     return (
@@ -22,11 +24,11 @@ export default function ModalLayout() {
             contentStyle: { backgroundColor: isAndroid ? androidBackgroundColor : colorScheme === 'dark' ? "#1c1c1e" : "#F2F2F6" },
         }}>
             <Stack.Screen name="new-film" options={{
-                title: "Add New Film"
+                title: t('newFilm.addTitle')
             }} />
 
             <Stack.Screen name="new-frame" options={{
-                title: "Add New Frame"
+                title: t('newFrame.addTitle')
             }} />
         </Stack>
     );

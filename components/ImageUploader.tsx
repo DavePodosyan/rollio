@@ -21,6 +21,7 @@ import { Host, Button, Menu, Divider, Section } from '@expo/ui/swift-ui';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
 import { writeAsync } from '@lodev09/react-native-exify';
+import { useTranslation } from 'react-i18next';
 
 interface ImageUploaderProps {
     value: string | null;
@@ -28,6 +29,7 @@ interface ImageUploaderProps {
 }
 
 export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
+    const { t } = useTranslation();
     const [previewVisible, setPreviewVisible] = useState(false);
     const colorScheme = useColorScheme();
     const isGlassAvailable = isLiquidGlassAvailable();
@@ -47,12 +49,12 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
 
     const handleUploadPress = () => {
         Alert.alert(
-            'Select Image',
-            'Choose an option',
+            t('imageUploader.selectImage.title'),
+            t('imageUploader.selectImage.message'),
             [
-                { text: 'Take Photo', onPress: takePhoto },
-                { text: 'Pick from Photos', onPress: pickFromGallery },
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('imageUploader.selectImage.takePhoto'), onPress: takePhoto },
+                { text: t('imageUploader.selectImage.pickFromPhotos'), onPress: pickFromGallery },
+                { text: t('shared.cancel'), style: 'cancel' },
             ],
             { cancelable: true }
         );
@@ -63,8 +65,8 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
             title,
             message,
             [
-                ...(canAskAgain ? [] : [{ text: 'Settings', onPress: () => Linking.openSettings() }]),
-                { text: 'OK', style: 'cancel' },
+                ...(canAskAgain ? [] : [{ text: t('shared.settings'), onPress: () => Linking.openSettings() }]),
+                { text: t('shared.ok'), style: 'cancel' },
             ],
             { cancelable: true }
         );
@@ -75,8 +77,8 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
             const permission = await ImagePicker.requestCameraPermissionsAsync();
             if (!permission.granted) {
                 showPermissionAlert(
-                    'Camera Permission Required',
-                    'Rollio needs camera access to take photos for frames.',
+                    t('imageUploader.cameraPermission.title'),
+                    t('imageUploader.cameraPermission.message'),
                     permission.canAskAgain
                 );
                 return;
@@ -100,7 +102,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
             }
         } catch (error) {
             console.error('Failed to take photo', error);
-            Alert.alert('Camera Error', 'Rollio could not open the camera. Please try again.');
+            Alert.alert(t('imageUploader.cameraError.title'), t('imageUploader.cameraError.message'));
         }
     };
 
@@ -110,8 +112,8 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
                 const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
                 if (!permission.granted) {
                     showPermissionAlert(
-                        'Photos Permission Required',
-                        'Rollio needs photo access to attach images to frames.',
+                        t('imageUploader.photosPermission.title'),
+                        t('imageUploader.photosPermission.message'),
                         permission.canAskAgain
                     );
                     return;
@@ -128,7 +130,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
             handleImageResult(result);
         } catch (error) {
             console.error('Failed to pick image', error);
-            Alert.alert('Photo Picker Error', 'Rollio could not open your photo library. Please try again.');
+            Alert.alert(t('imageUploader.photoPickerError.title'), t('imageUploader.photoPickerError.message'));
         }
     };
 
@@ -149,28 +151,28 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
 
             if (status !== 'granted') {
                 Alert.alert(
-                    'Permission Required',
-                    'Rollio needs access to your gallery to save photos.',
-                    [{ text: 'Settings', onPress: () => Linking.openSettings() }]);
+                    t('imageUploader.galleryPermission.title'),
+                    t('imageUploader.galleryPermission.message'),
+                    [{ text: t('shared.settings'), onPress: () => Linking.openSettings() }]);
                 return;
             }
 
             await MediaLibrary.saveToLibraryAsync(displayUri);
-            Alert.alert('Success', 'Image saved to your photo gallery.');
+            Alert.alert(t('shared.success'), t('imageUploader.saveSuccessMessage'));
         } catch (error: any) {
-            Alert.alert('Error', 'Failed to save image: ' + error.message);
+            Alert.alert(t('shared.error'), t('imageUploader.saveImageError', { message: error.message }));
         }
     }
 
     const handleRemove = () => {
         // Optional: Add a confirmation before deleting
         Alert.alert(
-            'Remove Image',
-            'Are you sure you want to remove the image?',
+            t('imageUploader.removeImage.title'),
+            t('imageUploader.removeImage.message'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('shared.cancel'), style: 'cancel' },
                 {
-                    text: 'Remove',
+                    text: t('imageUploader.removeImage.confirm'),
                     style: 'destructive',
                     onPress: () => onChange(null),
                 },
@@ -181,13 +183,13 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
 
     const handleImageActionsPress = () => {
         Alert.alert(
-            'Image',
+            t('imageUploader.imageMenu.title'),
             undefined,
             [
-                { text: 'Replace', onPress: handleUploadPress },
-                { text: 'Save to photos', onPress: handleImageSavetoGallery },
-                { text: 'Remove', style: 'destructive', onPress: handleRemove },
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('imageUploader.imageMenu.replace'), onPress: handleUploadPress },
+                { text: t('imageUploader.imageMenu.saveToPhotos'), onPress: handleImageSavetoGallery },
+                { text: t('imageUploader.removeImage.confirm'), style: 'destructive', onPress: handleRemove },
+                { text: t('shared.cancel'), style: 'cancel' },
             ],
             { cancelable: true }
         );
@@ -247,18 +249,18 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
                                         >
                                             <Section>
                                                 <Button
-                                                    label='Replace'
+                                                    label={t('imageUploader.imageMenu.replace')}
                                                     systemImage="arrow.trianglehead.2.clockwise.rotate.90"
                                                     onPress={() => handleUploadPress()}
                                                 />
                                                 <Button
-                                                    label='Save to photos'
+                                                    label={t('imageUploader.imageMenu.saveToPhotos')}
                                                     systemImage="square.and.arrow.down"
                                                     onPress={() => handleImageSavetoGallery()} />
                                             </Section>
                                             <Divider />
                                             <Button
-                                                label='Remove'
+                                                label={t('imageUploader.removeImage.confirm')}
                                                 systemImage="trash"
                                                 role="destructive"
                                                 onPress={() => handleRemove()} />
@@ -270,7 +272,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
                     ) : (
                         <View style={styles.placeholder}>
                             <SymbolView name={{ ios: 'paperclip', android: 'attach_file' }} size={32} tintColor={colorScheme === 'dark' ? "#ffffff" : "#100528"} style={{ marginBottom: 8 }} />
-                            <Text style={[styles.uploadText, { color: colorScheme === 'dark' ? "#ffffff" : "#100528" }]}>Attach image</Text>
+                            <Text style={[styles.uploadText, { color: colorScheme === 'dark' ? "#ffffff" : "#100528" }]}>{t('imageUploader.attachImage')}</Text>
                         </View>
                     )}
                 </GlassView>

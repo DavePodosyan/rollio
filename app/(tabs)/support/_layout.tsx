@@ -1,10 +1,12 @@
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Stack } from "expo-router";
 import { Platform, useColorScheme } from "react-native";
+import { useTranslation } from "react-i18next";
 
 export default function HomeLayout() {
     const isGlassAvailable = isLiquidGlassAvailable();
     const colorScheme = useColorScheme();
+    const { t } = useTranslation();
     const isAndroid = Platform.OS === "android";
     const androidBackgroundColor = colorScheme === 'dark' ? '#09090B' : '#EFF0F4';
 
@@ -31,7 +33,7 @@ export default function HomeLayout() {
             <Stack.Screen
                 name="index"
                 options={{
-                    title: "About Rollio",
+                    title: t('support.aboutTitle'),
                     // headerRight: () => (
                     //     <View>
                     //         <Pressable onPress={() => router.push('/home/new_film')} style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center', }} >

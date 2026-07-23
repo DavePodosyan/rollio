@@ -1,0 +1,7 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
+    "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos.",
+    "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos."
+  }
+}

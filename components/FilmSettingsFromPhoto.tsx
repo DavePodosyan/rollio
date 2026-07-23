@@ -5,6 +5,7 @@ import { File, Paths } from "expo-file-system";
 import { GlassContainer, GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import { useEffect, useMemo, useState } from "react";
 import { Platform, Pressable, Text, useColorScheme, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 interface FilmSettingsFromPhotoProps {
     filmIso: number;
@@ -46,6 +47,7 @@ const findClosestShutter = (targetSeconds: number) => {
 };
 
 export default function FilmSettingsFromPhoto({ filmIso, imageUri, onApplySettings }: FilmSettingsFromPhotoProps) {
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isAndroid = Platform.OS === 'android';
     const isGlassAvailable = isLiquidGlassAvailable();
@@ -87,11 +89,11 @@ export default function FilmSettingsFromPhoto({ filmIso, imageUri, onApplySettin
             try {
                 calculateMatches(await readAsync(assetUri));
             } catch (error) {
-                setError("Could not read EXIF data from the attached photo.");
+                setError(t('filmSettingsFromPhoto.exifReadErrorMessage'));
                 setSuggestions([]);
             }
         })();
-    }, [assetUri, filmIso]);
+    }, [assetUri, filmIso, t]);
 
     const calculateMatches = (exif: ExifTags | undefined) => {
         const { FNumber, ExposureTime, ISOSpeedRatings } = exif || {};
@@ -101,7 +103,7 @@ export default function FilmSettingsFromPhoto({ filmIso, imageUri, onApplySettin
             : Number(ISOSpeedRatings);
 
         if (!FNumber || !ExposureTime || !phoneIso) {
-            setError("Attached photo is missing required EXIF data.");
+            setError(t('filmSettingsFromPhoto.missingExifMessage'));
             setSuggestions([]);
             return;
         }
@@ -159,7 +161,7 @@ export default function FilmSettingsFromPhoto({ filmIso, imageUri, onApplySettin
                 fontFamily: 'LufgaMedium',
                 color: colorScheme === 'dark' ? '#fff' : '#100528'
             }}
-            >Suggested Settings</Text>
+            >{t('filmSettingsFromPhoto.suggestedSettingsHeading')}</Text>
 
             {!error && <Text style={{
                 width: '100%',
@@ -169,7 +171,7 @@ export default function FilmSettingsFromPhoto({ filmIso, imageUri, onApplySettin
                 fontFamily: "LufgaRegular",
                 color: "#8E8E93"
             }}>
-                {`Based on the attached photo's EXIF data and the film's ISO (${filmIso}), here are some suggested aperture and shutter speed combinations to achieve a similar exposure.`}
+                {t('filmSettingsFromPhoto.suggestionIntro', { filmIso })}
             </Text>}
 
             {error && <Text style={{

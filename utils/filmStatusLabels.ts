@@ -1,4 +1,5 @@
 import { FilmStatus } from "@/types";
+import i18n from "@/i18n";
 
 // Single source of truth for user-facing FilmStatus text. The enum values
 // themselves ('in-camera', 'developing', 'archived') are persisted in SQLite
@@ -7,11 +8,11 @@ import { FilmStatus } from "@/types";
 export const getFilmStatusLabel = (status: FilmStatus): string => {
     switch (status) {
         case FilmStatus.InCamera:
-            return 'In Camera';
+            return i18n.t('filmStatus.inCamera');
         case FilmStatus.Developing:
-            return 'Developing';
+            return i18n.t('filmStatus.developing');
         case FilmStatus.Archived:
-            return 'Archived';
+            return i18n.t('filmStatus.archived');
         default:
             return status;
     }

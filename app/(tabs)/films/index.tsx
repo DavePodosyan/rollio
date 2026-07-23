@@ -8,9 +8,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useState, useEffect } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as StoreReview from 'expo-store-review';
+import { useTranslation } from 'react-i18next';
 
 export default function Home() {
     const colorScheme = useColorScheme();
+    const { t } = useTranslation();
     const { films, loading, error, fetchFilms } = useFilms();
     const [ready, setReady] = useState(false);
     const navigation = useNavigation();
@@ -101,10 +103,10 @@ export default function Home() {
                             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                                 <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                                     <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
-                                        You don't have any film rolls yet.
+                                        {t('shared.noRollsYet.title')}
                                     </Text>
                                     <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
-                                        Click the + button to add one.
+                                        {t('shared.noRollsYet.subtitle')}
                                     </Text>
                                 </View>
 

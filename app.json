@@ -14,7 +14,8 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Rollio requires access to the camera to add images to your frames.",
-        "NSPhotoLibraryUsageDescription": "Rollio requires access to the photo library to add images to your frames."
+        "NSPhotoLibraryUsageDescription": "Rollio requires access to the photo library to add images to your frames.",
+        "CFBundleAllowMixedLocalizations": true
       }
     },
     "android": {
@@ -32,6 +33,9 @@
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
+    },
+    "locales": {
+      "en": "./native-locales/en.json"
     },
     "plugins": [
       "expo-router",
@@ -95,7 +99,12 @@
       ],
       "expo-image",
       "@react-native-community/datetimepicker",
-      "expo-localization"
+      [
+        "expo-localization",
+        {
+          "supportedLocales": ["en"]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

@@ -16,8 +16,10 @@ import { getFilmStatusLabel } from "@/utils/filmStatusLabels";
 import MySegmentedControl from "@/modules/my-segmented-control";
 import { usePreventRemove } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 export default function NewFilm() {
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isAndroid = Platform.OS === 'android';
     const isGlassAvailable = isLiquidGlassAvailable();
@@ -97,12 +99,12 @@ export default function NewFilm() {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
         Alert.alert(
-            'Discard changes?',
-            'You have unsaved changes. Discard them and leave the screen?',
+            t('shared.discardChanges.title'),
+            t('shared.discardChanges.message'),
             [
-                { text: "Don't leave", style: 'cancel', onPress: () => { } },
+                { text: t('shared.discardChanges.dontLeave'), style: 'cancel', onPress: () => { } },
                 {
-                    text: 'Discard',
+                    text: t('shared.discardChanges.discard'),
                     style: 'destructive',
                     onPress: () => navigation.dispatch(data.action),
                 },
@@ -204,7 +206,7 @@ export default function NewFilm() {
         console.log(formData);
 
         if (!title) {
-            Alert.alert('Missing film name', 'Please enter a name for the film roll.');
+            Alert.alert(t('newFilm.missingName.title'), t('newFilm.missingName.message'));
             return;
         }
 
@@ -230,7 +232,7 @@ export default function NewFilm() {
 
     useEffect(() => {
         navigation.setOptions({
-            title: mode === 'new' ? 'Add New Film' : 'Edit Film',
+            title: mode === 'new' ? t('newFilm.addTitle') : t('newFilm.editTitle'),
             headerLeft: isAndroid ? () => (
                 <Pressable
                     onPress={() => router.back()}
@@ -334,7 +336,7 @@ export default function NewFilm() {
                                 fontFamily: 'LufgaMedium',
                             }}
                             maxLength={35}
-                            placeholder="Film Name"
+                            placeholder={t('newFilm.filmNamePlaceholder')}
                             placeholderTextColor={"#8E8E93"}
                             value={formData.title}
                             onChangeText={(text) => setFormData(prev => ({ ...prev, title: text }))}
@@ -368,7 +370,7 @@ export default function NewFilm() {
                                 fontFamily: 'LufgaMedium',
                             }}
                             maxLength={35}
-                            placeholder="Camera (optional)"
+                            placeholder={t('newFilm.cameraPlaceholder')}
                             placeholderTextColor={"#8E8E93"}
                             value={formData.camera || ''}
                             onChangeText={(text) => setFormData(prev => ({ ...prev, camera: text }))}
@@ -390,7 +392,7 @@ export default function NewFilm() {
 
                     <View style={{ marginTop: 30, paddingHorizontal: 20, gap: 20 }}>
                         <RulerPicker
-                            label="ISO"
+                            label={t('shared.iso')}
                             valueKind="iso"
                             initial={formData.iso}
                             values={ISO_OPTIONS} // Example push/pull values
@@ -401,7 +403,7 @@ export default function NewFilm() {
                             }}
                         />
                         <RulerPicker
-                            label="Push/Pull"
+                            label={t('newFilm.pushPullLabel')}
                             valueKind="plain"
                             initial={formData.push_pull}
                             values={PUSH_PULL_OPTIONS} // Example push/pull values
@@ -412,7 +414,7 @@ export default function NewFilm() {
                             }}
                         />
                         <RulerPicker
-                            label="Expected Shots"
+                            label={t('newFilm.expectedShotsLabel')}
                             valueKind="plain"
                             initial={formData.expected_shots}
                             values={EXPECTED_SHOTS} // Example expected shots values

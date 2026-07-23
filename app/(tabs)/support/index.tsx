@@ -22,6 +22,7 @@ import { AndroidSymbol, SFSymbol, SymbolView } from 'expo-symbols';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as HapticFeedback from 'expo-haptics';
 import * as Application from 'expo-application';
+import { useTranslation } from 'react-i18next';
 
 const productSkus = [
     'support.1',
@@ -37,6 +38,7 @@ type PlatformSymbol = {
 };
 
 export default function Support() {
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isGlassAvailable = isLiquidGlassAvailable();
 
@@ -80,7 +82,7 @@ export default function Support() {
                 try {
                     await finishTransaction({ purchase, isConsumable: true });
                     processedTransactionIdsRef.current.add(purchase.transactionId);
-                    Alert.alert('Thank you ❤️', 'Your support is greatly appreciated!');
+                    Alert.alert(t('support.thankYou.title'), t('support.thankYou.message'));
                 } catch (e) {
                     console.error('Error finishing transaction:', e);
                 }
@@ -112,15 +114,15 @@ export default function Support() {
     const handleSharing = async () => {
         try {
             await Share.share({
-                message: 'Check out Rollio – the app for film photography enthusiasts!\n\nhttps://rollio.davitp.dev/app-link',
+                message: t('support.shareMessage'),
             }, {
-                dialogTitle: 'Share Rollio',
-                subject: 'Rollio - Film Photography App'
+                dialogTitle: t('support.shareDialogTitle'),
+                subject: t('support.shareSubject')
 
             });
         } catch (error) {
             console.error('Error sharing:', error);
-            Alert.alert('Error', 'Failed to share the app. Please try again later.');
+            Alert.alert(t('shared.error'), t('support.shareErrorMessage'));
         }
     };
 
@@ -160,8 +162,7 @@ export default function Support() {
                             fontSize: 15,
                             lineHeight: 22
                         }}>
-                            Rollio is a passion project built with love for the film photography community.
-                            If you enjoy using the app and want to show your appreciation, you can make a small contribution below.
+                            {t('support.passionProjectBody')}
                         </Text>
                     </View>
 
@@ -172,7 +173,7 @@ export default function Support() {
                             fontSize: 18,
                             marginBottom: 12,
                         }}>
-                            Support the Project
+                            {t('support.supportHeading')}
                         </Text>
                         <GlassView
                             isInteractive={true}
@@ -261,7 +262,7 @@ export default function Support() {
                             fontSize: 18,
                             marginBottom: 12,
                         }}>
-                            Spread the Word
+                            {t('support.spreadWordHeading')}
                         </Text>
                         <GlassView
                             isInteractive={true}
@@ -281,7 +282,7 @@ export default function Support() {
                                     if (storeURL) {
                                         Linking.openURL(storeURL).catch((err) => {
                                             console.error('Failed to open store URL:', err);
-                                            Alert.alert('Error', 'Failed to open the store URL. Please try again later.');
+                                            Alert.alert(t('shared.error'), t('support.storeUrlErrorMessage'));
                                         });
                                     }
                                 }}
@@ -310,7 +311,7 @@ export default function Support() {
                                         fontSize: 16,
                                         color: colorScheme === 'dark' ? '#ffffff' : '#100528',
                                     }}>
-                                        Write a Review
+                                        {t('support.writeReview')}
                                     </Text>
                                 </View>
                             </Pressable>
@@ -345,7 +346,7 @@ export default function Support() {
                                         fontSize: 16,
                                         color: colorScheme === 'dark' ? '#ffffff' : '#100528',
                                     }}>
-                                        Share the App
+                                        {t('support.shareApp')}
                                     </Text>
                                 </View>
                             </Pressable>
@@ -380,7 +381,7 @@ export default function Support() {
                             lineHeight: 22,
                             opacity: 0.5,
                         }}>
-                            Version {Application.nativeApplicationVersion} ({Application.nativeBuildVersion})
+                            {t('support.version', { version: Application.nativeApplicationVersion, build: Application.nativeBuildVersion })}
                         </Text>
                     </View>
 

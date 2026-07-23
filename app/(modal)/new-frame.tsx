@@ -17,9 +17,11 @@ import { saveFrameImage, deleteFrameImage } from "@/utils/ImageService";
 import { usePreventRemove } from "@react-navigation/native";
 import FilmSettingsFromPhoto from "@/components/FilmSettingsFromPhoto";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 
 export default function NewFrame() {
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isAndroid = Platform.OS === 'android';
     const isGlassAvailable = isLiquidGlassAvailable();
@@ -118,12 +120,12 @@ export default function NewFrame() {
 
         // Otherwise, we dispatch the action that was blocked earlier
         Alert.alert(
-            'Discard changes?',
-            'You have unsaved changes. Discard them and leave the screen?',
+            t('shared.discardChanges.title'),
+            t('shared.discardChanges.message'),
             [
-                { text: "Don't leave", style: 'cancel', onPress: () => { } },
+                { text: t('shared.discardChanges.dontLeave'), style: 'cancel', onPress: () => { } },
                 {
-                    text: 'Discard',
+                    text: t('shared.discardChanges.discard'),
                     style: 'destructive',
                     onPress: () => navigation.dispatch(data.action),
                 },
@@ -298,7 +300,7 @@ export default function NewFrame() {
 
         } catch (error) {
             console.error("Failed to save frame", error);
-            Alert.alert("Error", "Could not save the frame.");
+            Alert.alert(t('shared.error'), t('newFrame.saveErrorMessage'));
         }
 
     }, [formData, addFrame]);
@@ -309,7 +311,7 @@ export default function NewFrame() {
 
     useEffect(() => {
         navigation.setOptions({
-            title: mode === 'new' ? 'Add New Frame' : 'Edit Frame',
+            title: mode === 'new' ? t('newFrame.addTitle') : t('newFrame.editTitle'),
             headerLeft: isAndroid ? () => (
                 <Pressable
                     onPress={() => router.back()}
@@ -348,12 +350,12 @@ export default function NewFrame() {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
         Alert.alert(
-            'Delete Frame',
-            'Are you sure you want to delete this frame?',
+            t('newFrame.deleteFrame.button'),
+            t('newFrame.deleteFrame.message'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('shared.cancel'), style: 'cancel' },
                 {
-                    text: 'Delete',
+                    text: t('shared.delete'),
                     style: 'destructive',
                     onPress: async () => {
                         try {
@@ -363,14 +365,14 @@ export default function NewFrame() {
                             router.back();
                         } catch (error) {
                             console.error('Failed to delete frame', error);
-                            Alert.alert('Error', 'Could not delete the frame.');
+                            Alert.alert(t('shared.error'), t('newFrame.deleteErrorMessage'));
                         }
                     },
                 },
             ],
             { cancelable: true }
         );
-    }, [destroyFrame, formData, frame]);
+    }, [destroyFrame, formData, frame, t]);
 
     const renderCount = useRef(0);
     renderCount.current++;
@@ -422,7 +424,7 @@ export default function NewFrame() {
 
                     <View style={{ marginTop: 30, paddingHorizontal: 20, gap: 20 }}>
                         <RulerPicker
-                            label="Aperture"
+                            label={t('shared.aperture')}
                             valueKind="aperture"
                             initial={formData.aperture}
                             values={APERTURE_OPTIONS} // Example push/pull values
@@ -432,7 +434,7 @@ export default function NewFrame() {
                             }}
                         />
                         <RulerPicker
-                            label="Shutter Speed"
+                            label={t('newFrame.shutterSpeedLabel')}
                             valueKind="shutterSpeed"
                             initial={formData.shutter_speed}
                             values={SHUTTER_SPEED_OPTIONS} // Example push/pull values
@@ -455,7 +457,7 @@ export default function NewFrame() {
                                 fontFamily: 'LufgaMedium',
                             }}
                             maxLength={35}
-                            placeholder="Lens (optional)"
+                            placeholder={t('newFrame.lensPlaceholder')}
                             placeholderTextColor={"#8E8E93"}
                             value={formData.lens || ''}
                             onChangeText={(text) => setFormData(prev => ({ ...prev, lens: text }))}
@@ -489,7 +491,7 @@ export default function NewFrame() {
                                 fontFamily: 'LufgaMedium',
                             }}
                             // maxLength={35}
-                            placeholder="Note (optional)"
+                            placeholder={t('newFrame.notePlaceholder')}
                             placeholderTextColor={"#8E8E93"}
                             value={formData.note || ''}
                             onChangeText={(text) => setFormData(prev => ({ ...prev, note: text }))}
@@ -552,7 +554,7 @@ export default function NewFrame() {
                                     lineHeight: 22,
                                 }}
                             >
-                                Delete Frame
+                                {t('newFrame.deleteFrame.button')}
                             </Text>
                         </Pressable>
                     )}

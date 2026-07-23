@@ -2,11 +2,13 @@
 import { isLiquidGlassAvailable } from 'expo-glass-effect';
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { Platform, PlatformColor, useColorScheme } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export default function TabsLayout() {
   // const colorScheme = useColorScheme();
   const isGlassAvailable = isLiquidGlassAvailable();
   const colorScheme = useColorScheme();
+  const { t } = useTranslation();
   const isAndroid = Platform.OS === 'android';
   const androidTabBarBackground = colorScheme === 'dark' ? '#09090B' : '#EFF0F4';
   const androidInactiveColor = colorScheme === 'dark' ? '#9A96A8' : '#6B6877';
@@ -26,17 +28,17 @@ export default function TabsLayout() {
 
       <NativeTabs.Trigger name="films">
         <NativeTabs.Trigger.Icon sf="film.stack.fill" md="camera_roll" />
-        <NativeTabs.Trigger.Label>Films</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t('tabs.films')}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="light_meter">
         <NativeTabs.Trigger.Icon sf="sun.max.fill" md="light_mode" />
-        <NativeTabs.Trigger.Label>Light Meter</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t('tabs.lightMeter')}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="support">
         <NativeTabs.Trigger.Icon sf="heart.fill" md="favorite" />
-        <NativeTabs.Trigger.Label>Support</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t('tabs.support')}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
     </NativeTabs>

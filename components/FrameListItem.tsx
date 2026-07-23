@@ -5,6 +5,7 @@ import { SymbolView } from 'expo-symbols';
 import { router } from 'expo-router';
 import { memo } from 'react';
 import { getAutoValueLabel } from '@/utils/cameraSettingsLabels';
+import { useTranslation } from 'react-i18next';
 
 interface FrameListItemProps {
     frame: Frame;
@@ -13,6 +14,7 @@ interface FrameListItemProps {
 
 function FrameListItem({ frame, iso }: FrameListItemProps) {
 
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isGlassAvailable = isLiquidGlassAvailable();
 
@@ -112,7 +114,7 @@ function FrameListItem({ frame, iso }: FrameListItemProps) {
                                     fontFamily: 'LufgaMedium',
                                     color: colorScheme === 'dark' ? '#fff' : '#100528'
                                 }}>
-                                    {frame.aperture !== 'Auto' ? `f/${frame.aperture}` : getAutoValueLabel()}
+                                    {frame.aperture !== 'Auto' ? t('cameraSettings.apertureFormat', { value: frame.aperture }) : getAutoValueLabel()}
                                 </Text>
                             </View>
                             <View
@@ -135,7 +137,7 @@ function FrameListItem({ frame, iso }: FrameListItemProps) {
                                     fontFamily: 'LufgaMedium',
                                     color: colorScheme === 'dark' ? '#fff' : '#100528',
                                 }}>
-                                    {frame.shutter_speed !== 'Auto' ? `${frame.shutter_speed}s` : getAutoValueLabel()}
+                                    {frame.shutter_speed !== 'Auto' ? t('cameraSettings.shutterSpeedFormat', { value: frame.shutter_speed }) : getAutoValueLabel()}
                                 </Text>
                             </View>
                             {frame.image && (

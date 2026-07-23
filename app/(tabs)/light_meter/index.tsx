@@ -14,6 +14,7 @@ import { useSharedValue } from 'react-native-reanimated';
 import { ExifTags, readAsync } from '@lodev09/react-native-exify';
 import { Image as ExpoImage } from 'expo-image';
 import * as FileSystem from 'expo-file-system/legacy';
+import { useTranslation } from 'react-i18next';
 
 const platformColor = (iosName: string, androidName: string) => (
     PlatformColor(Platform.OS === 'ios' ? iosName : androidName)
@@ -269,6 +270,7 @@ const readPhotoExposureSettings = async (path: string, metadata?: Record<string,
 const ANDROID_READING_SHEET_COLLAPSED_DETENT = 0.52;
 
 export default function CameraBackgroundPage() {
+    const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const { height: windowHeight } = useWindowDimensions();
     const isFocused = useIsFocused();
@@ -486,7 +488,7 @@ export default function CameraBackgroundPage() {
 
             if (!photo) {
                 setLoading(false);
-                Alert.alert("Error", "Failed to take photo. Please try again.");
+                Alert.alert(t('shared.error'), t('lightMeter.takePhotoErrorMessage'));
                 return;
             }
 
@@ -502,7 +504,7 @@ export default function CameraBackgroundPage() {
                 setLoading(false);
                 console.log('Invalid EXIF data: missing aperture, shutter speed, or ISO');
                 console.log('Full metadata:', photo.metadata);
-                Alert.alert("Error", "Failed to read camera data. Please try again.");
+                Alert.alert(t('shared.error'), t('lightMeter.readCameraDataErrorMessage'));
                 return;
             }
 
@@ -566,7 +568,7 @@ export default function CameraBackgroundPage() {
             }
         } catch (error) {
             setLoading(false);
-            Alert.alert("Error", "Failed to capture image. Please try again.");
+            Alert.alert(t('shared.error'), t('lightMeter.captureErrorMessage'));
         }
     };
 
@@ -583,7 +585,7 @@ export default function CameraBackgroundPage() {
                     start={{ x: 0, y: 0 }} // Optional: start from top-left
                     end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
                 />
-                <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: lightMeterColors.label }}>We need your permission to show the camera</Text>
+                <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: lightMeterColors.label }}>{t('lightMeter.cameraPermissionMessage')}</Text>
                 {!permissionRequested && (
                     <Pressable onPress={handleRequestPermission} style={({ pressed }) => [
                         {
@@ -600,7 +602,7 @@ export default function CameraBackgroundPage() {
                                 color: 'white',
                                 fontFamily: 'LufgaMedium',
                                 fontSize: 14,
-                            }}>Grant Permission</Text>
+                            }}>{t('lightMeter.grantPermission')}</Text>
                         </GlassView>
                     </Pressable>
                 )}
@@ -617,7 +619,7 @@ export default function CameraBackgroundPage() {
                                 color: 'white',
                                 fontFamily: 'LufgaMedium',
                                 fontSize: 14,
-                            }}>Open Settings</Text>
+                            }}>{t('lightMeter.openSettings')}</Text>
                         </GlassView>
                     </Pressable>
                 )}
@@ -637,7 +639,7 @@ export default function CameraBackgroundPage() {
                     start={{ x: 0, y: 0 }} // Optional: start from top-left
                     end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
                 />
-                <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: lightMeterColors.label }}>No camera device available</Text>
+                <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: lightMeterColors.label }}>{t('lightMeter.noDeviceMessage')}</Text>
 
                 {/* <Pressable onPress={() => handleFormSheetOpen(true)}><Text style={{ color: PlatformColor('label'), marginTop: 50 }}>Debug</Text></Pressable> */}
 
@@ -750,7 +752,7 @@ export default function CameraBackgroundPage() {
                                     includeFontPadding: false,
                                     textAlignVertical: 'center',
                                     letterSpacing: 0.25,
-                                }}>Take a reading</Text>}
+                                }}>{t('lightMeter.takeReading')}</Text>}
                             {loading && <ActivityIndicator />}
 
                         </Pressable>

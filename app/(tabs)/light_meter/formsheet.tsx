@@ -24,6 +24,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScrollView as GestureScrollView } from "react-native-gesture-handler";
+import { useTranslation } from "react-i18next";
 // ────────────────────────────────────────────────
 // Config
 // ────────────────────────────────────────────────
@@ -257,7 +258,7 @@ const normalizeParam = (value: string | string[] | undefined): string | undefine
 };
 
 export function LightMeterReadingSheet({
-    title = "Light Meter Reading",
+    title,
     ev,
     aperture: initialAperture,
     shutterSpeed: initialShutter,
@@ -268,9 +269,13 @@ export function LightMeterReadingSheet({
     onClose,
     onSheetDetentChange,
 }: LightMeterReadingSheetProps) {
+    const { t } = useTranslation();
     const navigation = useNavigation();
     const colorScheme = useColorScheme();
     const dynamicSheetColors = useMemo(() => getSheetColors(colorScheme), [colorScheme]);
+    // Mirrors the previous `title = "Light Meter Reading"` default param, moved
+    // here since a default param can't call the useTranslation() hook above it.
+    const resolvedTitle = title || t('lightMeterSheet.defaultTitle');
     const isGlassAvailable = isLiquidGlassAvailable();
     const isBottomSheetPresentation = presentation === 'bottom-sheet';
     const compactSheetDetent = isBottomSheetPresentation ? BOTTOM_SHEET_COMPACT_DETENT : NATIVE_COMPACT_DETENT;
@@ -418,10 +423,10 @@ export function LightMeterReadingSheet({
     useEffect(() => {
         if (presentation === 'native-sheet') {
             navigation.setOptions({
-                title: title || "Exposure Settings",
+                title: title || t('lightMeterSheet.fallbackTitle'),
             });
         }
-    }, [navigation, presentation, title]);
+    }, [navigation, presentation, title, t]);
 
     // Scroll to initial values
     // useEffect(() => {
@@ -788,20 +793,20 @@ export function LightMeterReadingSheet({
         }
 
         Alert.alert(
-            'Settings',
-            showFullStopsOnly ? 'Currently showing full stops only.' : 'Currently showing half/third stops.',
+            t('shared.settings'),
+            showFullStopsOnly ? t('lightMeterSheet.stopsToggle.fullStopsOnlyMessage') : t('lightMeterSheet.stopsToggle.halfThirdStopsMessage'),
             [
                 {
-                    text: showFullStopsOnly ? 'Show half/third stops' : 'Show full stops only',
+                    text: showFullStopsOnly ? t('lightMeterSheet.stopsToggle.showHalfThird') : t('lightMeterSheet.stopsToggle.showFullStopsOnly'),
                     onPress: () => {
                         setShowFullStopsOnly(prev => !prev);
                         Haptics.selectionAsync().catch(() => { });
                     },
                 },
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('shared.cancel'), style: 'cancel' },
             ]
         );
-    }, [showFullStopsOnly]);
+    }, [showFullStopsOnly, t]);
 
     // Handle selecting a film - locks ISO to film's ISO and recalculates exposure
     const handleSelectFilm = useCallback((film: Film) => {
@@ -913,8 +918,8 @@ export function LightMeterReadingSheet({
         [dynamicSheetColors.label]
     );
 
-    const apertureRender = createRenderItem(selectedAperture, "ƒ/");
-    const shutterRender = createRenderItem(selectedShutter, "", "s");
+    const apertureRender = createRenderItem(selectedAperture, t('lightMeterSheet.apertureWheelPrefix'));
+    const shutterRender = createRenderItem(selectedShutter, "", t('lightMeterSheet.shutterWheelSuffix'));
     const isoRender = createRenderItem(selectedIso);
     const exposureBadgeColor = exposureDiff > 0 ? '#D96C00' : '#0066CC';
     const exposureBadgeBackground = isBottomSheetPresentation
@@ -963,7 +968,7 @@ export function LightMeterReadingSheet({
             marginLeft: 4,
             textAlign: 'center'
         }}>
-            Select a film to save this reading
+            {t('lightMeterSheet.selectFilmPrompt')}
         </Text>
     );
     const filmSelectorEmpty = (
@@ -974,7 +979,7 @@ export function LightMeterReadingSheet({
                 color: dynamicSheetColors.secondaryLabel,
                 textAlign: 'center'
             }}>
-                No films available.{'\n'}Create a film first to save readings.
+                {t('lightMeterSheet.noFilmsAvailable')}
             </Text>
         </View>
     );
@@ -990,7 +995,7 @@ export function LightMeterReadingSheet({
             }}>
                 <View>
                     <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: dynamicSheetColors.label }}>{film.title}</Text>
-                    <Text style={{ fontFamily: 'LufgaRegular', fontSize: 14, color: dynamicSheetColors.secondaryLabel }}>ISO {film.iso}</Text>
+                    <Text style={{ fontFamily: 'LufgaRegular', fontSize: 14, color: dynamicSheetColors.secondaryLabel }}>{t('lightMeterSheet.filmRowIso', { iso: film.iso })}</Text>
                 </View>
                 <View>
                     <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, color: dynamicSheetColors.label }}>{film.frame_count}/{film.expected_shots}</Text>
@@ -1013,7 +1018,7 @@ export function LightMeterReadingSheet({
                                 icon={!showFullStopsOnly ? "checkmark.circle.fill" : "circle"}
                                 onPress={() => setShowFullStopsOnly(prev => !prev)}
                             >
-                                Show half/third stops
+                                {t('lightMeterSheet.stopsToggle.showHalfThird')}
                             </Stack.Toolbar.MenuAction>
                         </Stack.Toolbar.Menu>
                     </Stack.Toolbar>
@@ -1023,7 +1028,7 @@ export function LightMeterReadingSheet({
                     <Pressable onPress={closeSheet} hitSlop={12} style={styles.inlineHeaderButton}>
                         <SheetIcon name="xmark" style={styles.inlineHeaderIcon} tintColor={dynamicSheetColors.label} />
                     </Pressable>
-                    <Text style={[styles.inlineHeaderTitle, { color: dynamicSheetColors.label }]}>{title}</Text>
+                    <Text style={[styles.inlineHeaderTitle, { color: dynamicSheetColors.label }]}>{resolvedTitle}</Text>
                     <Pressable
                         onPress={handleSettingsPress}
                         hitSlop={12}
@@ -1073,7 +1078,9 @@ export function LightMeterReadingSheet({
                                     fontSize: isBottomSheetPresentation ? 11 : 10,
                                     color: exposureBadgeTextColor
                                 }}>
-                                    {exposureDiff > 0 ? '+' : ''}{exposureDiff.toFixed(1)} EV {exposureDiff > 0 ? 'over' : 'under'}
+                                    {exposureDiff > 0
+                                        ? t('lightMeterSheet.exposureDiff.over', { diff: exposureDiff.toFixed(1) })
+                                        : t('lightMeterSheet.exposureDiff.under', { diff: exposureDiff.toFixed(1) })}
                                 </Text>
                             </GlassView>
                         </View>
@@ -1088,7 +1095,7 @@ export function LightMeterReadingSheet({
                 >
                     {/* Aperture */}
                     <View style={styles.wheelColumn}>
-                        <Text style={[styles.label, { color: dynamicSheetColors.label }]}>Aperture</Text>
+                        <Text style={[styles.label, { color: dynamicSheetColors.label }]}>{t('shared.aperture')}</Text>
                         {renderWheelSurface(lockedPicker === 'aperture', lockedPicker !== 'aperture',
                             <FlatList
                                 ref={apertureRef}
@@ -1130,7 +1137,7 @@ export function LightMeterReadingSheet({
 
                     {/* Shutter */}
                     <View style={styles.wheelColumn}>
-                        <Text style={[styles.label, { color: dynamicSheetColors.label }]}>Shutter</Text>
+                        <Text style={[styles.label, { color: dynamicSheetColors.label }]}>{t('lightMeterSheet.columnLabels.shutter')}</Text>
                         {renderWheelSurface(lockedPicker === 'shutter', lockedPicker !== 'shutter',
                             <FlatList
                                 ref={shutterRef}
@@ -1171,7 +1178,7 @@ export function LightMeterReadingSheet({
 
                     {/* ISO */}
                     <View style={styles.wheelColumn}>
-                        <Text style={[styles.label, { color: dynamicSheetColors.label }]}>ISO{isFilmMode ? ' (Film)' : ''}</Text>
+                        <Text style={[styles.label, { color: dynamicSheetColors.label }]}>{t('shared.iso')}{isFilmMode ? t('lightMeterSheet.columnLabels.isoFilmSuffix') : ''}</Text>
                         {renderWheelSurface(lockedPicker === 'iso', lockedPicker !== 'iso',
                             <FlatList
                                 ref={isoRef}
@@ -1227,7 +1234,7 @@ export function LightMeterReadingSheet({
                     ]}>
                         <TouchableOpacity onPress={() => expandSheetForm()}>
                             <Text style={{ color: dynamicSheetColors.label, fontFamily: 'LufgaRegular', marginTop: 18 }}>
-                                Save to Frame
+                                {t('lightMeterSheet.saveToFrame')}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -1250,7 +1257,7 @@ export function LightMeterReadingSheet({
                                         <SheetIcon name="xmark" style={styles.inlineHeaderIcon} tintColor={dynamicSheetColors.label} />
                                     </Pressable>
                                     <Text style={[styles.filmSelectorModalTitle, { color: dynamicSheetColors.label }]}>
-                                        Select Film
+                                        {t('lightMeterSheet.selectFilmTitle')}
                                     </Text>
                                     <View style={styles.inlineHeaderButton} />
                                 </View>
@@ -1307,7 +1314,11 @@ export function LightMeterReadingSheet({
                                     {selectedFilm.title}
                                 </Text>
                                 <Text style={{ fontFamily: 'LufgaRegular', fontSize: 14, color: dynamicSheetColors.secondaryLabel }}>
-                                    ISO {selectedFilm.iso} • Frame {selectedFilm.frame_count + 1}/{selectedFilm.expected_shots}
+                                    {t('lightMeterSheet.selectedFilmSummary', {
+                                        iso: selectedFilm.iso,
+                                        frameNumber: selectedFilm.frame_count + 1,
+                                        totalFrames: selectedFilm.expected_shots,
+                                    })}
                                 </Text>
                             </View>
                             <TouchableOpacity onPress={handleClearFilmSelection} style={{}}>
@@ -1327,7 +1338,7 @@ export function LightMeterReadingSheet({
                             marginTop: 12,
                             textAlign: 'center'
                         }}>
-                            ISO locked to film. Adjust aperture or shutter if needed.
+                            {t('lightMeterSheet.isoLockedHint')}
                         </Text>
 
                         {/* Save button */}
@@ -1360,7 +1371,7 @@ export function LightMeterReadingSheet({
                                     fontSize: 17,
                                     color: saveFrameButtonTextColor,
                                 }}>
-                                    Save Frame
+                                    {t('lightMeterSheet.saveFrame')}
                                 </Text>
                             </GlassView>
                         </Pressable>

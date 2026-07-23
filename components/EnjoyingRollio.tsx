@@ -1,9 +1,11 @@
 import { View, Text, TouchableOpacity, useColorScheme } from 'react-native';
 import { Link } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import { useTranslation } from 'react-i18next';
 
 export default function EnjoyingRollio() {
     const colorScheme = useColorScheme();
+    const { t } = useTranslation();
     const textColor = colorScheme === 'dark' ? '#ffffff' : '#100528';
 
     return (
@@ -13,7 +15,7 @@ export default function EnjoyingRollio() {
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10 }}>
                         <SymbolView name={{ ios: 'heart.fill', android: 'favorite' }} size={20} tintColor="#ff453a" style={{ marginRight: 4 }} />
                         <Text style={{ color: textColor, fontFamily: 'LufgaRegular', fontSize: 12, lineHeight: 24, textAlign: 'center' }}>
-                            Enjoying Rollio?
+                            {t('enjoyingRollio.cta')}
                         </Text>
                     </View>
                 </TouchableOpacity>

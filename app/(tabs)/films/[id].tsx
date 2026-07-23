@@ -13,10 +13,12 @@ import { useFrames } from '@/hooks/useFrames';
 import FrameListItem from '@/components/FrameListItem';
 import { Frame } from '@/utils/types';
 import { Button, ContextMenu, Divider, Host, Section } from '@expo/ui/swift-ui';
+import { useTranslation } from 'react-i18next';
 
 export default function FilmDetailPage() {
     const { id, title } = useLocalSearchParams<{ id: string, title: string }>();
     const colorScheme = useColorScheme();
+    const { t } = useTranslation();
     const isAndroid = Platform.OS === 'android';
     const isGlassAvailable = isLiquidGlassAvailable();
     const gradientColors: readonly [string, string, ...string[]] = colorScheme === 'dark'
@@ -43,12 +45,12 @@ export default function FilmDetailPage() {
                 break;
             case 'delete':
                 Alert.alert(
-                    'Delete Film',
-                    'Are you sure you want to delete this film?',
+                    t('rollDetail.deleteFilm.title'),
+                    t('rollDetail.deleteFilm.message'),
                     [
-                        { text: 'Cancel', style: 'cancel' },
+                        { text: t('shared.cancel'), style: 'cancel' },
                         {
-                            text: 'Delete', style: 'destructive', onPress: () => {
+                            text: t('shared.delete'), style: 'destructive', onPress: () => {
                                 deleteFilm();
                             }
                         },
@@ -71,22 +73,22 @@ export default function FilmDetailPage() {
     }
 
     const handleAndroidMenuPress = useCallback(() => {
-        Alert.alert('Film actions', undefined, [
+        Alert.alert(t('rollDetail.filmActionsTitle'), undefined, [
             {
-                text: 'Edit',
+                text: t('shared.edit'),
                 onPress: () => handleContextMenuSelect('edit'),
             },
             {
-                text: 'Delete',
+                text: t('shared.delete'),
                 style: 'destructive',
                 onPress: () => handleContextMenuSelect('delete'),
             },
             {
-                text: 'Cancel',
+                text: t('shared.cancel'),
                 style: 'cancel',
             },
         ]);
-    }, [film?.id]);
+    }, [film?.id, t]);
 
     useFocusEffect(
         useCallback(() => {
@@ -185,7 +187,7 @@ export default function FilmDetailPage() {
                                 fontFamily: 'LufgaMedium',
                                 color: colorScheme === 'dark' ? '#fff' : '#100528',
                             }}>
-                            ISO: {film.iso}
+                            {t('rollDetail.isoLabel', { iso: film.iso })}
                         </Text>
                     </GlassView>
 
@@ -210,7 +212,9 @@ export default function FilmDetailPage() {
                                     fontFamily: 'LufgaMedium',
                                     color: colorScheme === 'dark' ? '#fff' : '#100528',
                                 }}>
-                                {film.push_pull < 0 ? 'Pull ' : 'Push +'}{film.push_pull}
+                                {film.push_pull < 0
+                                    ? t('rollDetail.pushPull.pull', { stops: film.push_pull })
+                                    : t('rollDetail.pushPull.push', { stops: film.push_pull })}
                             </Text>
                         </GlassView>
                     )}
@@ -280,13 +284,13 @@ export default function FilmDetailPage() {
             <Stack.Toolbar placement="right" >
                 <Stack.Toolbar.Button icon="plus" onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } })} />
                 <Stack.Toolbar.Menu icon="ellipsis">
-                    <Stack.Toolbar.MenuAction icon="pencil" onPress={() => handleContextMenuSelect('edit')}>Edit</Stack.Toolbar.MenuAction>
-                    
+                    <Stack.Toolbar.MenuAction icon="pencil" onPress={() => handleContextMenuSelect('edit')}>{t('shared.edit')}</Stack.Toolbar.MenuAction>
+
                     {/* <Stack.Toolbar.MenuAction icon="clock" hidden={film.status !== 'in-camera'} onPress={() => null}>Mark as Developing</Stack.Toolbar.MenuAction> */}
                     {/* <Stack.Toolbar.MenuAction icon="archivebox" hidden={film.status !== 'developing'} onPress={() => null}>Mark as Archived</Stack.Toolbar.MenuAction> */}
-                    
+
                     <Stack.Toolbar.MenuAction icon="trash" destructive onPress={() => handleContextMenuSelect('delete')}>
-                        Delete
+                        {t('shared.delete')}
                     </Stack.Toolbar.MenuAction>
                 </Stack.Toolbar.Menu>
             </Stack.Toolbar>
@@ -324,10 +328,10 @@ export default function FilmDetailPage() {
                             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                                 <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                                     <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
-                                        You don't have any film rolls yet.
+                                        {t('rollDetail.noFramesYet.title')}
                                     </Text>
                                     <Text style={{ color: colorScheme === 'dark' ? '#ffffff' : '#100528', fontFamily: 'LufgaMedium', textAlign: "center", marginTop: 20 }}>
-                                        Click the + button to add one.
+                                        {t('rollDetail.noFramesYet.subtitle')}
                                     </Text>
                                 </View>
 

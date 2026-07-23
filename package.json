@@ -51,6 +51,7 @@
     "expo-system-ui": "~55.0.20",
     "expo-web-browser": "~55.0.18",
     "i18next": "^26.3.6",
+    "intl-pluralrules": "^2.0.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-i18next": "^17.0.11",

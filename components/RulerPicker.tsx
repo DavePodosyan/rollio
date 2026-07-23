@@ -6,6 +6,7 @@ import GlassView from 'expo-glass-effect/build/GlassView';
 import { useColorScheme } from 'react-native';
 import { isLiquidGlassAvailable } from 'expo-glass-effect';
 import { getAutoValueLabel } from '@/utils/cameraSettingsLabels';
+import { useTranslation } from 'react-i18next';
 
 // Stable identifier for unit formatting, decoupled from the visible `label` text
 // so a future localization pass can translate `label` without silently breaking
@@ -34,6 +35,7 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
   values,
   onChange
 }) => {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const isGlassAvailable = isLiquidGlassAvailable();
   const isAndroid = Platform.OS === 'android';
@@ -230,9 +232,9 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
           const value = values[selectedIndex];
           switch (valueKind) {
             case 'aperture':
-              return value === 'Auto' ? getAutoValueLabel() : `f/${value}`;
+              return value === 'Auto' ? getAutoValueLabel() : t('cameraSettings.apertureFormat', { value });
             case 'shutterSpeed':
-              return value === 'Auto' ? getAutoValueLabel() : `${value}s`;
+              return value === 'Auto' ? getAutoValueLabel() : t('cameraSettings.shutterSpeedFormat', { value });
             case 'iso':
             case 'plain':
             default:

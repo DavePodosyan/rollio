@@ -2,10 +2,12 @@ import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { router, Stack } from "expo-router";
 import { Platform, useColorScheme, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 export default function HomeLayout() {
     const isGlassAvailable = isLiquidGlassAvailable();
     const colorScheme = useColorScheme();
+    const { t } = useTranslation();
     const isAndroid = Platform.OS === "android";
     const androidBackgroundColor = colorScheme === 'dark' ? '#09090B' : '#EFF0F4';
 
@@ -32,7 +34,7 @@ export default function HomeLayout() {
         }}>
             <Stack.Screen name="index"
                 options={{
-                    title: "Film Rolls",
+                    title: t('rollList.title'),
                     headerRight: isAndroid ? () => (
                         <Pressable
                             onPress={() => router.push('/new-film')}

@@ -1,0 +1,188 @@
+{
+  "shared": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "ok": "OK",
+    "settings": "Settings",
+    "error": "Error",
+    "success": "Success",
+    "iso": "ISO",
+    "aperture": "Aperture",
+    "noRollsYet": {
+      "title": "You don't have any film rolls yet.",
+      "subtitle": "Click the + button to add one."
+    },
+    "discardChanges": {
+      "title": "Discard changes?",
+      "message": "You have unsaved changes. Discard them and leave the screen?",
+      "discard": "Discard",
+      "dontLeave": "Don't leave"
+    }
+  },
+  "tabs": {
+    "films": "Films",
+    "lightMeter": "Light Meter",
+    "support": "Support"
+  },
+  "filmStatus": {
+    "inCamera": "In Camera",
+    "developing": "Developing",
+    "archived": "Archived"
+  },
+  "cameraSettings": {
+    "auto": "Auto",
+    "apertureFormat": "f/{{value}}",
+    "shutterSpeedFormat": "{{value}}s"
+  },
+  "rollList": {
+    "title": "Film Rolls"
+  },
+  "rollDetail": {
+    "deleteFilm": {
+      "title": "Delete Film",
+      "message": "Are you sure you want to delete this film?"
+    },
+    "filmActionsTitle": "Film actions",
+    "noFramesYet": {
+      "title": "You don't have any frames yet.",
+      "subtitle": "Click the + button to add one."
+    },
+    "isoLabel": "ISO: {{iso}}",
+    "pushPull": {
+      "push": "Push +{{stops}}",
+      "pull": "Pull {{stops}}"
+    }
+  },
+  "newFilm": {
+    "addTitle": "Add New Film",
+    "editTitle": "Edit Film",
+    "missingName": {
+      "title": "Missing film name",
+      "message": "Please enter a name for the film roll."
+    },
+    "filmNamePlaceholder": "Film Name",
+    "cameraPlaceholder": "Camera (optional)",
+    "pushPullLabel": "Push/Pull",
+    "expectedShotsLabel": "Expected Shots"
+  },
+  "newFrame": {
+    "addTitle": "Add New Frame",
+    "editTitle": "Edit Frame",
+    "saveErrorMessage": "Could not save the frame.",
+    "deleteErrorMessage": "Could not delete the frame.",
+    "deleteFrame": {
+      "message": "Are you sure you want to delete this frame?",
+      "button": "Delete Frame"
+    },
+    "shutterSpeedLabel": "Shutter Speed",
+    "lensPlaceholder": "Lens (optional)",
+    "notePlaceholder": "Note (optional)"
+  },
+  "lightMeter": {
+    "cameraPermissionMessage": "We need your permission to show the camera",
+    "grantPermission": "Grant Permission",
+    "openSettings": "Open Settings",
+    "noDeviceMessage": "No camera device available",
+    "takeReading": "Take a reading",
+    "takePhotoErrorMessage": "Failed to take photo. Please try again.",
+    "readCameraDataErrorMessage": "Failed to read camera data. Please try again.",
+    "captureErrorMessage": "Failed to capture image. Please try again."
+  },
+  "lightMeterSheet": {
+    "defaultTitle": "Light Meter Reading",
+    "fallbackTitle": "Exposure Settings",
+    "stopsToggle": {
+      "fullStopsOnlyMessage": "Currently showing full stops only.",
+      "halfThirdStopsMessage": "Currently showing half/third stops.",
+      "showHalfThird": "Show half/third stops",
+      "showFullStopsOnly": "Show full stops only"
+    },
+    "selectFilmPrompt": "Select a film to save this reading",
+    "noFilmsAvailable": "No films available.\nCreate a film first to save readings.",
+    "columnLabels": {
+      "shutter": "Shutter",
+      "isoFilmSuffix": " (Film)"
+    },
+    "saveToFrame": "Save to Frame",
+    "selectFilmTitle": "Select Film",
+    "isoLockedHint": "ISO locked to film. Adjust aperture or shutter if needed.",
+    "saveFrame": "Save Frame",
+    "filmRowIso": "ISO {{iso}}",
+    "selectedFilmSummary": "ISO {{iso}} • Frame {{frameNumber}}/{{totalFrames}}",
+    "exposureDiff": {
+      "over": "+{{diff}} EV over",
+      "under": "{{diff}} EV under"
+    },
+    "apertureWheelPrefix": "ƒ/",
+    "shutterWheelSuffix": "s"
+  },
+  "support": {
+    "thankYou": {
+      "title": "Thank you ❤️",
+      "message": "Your support is greatly appreciated!"
+    },
+    "shareMessage": "Check out Rollio – the app for film photography enthusiasts!\n\nhttps://rollio.davitp.dev/app-link",
+    "shareDialogTitle": "Share Rollio",
+    "shareSubject": "Rollio - Film Photography App",
+    "shareErrorMessage": "Failed to share the app. Please try again later.",
+    "aboutTitle": "About Rollio",
+    "passionProjectBody": "Rollio is a passion project built with love for the film photography community. If you enjoy using the app and want to show your appreciation, you can make a small contribution below.",
+    "supportHeading": "Support the Project",
+    "spreadWordHeading": "Spread the Word",
+    "storeUrlErrorMessage": "Failed to open the store URL. Please try again later.",
+    "writeReview": "Write a Review",
+    "shareApp": "Share the App",
+    "version": "Version {{version}} ({{build}})"
+  },
+  "enjoyingRollio": {
+    "cta": "Enjoying Rollio?"
+  },
+  "filmSettingsFromPhoto": {
+    "exifReadErrorMessage": "Could not read EXIF data from the attached photo.",
+    "missingExifMessage": "Attached photo is missing required EXIF data.",
+    "suggestedSettingsHeading": "Suggested Settings",
+    "suggestionIntro": "Based on the attached photo's EXIF data and the film's ISO ({{filmIso}}), here are some suggested aperture and shutter speed combinations to achieve a similar exposure."
+  },
+  "imageUploader": {
+    "selectImage": {
+      "title": "Select Image",
+      "message": "Choose an option",
+      "takePhoto": "Take Photo",
+      "pickFromPhotos": "Pick from Photos"
+    },
+    "cameraPermission": {
+      "title": "Camera Permission Required",
+      "message": "Rollio needs camera access to take photos for frames."
+    },
+    "cameraError": {
+      "title": "Camera Error",
+      "message": "Rollio could not open the camera. Please try again."
+    },
+    "photosPermission": {
+      "title": "Photos Permission Required",
+      "message": "Rollio needs photo access to attach images to frames."
+    },
+    "photoPickerError": {
+      "title": "Photo Picker Error",
+      "message": "Rollio could not open your photo library. Please try again."
+    },
+    "galleryPermission": {
+      "title": "Permission Required",
+      "message": "Rollio needs access to your gallery to save photos."
+    },
+    "saveSuccessMessage": "Image saved to your photo gallery.",
+    "saveImageError": "Failed to save image: {{message}}",
+    "removeImage": {
+      "title": "Remove Image",
+      "message": "Are you sure you want to remove the image?",
+      "confirm": "Remove"
+    },
+    "imageMenu": {
+      "title": "Image",
+      "replace": "Replace",
+      "saveToPhotos": "Save to photos"
+    },
+    "attachImage": "Attach image"
+  }
+}
