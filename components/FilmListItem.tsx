@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { getStatusColor } from '@/utils/statusColors';
+import { getFilmStatusLabel } from '@/utils/filmStatusLabels';
 import { router } from 'expo-router';
 
 interface Props {
@@ -107,7 +108,7 @@ function FilmListItemBase({ film, index, onPress }: Props) {
                                 fontFamily: 'LufgaMedium',
                                 color: '#fff'
                             }}>
-                            {film.status}
+                            {getFilmStatusLabel(film.status)}
                         </Text>
                     </GlassView>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', gap: 4, marginBottom: 8 }}>
@@ -118,7 +119,7 @@ function FilmListItemBase({ film, index, onPress }: Props) {
                             </>
                         ) : null}
                         <Text style={[styles.cameraDateText, colorScheme === 'dark' ? { color: '#ffffff' } : { color: '#100528' }]}>
-                            {new Date(film.created_at).toLocaleDateString('en-GB', {
+                            {new Date(film.created_at).toLocaleDateString(undefined, {
                                 day: '2-digit',
                                 month: 'short',
                                 year: 'numeric',

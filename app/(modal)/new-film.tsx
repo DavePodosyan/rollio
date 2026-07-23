@@ -12,6 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useFilm } from "@/hooks/useFilm";
 import { getStatusColor } from "@/utils/statusColors";
+import { getFilmStatusLabel } from "@/utils/filmStatusLabels";
 import MySegmentedControl from "@/modules/my-segmented-control";
 import { usePreventRemove } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -266,6 +267,9 @@ export default function NewFilm() {
 
     // Memoize these so the array reference stays the same between renders
     const statusValues = useMemo(() => Object.values(FilmStatus), []);
+    // Display-only labels for the segmented control; selection is still tracked
+    // by index against statusValues (the enum codes), never by this array's text.
+    const statusLabels = useMemo(() => statusValues.map(getFilmStatusLabel), [statusValues]);
     const statusColors = useMemo(() =>
         Object.values(FilmStatus).map(status => getStatusColor(status as FilmStatus)),
         []);
@@ -387,6 +391,7 @@ export default function NewFilm() {
                     <View style={{ marginTop: 30, paddingHorizontal: 20, gap: 20 }}>
                         <RulerPicker
                             label="ISO"
+                            valueKind="iso"
                             initial={formData.iso}
                             values={ISO_OPTIONS} // Example push/pull values
                             onChange={(value) => {
@@ -397,6 +402,7 @@ export default function NewFilm() {
                         />
                         <RulerPicker
                             label="Push/Pull"
+                            valueKind="plain"
                             initial={formData.push_pull}
                             values={PUSH_PULL_OPTIONS} // Example push/pull values
                             onChange={(value) => {
@@ -407,6 +413,7 @@ export default function NewFilm() {
                         />
                         <RulerPicker
                             label="Expected Shots"
+                            valueKind="plain"
                             initial={formData.expected_shots}
                             values={EXPECTED_SHOTS} // Example expected shots values
                             onChange={(value) => {
@@ -422,7 +429,7 @@ export default function NewFilm() {
                         <MySegmentedControl
                             // key={`status-control-${formData.status}`}
                             style={{ width: '100%', height: 40 }}
-                            values={statusValues}
+                            values={statusLabels}
                             activeColors={statusColors}
                             selectedIndex={currentStatusIndex}
                             onValueChange={({ nativeEvent: { index } }) => {

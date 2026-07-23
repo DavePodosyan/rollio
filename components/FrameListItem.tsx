@@ -4,6 +4,7 @@ import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-ef
 import { SymbolView } from 'expo-symbols';
 import { router } from 'expo-router';
 import { memo } from 'react';
+import { getAutoValueLabel } from '@/utils/cameraSettingsLabels';
 
 interface FrameListItemProps {
     frame: Frame;
@@ -111,7 +112,7 @@ function FrameListItem({ frame, iso }: FrameListItemProps) {
                                     fontFamily: 'LufgaMedium',
                                     color: colorScheme === 'dark' ? '#fff' : '#100528'
                                 }}>
-                                    {frame.aperture !== 'Auto' ? `f/${frame.aperture}` : frame.aperture}
+                                    {frame.aperture !== 'Auto' ? `f/${frame.aperture}` : getAutoValueLabel()}
                                 </Text>
                             </View>
                             <View
@@ -134,7 +135,7 @@ function FrameListItem({ frame, iso }: FrameListItemProps) {
                                     fontFamily: 'LufgaMedium',
                                     color: colorScheme === 'dark' ? '#fff' : '#100528',
                                 }}>
-                                    {frame.shutter_speed !== 'Auto' ? `${frame.shutter_speed}s` : frame.shutter_speed}
+                                    {frame.shutter_speed !== 'Auto' ? `${frame.shutter_speed}s` : getAutoValueLabel()}
                                 </Text>
                             </View>
                             {frame.image && (

@@ -423,6 +423,7 @@ export default function NewFrame() {
                     <View style={{ marginTop: 30, paddingHorizontal: 20, gap: 20 }}>
                         <RulerPicker
                             label="Aperture"
+                            valueKind="aperture"
                             initial={formData.aperture}
                             values={APERTURE_OPTIONS} // Example push/pull values
                             onChange={(value) => {
@@ -432,6 +433,7 @@ export default function NewFrame() {
                         />
                         <RulerPicker
                             label="Shutter Speed"
+                            valueKind="shutterSpeed"
                             initial={formData.shutter_speed}
                             values={SHUTTER_SPEED_OPTIONS} // Example push/pull values
                             onChange={(value) => {

@@ -5,9 +5,16 @@ import GlassView from 'expo-glass-effect/build/GlassView';
 
 import { useColorScheme } from 'react-native';
 import { isLiquidGlassAvailable } from 'expo-glass-effect';
+import { getAutoValueLabel } from '@/utils/cameraSettingsLabels';
+
+// Stable identifier for unit formatting, decoupled from the visible `label` text
+// so a future localization pass can translate `label` without silently breaking
+// the f/ prefix or s suffix below.
+export type RulerPickerValueKind = 'aperture' | 'shutterSpeed' | 'iso' | 'plain';
 
 export type RulerPickerProps = {
   label: string;
+  valueKind: RulerPickerValueKind;
   values: Array<number | string>;
   initial: number | string;
   onChange?: (value: number | string) => void;
@@ -22,6 +29,7 @@ const THIN_OFFSET = (TICK_THICK * (1 - THIN_RATIO)) / 2;
 
 const RulerPicker: React.FC<RulerPickerProps> = ({
   label,
+  valueKind,
   initial,
   values,
   onChange
@@ -220,11 +228,13 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
       <Text style={{ color: values[selectedIndex] === 'Auto' ? '#4CAF50' : colorScheme === 'dark' ? 'white' : '#100528', fontFamily: 'LufgaMedium', position: 'absolute', zIndex: 1, top: 6 }}>
         {(() => {
           const value = values[selectedIndex];
-          switch (label) {
-            case 'Aperture':
-              return value === 'Auto' ? value : `f/${value}`;
-            case 'Shutter Speed':
-              return value === 'Auto' ? value : `${value}s`;
+          switch (valueKind) {
+            case 'aperture':
+              return value === 'Auto' ? getAutoValueLabel() : `f/${value}`;
+            case 'shutterSpeed':
+              return value === 'Auto' ? getAutoValueLabel() : `${value}s`;
+            case 'iso':
+            case 'plain':
             default:
               return value;
           }

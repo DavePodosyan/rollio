@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { useFilm } from '@/hooks/useFilm';
 import { MaterialIcons } from '@expo/vector-icons';
 import { getStatusColor } from '@/utils/statusColors';
+import { getFilmStatusLabel } from '@/utils/filmStatusLabels';
 import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { useFrames } from '@/hooks/useFrames';
 import FrameListItem from '@/components/FrameListItem';
@@ -156,7 +157,7 @@ export default function FilmDetailPage() {
                         opacity: 0.6,
                         fontFamily: 'LufgaRegular'
                     }}>
-                        {film ? new Date(film.created_at).toLocaleDateString('en-GB', {
+                        {film ? new Date(film.created_at).toLocaleDateString(undefined, {
                             day: '2-digit',
                             month: 'short',
                             year: 'numeric',
@@ -233,7 +234,7 @@ export default function FilmDetailPage() {
                                 fontFamily: 'LufgaMedium',
                                 color: '#fff'
                             }}>
-                            {film.status}
+                            {getFilmStatusLabel(film.status)}
                         </Text>
                     </GlassView>
                 </GlassContainer>
