@@ -1,0 +1,7 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "$(PRODUCT_NAME)にはカメラへのアクセスが必要です。",
+    "NSPhotoLibraryUsageDescription": "$(PRODUCT_NAME)に写真へのアクセスを許可します。",
+    "NSPhotoLibraryAddUsageDescription": "$(PRODUCT_NAME)に写真の保存を許可します。"
+  }
+}

@@ -6,9 +6,11 @@ import { getLocales } from 'expo-localization';
 import 'intl-pluralrules';
 
 import en from './locales/en.json';
+import ja from './locales/ja.json';
 
 const resources = {
   en: { translation: en },
+  ja: { translation: ja },
 } as const;
 
 const SUPPORTED_LANGUAGES = Object.keys(resources);

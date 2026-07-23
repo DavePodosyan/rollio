@@ -35,7 +35,8 @@
       "favicon": "./assets/images/favicon.png"
     },
     "locales": {
-      "en": "./native-locales/en.json"
+      "en": "./native-locales/en.json",
+      "ja": "./native-locales/ja.json"
     },
     "plugins": [
       "expo-router",
@@ -102,7 +103,7 @@
       [
         "expo-localization",
         {
-          "supportedLocales": ["en"]
+          "supportedLocales": ["en", "ja"]
         }
       ]
     ],

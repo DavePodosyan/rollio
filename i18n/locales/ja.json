@@ -1,0 +1,188 @@
+{
+  "shared": {
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "ok": "OK",
+    "settings": "設定",
+    "error": "エラー",
+    "success": "成功",
+    "iso": "ISO",
+    "aperture": "絞り",
+    "noRollsYet": {
+      "title": "フィルムロールがまだありません。",
+      "subtitle": "+ボタンをクリックして追加してください。"
+    },
+    "discardChanges": {
+      "title": "変更を破棄しますか？",
+      "message": "保存されていない変更があります。変更を破棄してこの画面を離れますか？",
+      "discard": "破棄する",
+      "dontLeave": "離れない"
+    }
+  },
+  "tabs": {
+    "films": "フィルム",
+    "lightMeter": "露出計",
+    "support": "サポート"
+  },
+  "filmStatus": {
+    "inCamera": "カメラ内",
+    "developing": "現像中",
+    "archived": "アーカイブ済み"
+  },
+  "cameraSettings": {
+    "auto": "Auto",
+    "apertureFormat": "f/{{value}}",
+    "shutterSpeedFormat": "{{value}}s"
+  },
+  "rollList": {
+    "title": "フィルムロール"
+  },
+  "rollDetail": {
+    "deleteFilm": {
+      "title": "フィルムを削除",
+      "message": "このフィルムを削除してもよろしいですか？"
+    },
+    "filmActionsTitle": "フィルムアクション",
+    "noFramesYet": {
+      "title": "フレームがまだありません。",
+      "subtitle": "+ボタンをクリックして追加してください。"
+    },
+    "isoLabel": "ISO: {{iso}}",
+    "pushPull": {
+      "push": "増感 +{{stops}}",
+      "pull": "減感 {{stops}}"
+    }
+  },
+  "newFilm": {
+    "addTitle": "新しいフィルムを追加",
+    "editTitle": "フィルムを編集",
+    "missingName": {
+      "title": "フィルム名がありません",
+      "message": "フィルムロールの名前を入力してください。"
+    },
+    "filmNamePlaceholder": "フィルム名",
+    "cameraPlaceholder": "カメラ（任意）",
+    "pushPullLabel": "増感/減感",
+    "expectedShotsLabel": "撮影予定枚数"
+  },
+  "newFrame": {
+    "addTitle": "新しいフレームを追加",
+    "editTitle": "フレームを編集",
+    "saveErrorMessage": "フレームを保存できませんでした。",
+    "deleteErrorMessage": "フレームを削除できませんでした。",
+    "deleteFrame": {
+      "message": "このフレームを削除してもよろしいですか？",
+      "button": "フレームを削除"
+    },
+    "shutterSpeedLabel": "シャッタースピード",
+    "lensPlaceholder": "レンズ（任意）",
+    "notePlaceholder": "メモ（任意）"
+  },
+  "lightMeter": {
+    "cameraPermissionMessage": "カメラを表示するための許可が必要です。",
+    "grantPermission": "許可を与える",
+    "openSettings": "設定を開く",
+    "noDeviceMessage": "利用可能なカメラデバイスがありません。",
+    "takeReading": "露出を測る",
+    "takePhotoErrorMessage": "写真の撮影に失敗しました。もう一度お試しください。",
+    "readCameraDataErrorMessage": "カメラデータの読み取りに失敗しました。もう一度お試しください。",
+    "captureErrorMessage": "画像のキャプチャに失敗しました。もう一度お試しください。"
+  },
+  "lightMeterSheet": {
+    "defaultTitle": "露出計の測定値",
+    "fallbackTitle": "露出設定",
+    "stopsToggle": {
+      "fullStopsOnlyMessage": "現在1段刻みのみを表示しています。",
+      "halfThirdStopsMessage": "現在1/2、1/3段刻みを表示しています。",
+      "showHalfThird": "1/2、1/3段刻みを表示",
+      "showFullStopsOnly": "1段刻みのみを表示"
+    },
+    "selectFilmPrompt": "この測定値を保存するフィルムを選択してください",
+    "noFilmsAvailable": "利用可能なフィルムがありません。\n測定値を保存するには、まずフィルムを作成してください。",
+    "columnLabels": {
+      "shutter": "シャッター",
+      "isoFilmSuffix": "（フィルム）"
+    },
+    "saveToFrame": "フレームに保存",
+    "selectFilmTitle": "フィルムを選択",
+    "isoLockedHint": "ISOはフィルムにロックされています。必要に応じて絞りまたはシャッタースピードを調整してください。",
+    "saveFrame": "フレームを保存",
+    "filmRowIso": "ISO {{iso}}",
+    "selectedFilmSummary": "ISO {{iso}} • フレーム {{frameNumber}}/{{totalFrames}}",
+    "exposureDiff": {
+      "over": "+{{diff}} EV オーバー",
+      "under": "{{diff}} EV アンダー"
+    },
+    "apertureWheelPrefix": "ƒ/",
+    "shutterWheelSuffix": "s"
+  },
+  "support": {
+    "thankYou": {
+      "title": "ありがとうございます ❤️",
+      "message": "あなたのサポートに心から感謝します！"
+    },
+    "shareMessage": "フィルム写真愛好家のためのアプリ、Rollioをチェックしてください！\n\nhttps://rollio.davitp.dev/app-link",
+    "shareDialogTitle": "Rollioをシェア",
+    "shareSubject": "Rollio - フィルム写真アプリ",
+    "shareErrorMessage": "アプリのシェアに失敗しました。後でもう一度お試しください。",
+    "aboutTitle": "Rollioについて",
+    "passionProjectBody": "Rollioは、フィルム写真コミュニティへの愛から生まれた情熱的なプロジェクトです。このアプリを気に入っていただき、感謝の意を示したい場合は、以下から少額の支援を行うことができます。",
+    "supportHeading": "プロジェクトを支援する",
+    "spreadWordHeading": "広める",
+    "storeUrlErrorMessage": "ストアURLを開けませんでした。後でもう一度お試しください。",
+    "writeReview": "レビューを書く",
+    "shareApp": "アプリをシェア",
+    "version": "バージョン {{version}} ({{build}})"
+  },
+  "enjoyingRollio": {
+    "cta": "Rollioを楽しんでいますか？"
+  },
+  "filmSettingsFromPhoto": {
+    "exifReadErrorMessage": "添付された写真からEXIFデータを読み取れませんでした。",
+    "missingExifMessage": "添付された写真には必要なEXIFデータが含まれていません。",
+    "suggestedSettingsHeading": "推奨設定",
+    "suggestionIntro": "添付された写真のEXIFデータとフィルムのISO ({{filmIso}}) に基づき、同様の露出を得るための推奨される絞りとシャッタースピードの組み合わせは以下の通りです。"
+  },
+  "imageUploader": {
+    "selectImage": {
+      "title": "画像を選択",
+      "message": "オプションを選択してください",
+      "takePhoto": "写真を撮る",
+      "pickFromPhotos": "写真から選ぶ"
+    },
+    "cameraPermission": {
+      "title": "カメラの許可が必要です",
+      "message": "Rollioでフレーム用の写真を撮影するには、カメラへのアクセスが必要です。"
+    },
+    "cameraError": {
+      "title": "カメラエラー",
+      "message": "Rollioがカメラを開けませんでした。もう一度お試しください。"
+    },
+    "photosPermission": {
+      "title": "写真の許可が必要です",
+      "message": "Rollioでフレームに画像を添付するには、写真へのアクセスが必要です。"
+    },
+    "photoPickerError": {
+      "title": "写真ピッカーエラー",
+      "message": "Rollioが写真ライブラリを開けませんでした。もう一度お試しください。"
+    },
+    "galleryPermission": {
+      "title": "許可が必要です",
+      "message": "Rollioで写真を保存するには、ギャラリーへのアクセスが必要です。"
+    },
+    "saveSuccessMessage": "画像が写真ギャラリーに保存されました。",
+    "saveImageError": "画像の保存に失敗しました: {{message}}",
+    "removeImage": {
+      "title": "画像を削除",
+      "message": "本当に画像を削除してもよろしいですか？",
+      "confirm": "削除"
+    },
+    "imageMenu": {
+      "title": "画像",
+      "replace": "置き換える",
+      "saveToPhotos": "写真に保存"
+    },
+    "attachImage": "画像を添付"
+  }
+}
