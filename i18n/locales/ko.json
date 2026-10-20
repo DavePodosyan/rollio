@@ -136,7 +136,9 @@
     "storeUrlErrorMessage": "스토어 URL을 열 수 없습니다. 나중에 다시 시도해 주세요.",
     "writeReview": "리뷰 작성",
     "shareApp": "앱 공유",
-    "version": "버전 {{version}} ({{build}})"
+    "version": "버전 {{version}} ({{build}})",
+    "contactDeveloper": "개발자에게 문의",
+    "contactErrorMessage": "메일 앱을 열 수 없습니다. {{email}} 으로 연락해 주세요."
   },
   "settings": {
     "title": "설정",

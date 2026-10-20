@@ -38,6 +38,8 @@ type PlatformSymbol = {
     android: AndroidSymbol;
 };
 
+const DEVELOPER_EMAIL = 'info@davitp.dev';
+
 export default function Support() {
     const { t } = useTranslation();
     const colorScheme = useColorScheme();
@@ -127,6 +129,13 @@ export default function Support() {
             console.error('Error sharing:', error);
             Alert.alert(t('shared.error'), t('support.shareErrorMessage'));
         }
+    };
+
+    const contactDeveloper = () => {
+        const subject = encodeURIComponent(`${Application.applicationName} ${Application.nativeApplicationVersion} (${Platform.OS})`);
+        Linking.openURL(`mailto:${DEVELOPER_EMAIL}?subject=${subject}`).catch(() => {
+            Alert.alert(t('shared.error'), t('support.contactErrorMessage', { email: DEVELOPER_EMAIL }));
+        });
     };
 
     return (
@@ -385,6 +394,21 @@ export default function Support() {
                         }}>
                             {t('support.version', { version: Application.nativeApplicationVersion, build: Application.nativeBuildVersion })}
                         </Text>
+                        <Pressable
+                            onPress={contactDeveloper}
+                            hitSlop={8}
+                            accessibilityRole="link"
+                            style={({ pressed }) => ({ marginTop: 12, opacity: pressed ? 0.5 : 1 })}
+                        >
+                            <Text style={{
+                                color: colorScheme === 'dark' ? '#a583ef' : '#39128F',
+                                fontFamily: 'LufgaMedium',
+                                fontSize: 15,
+                                lineHeight: 22,
+                            }}>
+                                {t('support.contactDeveloper')}
+                            </Text>
+                        </Pressable>
                     </View>
 
                 </ScrollView>

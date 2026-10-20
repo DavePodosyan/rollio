@@ -136,7 +136,9 @@
     "storeUrlErrorMessage": "ストアURLを開けませんでした。後でもう一度お試しください。",
     "writeReview": "レビューを書く",
     "shareApp": "アプリをシェア",
-    "version": "バージョン {{version}} ({{build}})"
+    "version": "バージョン {{version}} ({{build}})",
+    "contactDeveloper": "開発者に連絡",
+    "contactErrorMessage": "メールアプリを開けませんでした。{{email}} 宛にご連絡ください。"
   },
   "settings": {
     "title": "設定",

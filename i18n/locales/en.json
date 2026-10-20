@@ -136,7 +136,9 @@
     "storeUrlErrorMessage": "Failed to open the store URL. Please try again later.",
     "writeReview": "Write a Review",
     "shareApp": "Share the App",
-    "version": "Version {{version}} ({{build}})"
+    "version": "Version {{version}} ({{build}})",
+    "contactDeveloper": "Contact the developer",
+    "contactErrorMessage": "Could not open your mail app. You can write to {{email}}."
   },
   "settings": {
     "title": "Settings",
