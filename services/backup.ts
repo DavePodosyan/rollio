@@ -155,23 +155,30 @@ const deleteQuietly = (entry: File | Directory) => {
 };
 
 /**
- * Lets the user pick a file, unpacks it and checks that it is a Rollio backup
- * the current app can read. Returns null when the picker is cancelled. Throws
- * BackupError('invalid' | 'tooNew'); nothing in the app's data is touched.
+ * Lets the user pick a file, then unpacks and validates it. Returns null when
+ * the picker is cancelled. See unpackAndValidate for the errors thrown.
  */
 export const pickAndValidateBackup = async (): Promise<PendingRestore | null> => {
     const picked = await File.pickFileAsync();
     if (picked.canceled) {
         return null;
     }
+    return unpackAndValidate(picked.result.uri);
+};
 
+/**
+ * Unpacks an archive and checks that it is a Rollio backup the current app can
+ * read. Throws BackupError('invalid' | 'tooNew'); nothing in the app's data is
+ * touched, and the unpacked files are removed on failure.
+ */
+export const unpackAndValidate = async (archiveUri: string): Promise<PendingRestore> => {
     const dir = new Directory(Paths.cache, `restore-${Date.now()}`);
     dir.create({ intermediates: true, idempotent: true });
     const discard = () => deleteQuietly(dir);
 
     try {
         try {
-            await unzip(fsPath(picked.result.uri), fsPath(dir.uri));
+            await unzip(fsPath(archiveUri), fsPath(dir.uri));
         } catch (err) {
             throw new BackupError('invalid', `unzip failed: ${err instanceof Error ? err.message : String(err)}`);
         }
@@ -237,31 +244,38 @@ export const applyRestore = async (live: SQLiteDatabase, pending: PendingRestore
         throw new BackupError('failed', `migration failed: ${err instanceof Error ? err.message : String(err)}`);
     }
 
-    const liveFrames = new Directory(Paths.document, FRAMES_DIR);
-    const setAside = new Directory(Paths.document, SET_ASIDE_DIR);
-    deleteQuietly(setAside);
+    // Fresh Directory instances per operation: a moved instance's uri follows
+    // the folder, and moving onto an existing directory moves *into* it.
+    const framesDir = () => new Directory(Paths.document, FRAMES_DIR);
+    const setAsideDir = () => new Directory(Paths.document, SET_ASIDE_DIR);
 
-    // 2. Set the current photos aside.
-    const hadFrames = liveFrames.exists;
+    deleteQuietly(setAsideDir());
+    if (setAsideDir().exists) {
+        pending.discard();
+        throw new BackupError('failed', 'could not clear the set-aside photo folder');
+    }
+
+    // 2. Set the current photos aside (a rename, since the target is absent).
+    const hadFrames = framesDir().exists;
     if (hadFrames) {
-        liveFrames.move(setAside);
+        framesDir().move(setAsideDir());
     }
 
     try {
         // 3. Move the imported photos into place, 4. replace the rows.
-        pending.framesDir.move(liveFrames);
+        pending.framesDir.move(framesDir());
         const counts = await replaceAllData(live, fsPath(pending.dbFile.uri));
 
         // 5. Success: drop the old photos and the unpacked archive.
-        deleteQuietly(setAside);
+        deleteQuietly(setAsideDir());
         pending.discard();
         return counts;
     } catch (err) {
         // 6. Undo the folder swap; the transaction already rolled the rows back.
-        deleteQuietly(new Directory(Paths.document, FRAMES_DIR));
+        deleteQuietly(framesDir());
         if (hadFrames) {
             try {
-                setAside.move(new Directory(Paths.document, FRAMES_DIR));
+                setAsideDir().move(framesDir());
             } catch (moveErr) {
                 console.error('Could not put the original photos back:', moveErr);
             }
