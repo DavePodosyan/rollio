@@ -23,11 +23,13 @@ assert.equal(L.hasLocation(null), false);
 assert.equal(L.formatCoordinates(40.187235, 44.515235), '40.1872, 44.5152');
 assert.equal(L.formatCoordinates(-33.86882, 151.2), '-33.8688, 151.2000');
 
-// placeLabel: street + city, else name + city, else city, else region, else null
+// placeLabel: street (or name), city (or region), country; whichever exist
+assert.equal(L.placeLabel({ street: 'Spandauer Straße', city: 'Berlin', country: 'Germany', name: '1' }), 'Spandauer Straße, Berlin, Germany');
 assert.equal(L.placeLabel({ street: 'Mashtots Ave', city: 'Yerevan', name: '12' }), 'Mashtots Ave, Yerevan');
-assert.equal(L.placeLabel({ street: null, name: 'Tower Bridge', city: 'London' }), 'Tower Bridge, London');
-assert.equal(L.placeLabel({ city: 'Yerevan' }), 'Yerevan');
-assert.equal(L.placeLabel({ region: 'Kotayk', subregion: null }), 'Kotayk');
+assert.equal(L.placeLabel({ street: null, name: 'Tower Bridge', city: 'London', country: 'United Kingdom' }), 'Tower Bridge, London, United Kingdom');
+assert.equal(L.placeLabel({ city: 'Yerevan', country: 'Armenia' }), 'Yerevan, Armenia');
+assert.equal(L.placeLabel({ region: 'Kotayk', subregion: null, country: 'Armenia' }), 'Kotayk, Armenia');
+assert.equal(L.placeLabel({ country: 'Armenia' }), 'Armenia');
 assert.equal(L.placeLabel({ street: 'Only St' }), 'Only St');
 assert.equal(L.placeLabel({}), null);
 assert.equal(L.placeLabel(null), null);

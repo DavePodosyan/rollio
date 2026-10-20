@@ -57,19 +57,20 @@ type GeocodeLike = {
     city?: string | null;
     region?: string | null;
     subregion?: string | null;
+    country?: string | null;
 };
 
 /**
- * A short label from a reverse-geocode result: street or placemark name,
- * joined with the city when there is one; the city or region alone otherwise.
+ * A label from a reverse-geocode result: street (or placemark name), city
+ * (or region when there is no city) and country, whichever exist, joined
+ * with commas.
  */
 export const placeLabel = (geocode: GeocodeLike | null | undefined): string | null => {
     if (!geocode) return null;
-    const first = geocode.street || geocode.name || null;
-    const second = geocode.city || null;
-    const parts = [first, second].filter((p): p is string => !!p);
-    if (parts.length > 0) return parts.join(', ');
-    return geocode.subregion || geocode.region || null;
+    const street = geocode.street || geocode.name || null;
+    const city = geocode.city || geocode.subregion || geocode.region || null;
+    const parts = [street, city, geocode.country || null].filter((p): p is string => !!p);
+    return parts.length > 0 ? parts.join(', ') : null;
 };
 
 /**

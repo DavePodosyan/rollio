@@ -270,8 +270,8 @@ EAS. `WHATS_NEW` gains the `2.3.0` release entry (newest first).
   fields.
 - New `tests/location/test-frame-location.mjs` for the pure module:
   `roundCoordinate`, `hasLocation`, `formatCoordinates` ("40.1872, 44.5152",
-  4 decimals for display), `placeLabel(geocode)` (street + city, else name +
-  city, else city/region, else null), `mapsUrl({ latitude, longitude, label,
+  4 decimals for display), `placeLabel(geocode)` (street or name, city or
+  region, country, whichever exist, else null), `mapsUrl({ latitude, longitude, label,
   platform })` for ios / android / web fallback, and `fixedSubtitle(fix,
   strings)` returning the two lines for every combination of place and
   accuracy.
