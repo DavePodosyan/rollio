@@ -15,6 +15,8 @@ interface LocationRowProps {
     onOpenMaps: () => void;
 }
 
+const withAlpha = (hex: string, alpha: number) => hex + Math.round(alpha * 255).toString(16).padStart(2, '0');
+
 /** The "Save Location" row of the frame form; styled like the Attach Image card. */
 export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps }: LocationRowProps) {
     const { t } = useTranslation();
@@ -29,19 +31,17 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
     const surfaceBorder = dark ? '#2a2a2d' : '#e6e6ee';
     const on = status !== 'off';
 
-    const fixed = status === 'fixed' && fix
-        ? fixedSubtitle(fix, {
-            accuracy: (meters) => t('newFrame.location.accuracy', { meters }),
-            openInMaps: t('newFrame.location.openInMaps'),
-        })
-        : null;
-    const plainSubtitle = status === 'finding'
-        ? t('newFrame.location.finding')
-        : status === 'waiting'
-            ? t('newFrame.location.waiting')
-            : t('newFrame.location.off');
+    const fixed = status === 'fixed' && !!fix;
+    const subtitle = fixed
+        ? fixedSubtitle(fix, { accuracy: (meters) => t('newFrame.location.accuracy', { meters }) })
+        : status === 'finding'
+            ? t('newFrame.location.finding')
+            : status === 'waiting'
+                ? t('newFrame.location.waiting')
+                : t('newFrame.location.off');
 
     return (
+        <View>
         <GlassView
             isInteractive={true}
             glassEffectStyle="regular"
@@ -58,18 +58,7 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                 backgroundColor: surfaceBackground,
             }}
         >
-            <Pressable
-                disabled={!fixed}
-                onPress={onOpenMaps}
-                accessibilityRole={fixed ? 'link' : undefined}
-                style={({ pressed }) => ({
-                    flex: 1,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 14,
-                    opacity: pressed ? 0.7 : 1,
-                })}
-            >
+            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
                 <View
                     style={{
                         width: 40,
@@ -91,15 +80,10 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                         {t('newFrame.location.title')}
                     </Text>
                     <Text numberOfLines={1} style={{ fontFamily: 'LufgaRegular', fontSize: 13, lineHeight: 18, color: textColor, opacity: 0.6, marginTop: 2 }}>
-                        {fixed ? fixed[0] : plainSubtitle}
+                        {subtitle}
                     </Text>
-                    {fixed && (
-                        <Text numberOfLines={1} style={{ fontFamily: 'LufgaRegular', fontSize: 13, lineHeight: 18, color: accent, marginTop: 1 }}>
-                            {fixed[1]}
-                        </Text>
-                    )}
                 </View>
-            </Pressable>
+            </View>
             <Switch
                 value={enabled}
                 onValueChange={(next) => {
@@ -111,5 +95,30 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                 accessibilityLabel={t('newFrame.location.title')}
             />
         </GlassView>
+        {fixed && (
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
+                <Pressable
+                    onPress={onOpenMaps}
+                    accessibilityRole="link"
+                    hitSlop={6}
+                    style={({ pressed }) => ({
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 6,
+                        paddingVertical: 6,
+                        paddingHorizontal: 12,
+                        borderRadius: 16,
+                        backgroundColor: withAlpha(accent, dark ? 0.2 : 0.12),
+                        opacity: pressed ? 0.7 : 1,
+                    })}
+                >
+                    <SymbolView name={{ ios: 'arrow.up.right', android: 'open_in_new' }} size={14} tintColor={accent} />
+                    <Text style={{ fontFamily: 'LufgaMedium', fontSize: 13, lineHeight: 18, color: accent }}>
+                        {t('newFrame.location.openInMaps')}
+                    </Text>
+                </Pressable>
+            </View>
+        )}
+        </View>
     );
 }

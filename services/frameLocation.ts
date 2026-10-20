@@ -100,18 +100,11 @@ export const fixToFields = (fix: FrameFix | null): LocationFields =>
         : { latitude: null, longitude: null, location_accuracy: null, place: null };
 
 /**
- * The two subtitle lines of the row in its fixed state: the place (or the
- * coordinates when there is none), then coordinates / accuracy / "Open in
- * Maps" joined with middle dots, each part only when it adds something.
+ * The row's subtitle in its fixed state: the place (or the coordinates when
+ * there is none), followed by the accuracy when it is known.
  */
-export const fixedSubtitle = (
-    fix: FrameFix,
-    strings: { accuracy: (meters: number) => string; openInMaps: string }
-): [string, string] => {
-    const coordinates = formatCoordinates(fix.latitude, fix.longitude);
-    const parts: string[] = [];
-    if (fix.place) parts.push(coordinates);
+export const fixedSubtitle = (fix: FrameFix, strings: { accuracy: (meters: number) => string }): string => {
+    const parts = [fix.place ?? formatCoordinates(fix.latitude, fix.longitude)];
     if (fix.accuracy !== null) parts.push(strings.accuracy(Math.round(fix.accuracy)));
-    parts.push(strings.openInMaps);
-    return [fix.place ?? coordinates, parts.join(' · ')];
+    return parts.join(' · ');
 };

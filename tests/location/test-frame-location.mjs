@@ -45,15 +45,11 @@ assert.equal(L.mapsUrl({ ...args, label: 'a(b)', platform: 'android' }), 'geo:40
 assert.deepEqual(L.fixToFields({ latitude: 1, longitude: 2, accuracy: 3, place: 'x' }), { latitude: 1, longitude: 2, location_accuracy: 3, place: 'x' });
 assert.deepEqual(L.fixToFields(null), { latitude: null, longitude: null, location_accuracy: null, place: null });
 
-// fixedSubtitle: every combination of place and accuracy
-const strings = { accuracy: (m) => `±${m} m`, openInMaps: 'Open in Maps' };
-assert.deepEqual(L.fixedSubtitle({ latitude: 40.187235, longitude: 44.515235, accuracy: 12.3, place: 'Mashtots Ave, Yerevan' }, strings),
-    ['Mashtots Ave, Yerevan', '40.1872, 44.5152 · ±12 m · Open in Maps']);
-assert.deepEqual(L.fixedSubtitle({ latitude: 40.187235, longitude: 44.515235, accuracy: null, place: 'Yerevan' }, strings),
-    ['Yerevan', '40.1872, 44.5152 · Open in Maps']);
-assert.deepEqual(L.fixedSubtitle({ latitude: 40.187235, longitude: 44.515235, accuracy: 7.8, place: null }, strings),
-    ['40.1872, 44.5152', '±8 m · Open in Maps']);
-assert.deepEqual(L.fixedSubtitle({ latitude: 40.187235, longitude: 44.515235, accuracy: null, place: null }, strings),
-    ['40.1872, 44.5152', 'Open in Maps']);
+// fixedSubtitle: every combination of place and accuracy, one line
+const strings = { accuracy: (m) => `±${m} m` };
+assert.equal(L.fixedSubtitle({ latitude: 40.187235, longitude: 44.515235, accuracy: 12.3, place: 'Mashtots Ave, Yerevan' }, strings), 'Mashtots Ave, Yerevan · ±12 m');
+assert.equal(L.fixedSubtitle({ latitude: 40.187235, longitude: 44.515235, accuracy: null, place: 'Yerevan' }, strings), 'Yerevan');
+assert.equal(L.fixedSubtitle({ latitude: 40.187235, longitude: 44.515235, accuracy: 7.8, place: null }, strings), '40.1872, 44.5152 · ±8 m');
+assert.equal(L.fixedSubtitle({ latitude: 40.187235, longitude: 44.515235, accuracy: null, place: null }, strings), '40.1872, 44.5152');
 
 console.log('ok');
