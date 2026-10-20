@@ -37,20 +37,14 @@ export const useFrames = (filmId: number) => {
     }, [loadFrames]);
 
     // 2. CREATE
-    const addFrame = async (input: CreateFrameInput) => {
-        if (!db) return;
+    const addFrame = async (input: CreateFrameInput): Promise<Frame> => {
+        if (!db) throw new Error('Database not initialized');
         try {
-            // Prepare the full object required by your service
-            // const newFrameData = {
-            //     ...input,
-            //     film_id: filmId,
-            //     created_at: new Date().toISOString()
-            // };
-
-            await dbCreateFrame(db, input);
+            const created = await dbCreateFrame(db, input);
 
             // Reload the list to show the new frame immediately
             await loadFrames();
+            return created;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to add frame');
             throw err; // Re-throw so the UI (Modal) knows it failed

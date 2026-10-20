@@ -19,6 +19,8 @@ import FilmSettingsFromPhoto from "@/components/FilmSettingsFromPhoto";
 import { MaterialIcons } from '@react-native-vector-icons/material-icons/static';
 import { useTranslation } from "react-i18next";
 import { useSideRailInsets } from '@/hooks/useSideRailInsets';
+import { useFrameLocation } from '@/hooks/useFrameLocation';
+import LocationRow from '@/components/LocationRow';
 
 
 export default function NewFrame() {
@@ -51,6 +53,16 @@ export default function NewFrame() {
     const previousFrameData = prefillFromPreviousFrame();
     const hasPrefilled = useRef(false);
 
+    // The Save Location row: remembered choice, GPS fix, late fill, Open in Maps.
+    const location = useFrameLocation({ mode: mode === 'edit' ? 'edit' : 'new', frame: mode === 'edit' ? frame : null });
+    // Set once the row knows its starting state; a fix arriving later is not a change.
+    const initialLocationEnabled = useRef<boolean | null>(null);
+    useEffect(() => {
+        if (location.ready && initialLocationEnabled.current === null) {
+            initialLocationEnabled.current = location.enabled;
+        }
+    }, [location.ready, location.enabled]);
+
     const scrollViewRef = useRef<ScrollViewInstance>(null);
 
     // Use aperture/shutterSpeed from light meter if provided, otherwise default to Auto
@@ -79,8 +91,9 @@ export default function NewFrame() {
     const hasUnsavedChanges = useCallback(() => {
         if (!initialDataRef.current) return false;
 
-        return JSON.stringify(initialDataRef.current) !== JSON.stringify(formData);
-    }, [formData]);
+        const locationChanged = initialLocationEnabled.current !== null && location.enabled !== initialLocationEnabled.current;
+        return locationChanged || JSON.stringify(initialDataRef.current) !== JSON.stringify(formData);
+    }, [formData, location.enabled]);
 
 
     // useEffect(() => {
@@ -258,7 +271,7 @@ export default function NewFrame() {
     const handleSaveFrame = useCallback(async () => {
 
         try {
-            const dataToSave = { ...formData };
+            const dataToSave = { ...formData, ...location.fields() };
 
             // Copy a freshly picked image into app storage before touching the database.
             let savedImagePath: string | null = null;
@@ -270,8 +283,10 @@ export default function NewFrame() {
             try {
                 if (mode === 'edit' && frame) {
                     await updateFrame(dataToSave);
+                    location.fillWhenReady(frame.id);
                 } else {
-                    await addFrame(dataToSave);
+                    const created = await addFrame(dataToSave);
+                    location.fillWhenReady(created.id);
                 }
             } catch (error) {
                 // The row was not written, so don't keep the orphaned copy.
@@ -287,6 +302,7 @@ export default function NewFrame() {
             }
 
             initialDataRef.current = formData;
+            initialLocationEnabled.current = location.enabled;
             disablePrevention();
 
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -297,7 +313,7 @@ export default function NewFrame() {
             Alert.alert(t('shared.error'), t('newFrame.saveErrorMessage'));
         }
 
-    }, [formData, mode, frame, updateFrame, addFrame, disablePrevention, t]);
+    }, [formData, mode, frame, updateFrame, addFrame, disablePrevention, t, location]);
 
     useEffect(() => {
         fetchUniqueLensNames();
@@ -370,7 +386,7 @@ export default function NewFrame() {
     }, [destroyFrame, formData, frame, t]);
 
     // Loading: Show spinner if edit + fetching
-    if (loading || !isReady.current) {
+    if (loading || !isReady.current || !location.ready) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="small" color="#fff" />
@@ -496,6 +512,15 @@ export default function NewFrame() {
                             numberOfLines={3}
                             ref={notesInputRef}
 
+                        />
+                    </View>
+                    <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>
+                        <LocationRow
+                            enabled={location.enabled}
+                            status={location.status}
+                            fix={location.fix}
+                            onToggle={location.toggle}
+                            onOpenMaps={() => location.openInMaps(location.fix?.place ?? t('newFrame.location.frameLabel', { number: formData.frame_no }))}
                         />
                     </View>
                     <View style={{ padding: 20 }}>
