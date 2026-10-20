@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { memo } from 'react';
 import { getAutoValueLabel } from '@/utils/cameraSettingsLabels';
 import { useTranslation } from 'react-i18next';
+import { hasLocation } from '@/services/frameLocation';
 
 interface FrameListItemProps {
     frame: Frame;
@@ -140,9 +141,15 @@ function FrameListItem({ frame, iso }: FrameListItemProps) {
                                     {frame.shutter_speed !== 'Auto' ? t('cameraSettings.shutterSpeedFormat', { value: frame.shutter_speed }) : getAutoValueLabel()}
                                 </Text>
                             </View>
-                            {frame.image && (
-                                <SymbolView name={{ ios: 'paperclip', android: 'attach_file' }} size={20} tintColor={colorScheme === 'dark' ? '#ffffff' : '#100528'} style={{ marginLeft: 'auto' }} />
-
+                            {(hasLocation(frame) || frame.image) && (
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginLeft: 'auto' }}>
+                                    {hasLocation(frame) && (
+                                        <SymbolView name={{ ios: 'mappin.and.ellipse', android: 'location_on' }} size={20} tintColor={colorScheme === 'dark' ? '#ffffff' : '#100528'} />
+                                    )}
+                                    {frame.image && (
+                                        <SymbolView name={{ ios: 'paperclip', android: 'attach_file' }} size={20} tintColor={colorScheme === 'dark' ? '#ffffff' : '#100528'} />
+                                    )}
+                                </View>
                             )}
                         </View>
 
@@ -190,6 +197,8 @@ export default memo(FrameListItem, (prev, next) => {
         prev.frame.aperture === next.frame.aperture &&
         prev.frame.shutter_speed === next.frame.shutter_speed &&
         prev.frame.note === next.frame.note &&
-        prev.frame.image === next.frame.image
+        prev.frame.image === next.frame.image &&
+        prev.frame.latitude === next.frame.latitude &&
+        prev.frame.longitude === next.frame.longitude
     );
 }); 
