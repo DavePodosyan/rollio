@@ -89,7 +89,7 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
 
             {fixed && (
                 <>
-                    <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: textColor, opacity: 0.12, marginLeft: INSET + ICON_COLUMN + GAP, marginRight: INSET }} />
+                    <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: textColor, opacity: 0.12 }} />
                     <Pressable
                         onPress={onOpenMaps}
                         accessibilityRole="link"
@@ -98,7 +98,7 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                             flexDirection: 'row',
                             alignItems: 'center',
                             gap: GAP,
-                            paddingVertical: 12,
+                            paddingVertical: 14,
                             paddingHorizontal: INSET,
                             backgroundColor: pressed ? (dark ? '#ffffff14' : '#10052810') : 'transparent',
                         })}
@@ -106,15 +106,10 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                         <View style={{ width: ICON_COLUMN, alignItems: 'center' }}>
                             <SymbolView name={{ ios: 'map', android: 'map' }} size={22} tintColor={secondary} />
                         </View>
-                        <View style={{ flex: 1, minWidth: 0 }}>
-                            <Text numberOfLines={2} style={{ fontFamily: 'LufgaRegular', fontSize: 14, lineHeight: 19, color: textColor }}>
-                                {fix.place ?? formatCoordinates(fix.latitude, fix.longitude)}
-                            </Text>
-                            <Text numberOfLines={1} style={{ fontFamily: 'LufgaRegular', fontSize: 13, lineHeight: 18, color: tint, marginTop: 2 }}>
-                                {t('newFrame.location.openInMaps')}
-                            </Text>
-                        </View>
-                        <SymbolView name={{ ios: 'chevron.forward', android: 'chevron_right' }} size={16} tintColor={secondary} />
+                        <Text style={{ flex: 1, minWidth: 0, fontFamily: 'LufgaRegular', fontSize: 15, lineHeight: 21, color: textColor }}>
+                            {fix.place ?? formatCoordinates(fix.latitude, fix.longitude)}
+                        </Text>
+                        <SymbolView name={{ ios: 'arrow.up.right', android: 'open_in_new' }} size={16} tintColor={secondary} />
                     </Pressable>
                 </>
             )}
