@@ -316,8 +316,11 @@ export default function FilmDetailPage() {
                     <Stack.Toolbar.Button icon="plus" onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } })} />
                     <Stack.Toolbar.Menu icon="ellipsis">
                         <Stack.Toolbar.MenuAction icon="pencil" onPress={() => handleContextMenuSelect('edit')}>{t('shared.edit')}</Stack.Toolbar.MenuAction>
-                        <Stack.Toolbar.MenuAction icon="doc.richtext" onPress={() => exportPdf(film, frames)}>{t('export.pdf')}</Stack.Toolbar.MenuAction>
-                        <Stack.Toolbar.MenuAction icon="tablecells" onPress={() => exportCsv(film, frames)}>{t('export.csv')}</Stack.Toolbar.MenuAction>
+                        <Stack.Toolbar.Menu icon="square.and.arrow.up">
+                            <Stack.Toolbar.Label>{t('export.menu')}</Stack.Toolbar.Label>
+                            <Stack.Toolbar.MenuAction icon="doc.richtext" onPress={() => exportPdf(film, frames)}>{t('export.pdf')}</Stack.Toolbar.MenuAction>
+                            <Stack.Toolbar.MenuAction icon="tablecells" onPress={() => exportCsv(film, frames)}>{t('export.csv')}</Stack.Toolbar.MenuAction>
+                        </Stack.Toolbar.Menu>
 
                         {/* <Stack.Toolbar.MenuAction icon="clock" hidden={film.status !== 'in-camera'} onPress={() => null}>Mark as Developing</Stack.Toolbar.MenuAction> */}
                         {/* <Stack.Toolbar.MenuAction icon="archivebox" hidden={film.status !== 'developing'} onPress={() => null}>Mark as Archived</Stack.Toolbar.MenuAction> */}

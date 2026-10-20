@@ -164,9 +164,9 @@
     }
   },
   "export": {
-    "menu": "내보내기…",
-    "pdf": "PDF로 내보내기…",
-    "csv": "CSV로 내보내기…",
+    "menu": "내보내기",
+    "pdf": "PDF 컨택트 시트",
+    "csv": "CSV 스프레드시트",
     "preparingPdf": "PDF 준비 중…",
     "preparingCsv": "CSV 준비 중…",
     "errorMessage": "이 필름을 내보낼 수 없습니다.",

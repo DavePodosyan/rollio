@@ -164,9 +164,9 @@
     }
   },
   "export": {
-    "menu": "書き出し…",
-    "pdf": "PDFを書き出す…",
-    "csv": "CSVを書き出す…",
+    "menu": "書き出し",
+    "pdf": "PDFコンタクトシート",
+    "csv": "CSVスプレッドシート",
     "preparingPdf": "PDFを準備中…",
     "preparingCsv": "CSVを準備中…",
     "errorMessage": "このフィルムを書き出せませんでした。",
