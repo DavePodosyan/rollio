@@ -6,6 +6,7 @@ import FilmListItem from "@/components/FilmListItem";
 import EnjoyingRollio from "@/components/EnjoyingRollio";
 import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useState, useEffect, useRef } from "react";
+import { useWhatsNew } from '@/hooks/useWhatsNew';
 import Storage from 'expo-sqlite/kv-store';
 import { DATA_RESTORED_EVENT } from '@/hooks/useBackup';
 import * as StoreReview from 'expo-store-review';
@@ -16,6 +17,7 @@ export default function Home() {
     const colorScheme = useColorScheme();
     const { t } = useTranslation();
     const { films, loading, error, fetchFilms } = useFilms();
+    useWhatsNew();
     const [ready, setReady] = useState(false);
     // Horizontal insets are non-zero when iOS places the toolbar/tab rail on a
     // side edge (iPhone Duo inner display, Split View). Scroll views only offset

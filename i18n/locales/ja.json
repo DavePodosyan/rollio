@@ -230,5 +230,26 @@
       "saveToPhotos": "写真に保存"
     },
     "attachImage": "画像を添付"
+  },
+  "whatsNew": {
+    "title": "Rollioの新機能",
+    "version": "バージョン {{version}}",
+    "continue": "続ける",
+    "releases": {
+      "2_2_0": {
+        "backup": {
+          "title": "バックアップと復元",
+          "body": "すべてのフィルム、コマ、写真を1つのファイルにまとめてiCloud DriveやGoogle Driveに保存し、どの端末でも元どおりに復元できます。"
+        },
+        "export": {
+          "title": "フィルムの書き出し",
+          "body": "フィルムを印刷用のPDFコンタクトシート、またはスキャン用のCSVスプレッドシートに書き出せます。フィルムのメニューの「書き出し」から。"
+        },
+        "settings": {
+          "title": "設定タブ",
+          "body": "アプリの言語やバックアップなど、これからの設定の置き場所です。"
+        }
+      }
+    }
   }
 }

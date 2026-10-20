@@ -30,6 +30,10 @@ export default function ModalLayout() {
             <Stack.Screen name="new-frame" options={{
                 title: t('newFrame.addTitle')
             }} />
+
+            <Stack.Screen name="whats-new" options={{
+                headerShown: false,
+            }} />
         </Stack>
     );
 }

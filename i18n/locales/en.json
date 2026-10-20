@@ -233,5 +233,26 @@
       "saveToPhotos": "Save to photos"
     },
     "attachImage": "Attach image"
+  },
+  "whatsNew": {
+    "title": "What's New in Rollio",
+    "version": "Version {{version}}",
+    "continue": "Continue",
+    "releases": {
+      "2_2_0": {
+        "backup": {
+          "title": "Back up and restore",
+          "body": "Save every roll, frame and photo to a single file in iCloud Drive or Google Drive, and bring it all back on any phone."
+        },
+        "export": {
+          "title": "Export a roll",
+          "body": "Turn any film into a print-ready PDF contact sheet, or a CSV spreadsheet for your scans. Find it under Export in the film's menu."
+        },
+        "settings": {
+          "title": "Settings tab",
+          "body": "A new home for your app language, backups and whatever comes next."
+        }
+      }
+    }
   }
 }
