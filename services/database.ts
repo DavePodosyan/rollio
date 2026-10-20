@@ -35,7 +35,7 @@ export const initDatabase = async (db: SQLiteDatabase) => {
     `);
 
     const [{ user_version: currentVersion }] = await db.getAllAsync<{ user_version: number }>('PRAGMA user_version');
-    const TARGET_VERSION = 2;
+    const TARGET_VERSION = 3;
 
     if (currentVersion < TARGET_VERSION) {
         console.log(`Migrating database from version ${currentVersion} to ${TARGET_VERSION}...`);
@@ -44,26 +44,79 @@ export const initDatabase = async (db: SQLiteDatabase) => {
             await migrateToV2(db);
         }
 
+        if (currentVersion < 3) {
+            await migrateToV3(db);
+        }
+
         await db.execAsync(`PRAGMA user_version = ${TARGET_VERSION}`);
     } else {
         console.log('Database is up to date.');
     }
-
-    console.log(db.databasePath);
-
-
 };
 
 const migrateToV2 = async (db: SQLiteDatabase) => {
     console.log('Applying migration to version 2...');
 
     await db.execAsync(`
-        UPDATE frames 
-        SET aperture = 'Auto' 
+        UPDATE frames
+        SET aperture = 'Auto'
         WHERE aperture = '0';
     `);
 
     console.log('Migration to version 2 completed.');
+}
+
+/**
+ * Restores the two startup migrations that 1.x ran on every launch and that the
+ * 2.0 rewrite dropped. Users coming straight from an early 1.x build may still be
+ * missing columns added later in 1.x, and may still have absolute `file://` image
+ * paths (which break whenever iOS moves the app container). Both steps are
+ * idempotent, so it is safe to run them on databases that are already correct.
+ */
+const migrateToV3 = async (db: SQLiteDatabase) => {
+    console.log('Applying migration to version 3...');
+
+    await addMissingColumns(db);
+    await migrateImagePaths(db);
+
+    console.log('Migration to version 3 completed.');
+}
+
+const addMissingColumns = async (db: SQLiteDatabase) => {
+    const columnsToAdd = [
+        { table: 'films', column: 'expected_shots', definition: 'INTEGER NOT NULL DEFAULT 36' },
+        { table: 'films', column: 'push_pull', definition: 'INTEGER NOT NULL DEFAULT 0' },
+        { table: 'frames', column: 'lens', definition: 'TEXT DEFAULT NULL' },
+        { table: 'frames', column: 'image', definition: 'TEXT DEFAULT NULL' },
+    ];
+
+    for (const { table, column, definition } of columnsToAdd) {
+        const existingColumns = await db.getAllAsync<{ name: string }>(`PRAGMA table_info(${table})`);
+
+        if (!existingColumns.some((col) => col.name === column)) {
+            await db.execAsync(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition};`);
+            console.log(`Added column ${column} to ${table}`);
+        }
+    }
+}
+
+const migrateImagePaths = async (db: SQLiteDatabase) => {
+    const frames = await db.getAllAsync<{ id: number; image: string }>(
+        `SELECT id, image FROM frames WHERE image LIKE 'file://%'`
+    );
+
+    for (const frame of frames) {
+        const matchIndex = frame.image.indexOf('/frames/');
+
+        if (matchIndex !== -1) {
+            const relativePath = frame.image.substring(matchIndex + 1);
+            await db.runAsync(`UPDATE frames SET image = ? WHERE id = ?`, [relativePath, frame.id]);
+        }
+    }
+
+    if (frames.length > 0) {
+        console.log(`Migrated ${frames.length} absolute image paths to relative paths`);
+    }
 }
 
 export const getFilms = async (db: SQLiteDatabase): Promise<Film[]> => {
