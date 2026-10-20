@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 import Storage from 'expo-sqlite/kv-store';
 import { Directory, File, Paths } from 'expo-file-system';
-import { unzip, zip } from 'react-native-zip-archive';
+import { listContents, unzip, zip } from 'react-native-zip-archive';
 import { shareAsync } from 'expo-sharing';
 import * as Application from 'expo-application';
 
@@ -31,12 +31,21 @@ export type BackupManifest = {
 export const BACKUP_EXTENSION = '.rollio';
 export const FRAMES_DIR = 'frames';
 export const LAST_BACKUP_KEY = 'last_backup_created_at';
+/** Set while the live photo folder is set aside during a restore. */
+export const RESTORE_IN_PROGRESS_KEY = 'restore_in_progress';
 
 const MANIFEST_NAME = 'manifest.json';
 const DB_NAME = 'rollio.db';
+const SET_ASIDE_DIR = `${FRAMES_DIR}-restore-backup`;
+const STAGING_PREFIX = 'backup-';
+const UNPACK_PREFIX = 'restore-';
+const PICKED_PREFIX = 'restore-input-';
+
+// NOTE: in expo-file-system 58 `copy`, `move`, `write` and `text` are async
+// and must be awaited; `create`, `delete`, `list` and `exists` are sync.
 
 /** Filesystem path for the zip library, which does not take `file://` URIs. */
-const fsPath = (uri: string) => decodeURI(uri.replace(/^file:\/\//, ''));
+const fsPath = (uri: string) => decodeURIComponent(uri.replace(/^file:\/\//, ''));
 
 const backupFileName = (date: Date) => {
     const yyyy = date.getFullYear();
@@ -45,34 +54,95 @@ const backupFileName = (date: Date) => {
     return `Rollio Backup ${yyyy}-${mm}-${dd}${BACKUP_EXTENSION}`;
 };
 
+const deleteQuietly = (entry: File | Directory) => {
+    try {
+        if (entry.exists) entry.delete();
+    } catch (err) {
+        console.warn('Could not delete', entry.uri, err);
+    }
+};
+
+const framesDir = () => new Directory(Paths.document, FRAMES_DIR);
+const setAsideDir = () => new Directory(Paths.document, SET_ASIDE_DIR);
+
+const countFiles = (dir: Directory): number => dir.list().filter((e) => e instanceof File).length;
+
+// ---------------------------------------------------------------------------
+// Housekeeping
+// ---------------------------------------------------------------------------
+
 /**
- * Removes archives left in the cache by earlier backups. They are kept after
- * sharing because the receiving app may still be reading them.
+ * Removes archives and working folders left in the cache by earlier backups
+ * and restores. Archives are kept after sharing because the receiving app may
+ * still be reading them; working folders only survive a crash.
  */
 export const cleanupStaleArchives = (): void => {
     try {
         for (const entry of Paths.cache.list()) {
-            if (entry instanceof File && entry.name.endsWith(BACKUP_EXTENSION)) {
+            const isArchive = entry instanceof File && entry.name.endsWith(BACKUP_EXTENSION);
+            const isWorkDir = entry instanceof Directory
+                && (entry.name.startsWith(STAGING_PREFIX) || entry.name.startsWith(UNPACK_PREFIX));
+            const isPickedCopy = entry instanceof File && entry.name.startsWith(PICKED_PREFIX);
+            if (isArchive || isWorkDir || isPickedCopy) {
                 entry.delete();
             }
         }
     } catch (err) {
-        console.warn('Could not clean up old backup archives:', err);
+        console.warn('Could not clean up old backup files:', err);
     }
 };
 
+/**
+ * Repairs the photo folder after a restore that was interrupted (app killed)
+ * between setting the live photos aside and committing the new rows.
+ * - Marker set and set-aside folder present: the rows never changed, so the
+ *   original photos go back.
+ * - Set-aside folder present without the marker: the rows were committed, so
+ *   the old photos are no longer needed.
+ */
+export const recoverInterruptedRestore = async (): Promise<void> => {
+    try {
+        const aside = setAsideDir();
+        const marker = await Storage.getItem(RESTORE_IN_PROGRESS_KEY);
+        if (aside.exists) {
+            if (marker) {
+                deleteQuietly(framesDir());
+                await aside.move(framesDir());
+            } else {
+                aside.delete();
+            }
+        }
+        if (marker) {
+            await Storage.removeItem(RESTORE_IN_PROGRESS_KEY);
+        }
+    } catch (err) {
+        console.error('Could not recover from an interrupted restore:', err);
+    }
+};
+
+// ---------------------------------------------------------------------------
+// Backup
+// ---------------------------------------------------------------------------
+
 export const createBackupArchive = async (db: SQLiteDatabase): Promise<{ file: File; manifest: BackupManifest }> => {
     const now = new Date();
-    const staging = new Directory(Paths.cache, `backup-${now.getTime()}`);
+    const staging = new Directory(Paths.cache, `${STAGING_PREFIX}${now.getTime()}`);
     staging.create({ intermediates: true, idempotent: true });
+    const archive = new File(Paths.cache, backupFileName(now));
 
     try {
         await snapshotDatabase(db, fsPath(new File(staging, DB_NAME).uri));
 
-        const framesSource = new Directory(Paths.document, FRAMES_DIR);
+        const framesSource = framesDir();
         const framesTarget = new Directory(staging, FRAMES_DIR);
+        let expectedPhotos = 0;
         if (framesSource.exists) {
-            framesSource.copy(framesTarget);
+            expectedPhotos = countFiles(framesSource);
+            await framesSource.copy(framesTarget);
+            const copied = countFiles(framesTarget);
+            if (copied !== expectedPhotos) {
+                throw new BackupError('failed', `copied ${copied} of ${expectedPhotos} photos`);
+            }
         } else {
             framesTarget.create();
         }
@@ -87,20 +157,28 @@ export const createBackupArchive = async (db: SQLiteDatabase): Promise<{ file: F
             platform: Platform.OS === 'android' ? 'android' : 'ios',
             ...counts,
         };
-        new File(staging, MANIFEST_NAME).write(JSON.stringify(manifest, null, 2));
+        await new File(staging, MANIFEST_NAME).write(JSON.stringify(manifest, null, 2));
 
-        const archive = new File(Paths.cache, backupFileName(now));
-        if (archive.exists) {
-            archive.delete();
-        }
+        deleteQuietly(archive);
         await zip(fsPath(staging.uri), fsPath(archive.uri));
-        return { file: archive, manifest };
-    } finally {
-        try {
-            staging.delete();
-        } catch (err) {
-            console.warn('Could not remove backup staging directory:', err);
+
+        // The archive is the user's only copy of their data; check it before
+        // calling the backup a success.
+        const entries = await listContents(fsPath(archive.uri));
+        const paths = entries.filter((e) => !e.isDirectory).map((e) => e.path);
+        const hasManifest = paths.includes(MANIFEST_NAME);
+        const hasDb = paths.includes(DB_NAME);
+        const photos = paths.filter((p) => p.startsWith(`${FRAMES_DIR}/`)).length;
+        if (!hasManifest || !hasDb || photos !== expectedPhotos) {
+            throw new BackupError('failed', `archive incomplete: manifest=${hasManifest} db=${hasDb} photos=${photos}/${expectedPhotos}`);
         }
+
+        return { file: archive, manifest };
+    } catch (err) {
+        deleteQuietly(archive);
+        throw err instanceof BackupError ? err : new BackupError('failed', err instanceof Error ? err.message : String(err));
+    } finally {
+        deleteQuietly(staging);
     }
 };
 
@@ -134,8 +212,6 @@ export type PendingRestore = {
     discard: () => void;
 };
 
-const SET_ASIDE_DIR = `${FRAMES_DIR}-restore-backup`;
-
 const isManifest = (value: unknown): value is BackupManifest => {
     if (typeof value !== 'object' || value === null) return false;
     const m = value as Record<string, unknown>;
@@ -144,14 +220,6 @@ const isManifest = (value: unknown): value is BackupManifest => {
         && typeof m.createdAt === 'string'
         && typeof m.filmCount === 'number'
         && typeof m.frameCount === 'number';
-};
-
-const deleteQuietly = (entry: File | Directory) => {
-    try {
-        if (entry.exists) entry.delete();
-    } catch (err) {
-        console.warn('Could not delete', entry.uri, err);
-    }
 };
 
 /**
@@ -163,7 +231,27 @@ export const pickAndValidateBackup = async (): Promise<PendingRestore | null> =>
     if (picked.canceled) {
         return null;
     }
-    return unpackAndValidate(picked.result.uri);
+    // The picker may return a content:// (Android) or an Inbox file (iOS);
+    // a copy in the cache is a plain path the zip library can open.
+    const localCopy = new File(Paths.cache, `${PICKED_PREFIX}${Date.now()}.zip`);
+    try {
+        await picked.result.copy(localCopy);
+        return await unpackAndValidate(localCopy.uri);
+    } finally {
+        deleteQuietly(localCopy);
+    }
+};
+
+const unzipOrInvalid = async (archivePath: string, dir: Directory, entries?: string[]) => {
+    try {
+        if (entries) {
+            await unzip(archivePath, fsPath(dir.uri), { entries });
+        } else {
+            await unzip(archivePath, fsPath(dir.uri));
+        }
+    } catch (err) {
+        throw new BackupError('invalid', `unzip failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
 };
 
 /**
@@ -172,16 +260,15 @@ export const pickAndValidateBackup = async (): Promise<PendingRestore | null> =>
  * touched, and the unpacked files are removed on failure.
  */
 export const unpackAndValidate = async (archiveUri: string): Promise<PendingRestore> => {
-    const dir = new Directory(Paths.cache, `restore-${Date.now()}`);
+    const dir = new Directory(Paths.cache, `${UNPACK_PREFIX}${Date.now()}`);
     dir.create({ intermediates: true, idempotent: true });
     const discard = () => deleteQuietly(dir);
+    const archivePath = fsPath(archiveUri);
 
     try {
-        try {
-            await unzip(fsPath(archiveUri), fsPath(dir.uri));
-        } catch (err) {
-            throw new BackupError('invalid', `unzip failed: ${err instanceof Error ? err.message : String(err)}`);
-        }
+        // Validate from the two small entries before extracting any photos, so
+        // a huge unrelated zip costs little.
+        await unzipOrInvalid(archivePath, dir, [MANIFEST_NAME, DB_NAME]);
 
         const manifestFile = new File(dir, MANIFEST_NAME);
         const dbFile = new File(dir, DB_NAME);
@@ -212,12 +299,13 @@ export const unpackAndValidate = async (archiveUri: string): Promise<PendingRest
             await imported.closeAsync();
         }
 
-        const framesDir = new Directory(dir, FRAMES_DIR);
-        if (!framesDir.exists) {
-            framesDir.create();
+        await unzipOrInvalid(archivePath, dir);
+        const unpackedFrames = new Directory(dir, FRAMES_DIR);
+        if (!unpackedFrames.exists) {
+            unpackedFrames.create();
         }
 
-        return { dir, manifest, dbFile, framesDir, discard };
+        return { dir, manifest, dbFile, framesDir: unpackedFrames, discard };
     } catch (err) {
         discard();
         if (err instanceof BackupError) throw err;
@@ -244,41 +332,48 @@ export const applyRestore = async (live: SQLiteDatabase, pending: PendingRestore
         throw new BackupError('failed', `migration failed: ${err instanceof Error ? err.message : String(err)}`);
     }
 
-    // Fresh Directory instances per operation: a moved instance's uri follows
-    // the folder, and moving onto an existing directory moves *into* it.
-    const framesDir = () => new Directory(Paths.document, FRAMES_DIR);
-    const setAsideDir = () => new Directory(Paths.document, SET_ASIDE_DIR);
-
-    deleteQuietly(setAsideDir());
+    // A leftover set-aside folder means an earlier restore was interrupted.
+    await recoverInterruptedRestore();
     if (setAsideDir().exists) {
         pending.discard();
         throw new BackupError('failed', 'could not clear the set-aside photo folder');
     }
 
-    // 2. Set the current photos aside (a rename, since the target is absent).
-    const hadFrames = framesDir().exists;
-    if (hadFrames) {
-        framesDir().move(setAsideDir());
-    }
-
+    // Fresh Directory instances per operation: a moved instance's uri follows
+    // the folder, and moving onto an existing directory moves *into* it.
+    let setAside = false;
     try {
+        await Storage.setItem(RESTORE_IN_PROGRESS_KEY, new Date().toISOString());
+
+        // 2. Set the current photos aside (a rename, since the target is absent).
+        if (framesDir().exists) {
+            await framesDir().move(setAsideDir());
+            setAside = true;
+        }
+
         // 3. Move the imported photos into place, 4. replace the rows.
-        pending.framesDir.move(framesDir());
+        await pending.framesDir.move(framesDir());
         const counts = await replaceAllData(live, fsPath(pending.dbFile.uri));
 
-        // 5. Success: drop the old photos and the unpacked archive.
+        // 5. Committed: from here the old photos are no longer needed.
+        await Storage.removeItem(RESTORE_IN_PROGRESS_KEY);
         deleteQuietly(setAsideDir());
         pending.discard();
         return counts;
     } catch (err) {
         // 6. Undo the folder swap; the transaction already rolled the rows back.
         deleteQuietly(framesDir());
-        if (hadFrames) {
+        if (setAside) {
             try {
-                setAsideDir().move(framesDir());
+                await setAsideDir().move(framesDir());
             } catch (moveErr) {
                 console.error('Could not put the original photos back:', moveErr);
             }
+        }
+        try {
+            await Storage.removeItem(RESTORE_IN_PROGRESS_KEY);
+        } catch (markerErr) {
+            console.warn('Could not clear the restore marker:', markerErr);
         }
         pending.discard();
         throw err instanceof BackupError ? err : new BackupError('failed', err instanceof Error ? err.message : String(err));

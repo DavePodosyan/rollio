@@ -84,6 +84,13 @@ export const replaceAllData = async (live: SQLiteDatabase, importedPath: string)
                 );
             }
 
+            // Only paths inside the app's photo folder are trusted; anything
+            // else (absolute paths, traversal) is dropped rather than resolved.
+            await live.execAsync(
+                `UPDATE main.frames SET image = NULL
+                 WHERE image IS NOT NULL AND (image NOT LIKE 'frames/%' OR image LIKE '%..%')`
+            );
+
             // Continue AUTOINCREMENT ids after the imported ones.
             await live.execAsync(`DELETE FROM main.sqlite_sequence WHERE name IN ('films', 'frames')`);
             await live.execAsync(

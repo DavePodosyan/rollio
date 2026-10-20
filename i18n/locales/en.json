@@ -152,13 +152,17 @@
     },
     "restore": {
       "confirmTitle": "Replace all data?",
-      "confirmMessage": "Restoring will delete all films, frames and photos currently in Rollio and replace them with this backup from {{date}} ({{count}} rolls). This cannot be undone.",
+      "confirmMessage": "Restoring will delete all films, frames and photos currently in Rollio and replace them with this backup from {{date}} ({{rolls}}). This cannot be undone.",
       "confirmButton": "Delete and Restore",
       "invalidMessage": "That file is not a Rollio backup.",
       "tooNewMessage": "This backup was made with a newer version of Rollio. Update the app and try again.",
       "failedMessage": "The backup could not be restored. Your current data was left unchanged.",
       "successTitle": "Restore complete",
-      "successMessage": "{{films}} rolls and {{frames}} frames were restored."
+      "successMessage": "{{rolls}} and {{frames}} were restored.",
+      "rollsCount_one": "{{count}} roll",
+      "rollsCount_other": "{{count}} rolls",
+      "framesCount_one": "{{count}} frame",
+      "framesCount_other": "{{count}} frames"
     }
   },
   "enjoyingRollio": {

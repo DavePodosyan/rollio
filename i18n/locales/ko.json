@@ -152,13 +152,15 @@
     },
     "restore": {
       "confirmTitle": "모든 데이터를 교체할까요?",
-      "confirmMessage": "복원하면 현재 Rollio에 있는 모든 필름, 프레임, 사진이 삭제되고 {{date}} 백업({{count}}롤)으로 교체됩니다. 이 작업은 되돌릴 수 없습니다.",
+      "confirmMessage": "복원하면 현재 Rollio에 있는 모든 필름, 프레임, 사진이 삭제되고 {{date}} 백업({{rolls}})으로 교체됩니다. 이 작업은 되돌릴 수 없습니다.",
       "confirmButton": "삭제 후 복원",
       "invalidMessage": "이 파일은 Rollio 백업이 아닙니다.",
       "tooNewMessage": "이 백업은 최신 버전의 Rollio에서 만들어졌습니다. 앱을 업데이트한 후 다시 시도하세요.",
       "failedMessage": "백업을 복원할 수 없습니다. 현재 데이터는 변경되지 않았습니다.",
       "successTitle": "복원 완료",
-      "successMessage": "필름 {{films}}롤과 프레임 {{frames}}개를 복원했습니다."
+      "successMessage": "{{rolls}}과 {{frames}}을 복원했습니다.",
+      "rollsCount_other": "필름 {{count}}롤",
+      "framesCount_other": "프레임 {{count}}개"
     }
   },
   "enjoyingRollio": {

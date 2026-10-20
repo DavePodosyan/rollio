@@ -2,7 +2,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { SQLiteProvider } from 'expo-sqlite';
 import { initDatabase } from '@/services/database';
-import { cleanupStaleArchives } from '@/services/backup';
+import { cleanupStaleArchives, recoverInterruptedRestore } from '@/services/backup';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -29,9 +29,11 @@ export default function RootLayout() {
     }, [fontsLoaded]);
 
     // Backup archives are left in the cache after sharing (the receiving app may
-    // still be reading them); sweep them on the next launch instead.
+    // still be reading them); sweep them on the next launch instead. Also put
+    // the photo folder back if a restore was interrupted by the app being killed.
     useEffect(() => {
         cleanupStaleArchives();
+        recoverInterruptedRestore();
     }, []);
 
     if (!fontsLoaded) {

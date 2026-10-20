@@ -152,13 +152,15 @@
     },
     "restore": {
       "confirmTitle": "すべてのデータを置き換えますか？",
-      "confirmMessage": "復元すると、現在Rollioにあるすべてのフィルム、フレーム、写真が削除され、{{date}}のバックアップ（{{count}}本）に置き換えられます。この操作は取り消せません。",
+      "confirmMessage": "復元すると、現在Rollioにあるすべてのフィルム、フレーム、写真が削除され、{{date}}のバックアップ（{{rolls}}）に置き換えられます。この操作は取り消せません。",
       "confirmButton": "削除して復元",
       "invalidMessage": "このファイルはRollioのバックアップではありません。",
       "tooNewMessage": "このバックアップは新しいバージョンのRollioで作成されました。アプリを更新してからもう一度お試しください。",
       "failedMessage": "バックアップを復元できませんでした。現在のデータは変更されていません。",
       "successTitle": "復元が完了しました",
-      "successMessage": "{{films}}本のフィルムと{{frames}}枚のフレームを復元しました。"
+      "successMessage": "{{rolls}}と{{frames}}を復元しました。",
+      "rollsCount_other": "フィルム{{count}}本",
+      "framesCount_other": "フレーム{{count}}枚"
     }
   },
   "enjoyingRollio": {

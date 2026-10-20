@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, DeviceEventEmitter } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import Storage from 'expo-sqlite/kv-store';
@@ -26,6 +26,18 @@ export const useBackup = () => {
     const db = useSQLiteContext();
     const { t, i18n } = useTranslation();
     const [busy, setBusy] = useState<BackupBusy>('idle');
+    // Two taps in the same frame both see busy === 'idle'; the ref closes that gap.
+    const busyRef = useRef<BackupBusy>('idle');
+    const start = (what: BackupBusy) => {
+        if (busyRef.current !== 'idle') return false;
+        busyRef.current = what;
+        setBusy(what);
+        return true;
+    };
+    const finish = () => {
+        busyRef.current = 'idle';
+        setBusy('idle');
+    };
     const [lastBackupAt, setLastBackupAt] = useState<string | null>(null);
 
     useEffect(() => {
@@ -40,8 +52,7 @@ export const useBackup = () => {
     );
 
     const backUp = useCallback(async () => {
-        if (busy !== 'idle') return;
-        setBusy('backup');
+        if (!start('backup')) return;
         try {
             const manifest = await backupAndShare(db);
             setLastBackupAt(manifest.createdAt);
@@ -49,9 +60,9 @@ export const useBackup = () => {
             console.warn('Backup failed:', err);
             Alert.alert(t('shared.error'), t('settings.backup.errorMessage'));
         } finally {
-            setBusy('idle');
+            finish();
         }
-    }, [busy, db, t]);
+    }, [db, t]);
 
     const confirmRestore = useCallback((pending: PendingRestore) => {
         return new Promise<boolean>((resolve) => {
@@ -59,7 +70,7 @@ export const useBackup = () => {
                 t('settings.restore.confirmTitle'),
                 t('settings.restore.confirmMessage', {
                     date: formatDate(pending.manifest.createdAt),
-                    count: pending.manifest.filmCount,
+                    rolls: t('settings.restore.rollsCount', { count: pending.manifest.filmCount }),
                 }),
                 [
                     { text: t('shared.cancel'), style: 'cancel', onPress: () => resolve(false) },
@@ -71,8 +82,7 @@ export const useBackup = () => {
     }, [t, formatDate]);
 
     const restore = useCallback(async () => {
-        if (busy !== 'idle') return;
-        setBusy('restore');
+        if (!start('restore')) return;
         try {
             const pending = await pickAndValidateBackup();
             if (!pending) return;
@@ -88,7 +98,10 @@ export const useBackup = () => {
             DeviceEventEmitter.emit(DATA_RESTORED_EVENT);
             Alert.alert(
                 t('settings.restore.successTitle'),
-                t('settings.restore.successMessage', { films: counts.filmCount, frames: counts.frameCount })
+                t('settings.restore.successMessage', {
+                    rolls: t('settings.restore.rollsCount', { count: counts.filmCount }),
+                    frames: t('settings.restore.framesCount', { count: counts.frameCount }),
+                })
             );
         } catch (err) {
             console.warn('Restore failed:', err);
@@ -101,9 +114,9 @@ export const useBackup = () => {
             await new Promise((resolve) => setTimeout(resolve, PICKER_DISMISS_DELAY_MS));
             Alert.alert(t('shared.error'), message);
         } finally {
-            setBusy('idle');
+            finish();
         }
-    }, [busy, db, t, confirmRestore]);
+    }, [db, t, confirmRestore]);
 
     return { busy, lastBackupAt, backUp, restore, formatDate };
 };

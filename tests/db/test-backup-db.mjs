@@ -179,6 +179,29 @@ try {
         check(film.title === 'Old' && film.expected_shots === 36, 'old film copied with defaulted new columns');
     }
 
+    console.log('\nreplaceAllData: image paths outside frames/ are dropped');
+    {
+        const live = openDb(tmpPath('live6.db'));
+        await initDatabase(live);
+        const importedPath = tmpPath('import6.db');
+        const imported = openDb(importedPath);
+        await initDatabase(imported);
+        const f = await createFilm(imported, filmInput('Crafted'));
+        await createFrame(imported, frameInput(f.id, 1, 'frames/ok.jpg'));
+        await createFrame(imported, frameInput(f.id, 2, '../../etc/passwd'));
+        await createFrame(imported, frameInput(f.id, 3, 'frames/../secret.jpg'));
+        await createFrame(imported, frameInput(f.id, 4, '/absolute/path.jpg'));
+        imported.raw.close();
+
+        const counts = await replaceAllData(live, importedPath);
+        const [film] = await getFilms(live);
+        const frames = await getFramesByFilmId(live, film.id);
+        const images = frames.sort((a, b) => a.frame_no - b.frame_no).map(fr => fr.image);
+        check(images[0] === 'frames/ok.jpg', 'relative frames/ path kept');
+        check(images[1] === null && images[2] === null && images[3] === null, 'traversal and absolute paths nulled');
+        check(counts.imageCount === 1, 'imageCount reflects the sanitized rows');
+    }
+
     console.log('\nreplaceAllData: failure mid-copy rolls back and keeps the live data');
     {
         const live = openDb(tmpPath('live5.db'));
