@@ -1,7 +1,7 @@
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { router, Stack } from "expo-router";
 import { Platform, useColorScheme, Pressable } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from '@react-native-vector-icons/material-icons/static';
 import { useTranslation } from "react-i18next";
 
 export default function HomeLayout() {

@@ -1,10 +1,9 @@
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { Dimensions, View, Text, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, Animated, FlatList, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import GlassView from 'expo-glass-effect/build/GlassView';
 
 import { useColorScheme } from 'react-native';
-import { isLiquidGlassAvailable } from 'expo-glass-effect';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { getAutoValueLabel } from '@/utils/cameraSettingsLabels';
 import { useTranslation } from 'react-i18next';
 

@@ -15,12 +15,13 @@ import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 // Make sure this is the beta API or standard API you intend to use
 import { Paths, File } from 'expo-file-system';
-import { Host, Button, Menu, Divider, Section } from '@expo/ui/swift-ui';
+import { Host, Button, Menu, Divider, Section, Image as SwiftImage } from '@expo/ui/swift-ui';
+import { contentShape, frame, shapes } from '@expo/ui/swift-ui/modifiers';
 
 // Icons
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
-import { writeAsync } from '@lodev09/react-native-exify';
+import { write as writeExif } from '@lodev09/react-native-exify';
 import { useTranslation } from 'react-i18next';
 
 interface ImageUploaderProps {
@@ -95,7 +96,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
                 onChange(result.assets[0].uri);
 
                 try {
-                    await writeAsync(result.assets[0].uri, result.assets[0].exif || {});
+                    await writeExif(result.assets[0].uri, result.assets[0].exif || {});
                 } catch (error) {
                     console.warn('Failed to preserve photo EXIF data', error);
                 }
@@ -157,7 +158,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
                 return;
             }
 
-            await MediaLibrary.saveToLibraryAsync(displayUri);
+            await MediaLibrary.Asset.create(displayUri);
             Alert.alert(t('shared.success'), t('imageUploader.saveSuccessMessage'));
         } catch (error: any) {
             Alert.alert(t('shared.error'), t('imageUploader.saveImageError', { message: error.message }));
@@ -242,9 +243,15 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
                                     <Host matchContents>
                                         <Menu
                                             label={
-                                                <View style={styles.menuButton} >
-                                                    <SymbolView name={{ ios: 'ellipsis', android: 'more_horiz' }} size={24} tintColor="#fff" />
-                                                </View>
+                                                <SwiftImage
+                                                    systemName="ellipsis"
+                                                    size={24}
+                                                    color={isGlassAvailable && colorScheme !== 'dark' ? '#100528' : '#fff'}
+                                                    modifiers={[
+                                                        frame({ width: styles.menuButton.width, height: styles.menuButton.height }),
+                                                        contentShape(shapes.circle()),
+                                                    ]}
+                                                />
                                             }
                                         >
                                             <Section>

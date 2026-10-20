@@ -20,9 +20,8 @@ import {
 import * as Haptics from 'expo-haptics';
 import { Film } from "@/types";
 import { useFilms } from "@/hooks/useFilms";
-import { useIsFocused } from "@react-navigation/native";
-import { useHeaderHeight } from "@react-navigation/elements";
-import { MaterialIcons } from "@expo/vector-icons";
+import { useIsFocused, useHeaderHeight } from "expo-router/react-navigation";
+import { MaterialIcons } from '@react-native-vector-icons/material-icons/static';
 import { ScrollView as GestureScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 // ────────────────────────────────────────────────
@@ -546,7 +545,7 @@ export function LightMeterReadingSheet({
         ref: React.RefObject<FlatList | null>,
         options: string[],
         value: string,
-        tickRef: React.MutableRefObject<number>
+        tickRef: React.RefObject<number>
     ) => {
         const idx = options.indexOf(value);
         if (idx >= 0 && ref.current) {
@@ -737,7 +736,7 @@ export function LightMeterReadingSheet({
     // Updates selection live during scroll (visual only, no linked calc)
     const createScrollHandler = useCallback(
         <T extends string | number>(
-            tickRef: React.MutableRefObject<number>,
+            tickRef: React.RefObject<number>,
             data: string[],
             setter: React.Dispatch<React.SetStateAction<T>>,
             isNumeric = false
@@ -1266,7 +1265,7 @@ export function LightMeterReadingSheet({
                                     data={films}
                                     keyExtractor={(film) => String(film.id)}
                                     renderItem={({ item, index }) => renderFilmSelectorRow(item, index)}
-                                    ListHeaderComponent={films.length > 0 ? filmSelectorHeader : null}
+                                    ListHeaderComponent={films.length > 0 ? filmSelectorHeader : undefined}
                                     ListEmptyComponent={filmSelectorEmpty}
                                     contentContainerStyle={styles.filmSelectorModalContent}
                                     keyboardShouldPersistTaps="handled"

@@ -1,19 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform, PlatformColor, ActivityIndicator, Alert, Linking, Animated, useColorScheme, useWindowDimensions } from 'react-native';
 import { Camera, Point, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from "expo-router/react-navigation";
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { router } from 'expo-router';
 import { calculateEV100 } from '@/utils/calculations';
 import * as Haptics from 'expo-haptics';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import { GestureDetector, useTapGesture } from 'react-native-gesture-handler'
 import { LinearGradient } from 'expo-linear-gradient';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
 import { LightMeterReadingParams, LightMeterReadingSheet } from './formsheet';
 import { useSharedValue } from 'react-native-reanimated';
-import { ExifTags, readAsync } from '@lodev09/react-native-exify';
+import { ExifTags, read as readExif } from '@lodev09/react-native-exify';
 import { Image as ExpoImage } from 'expo-image';
-import * as FileSystem from 'expo-file-system/legacy';
+import { File, FileMode } from 'expo-file-system';
 import { useTranslation } from 'react-i18next';
 
 const platformColor = (iosName: string, androidName: string) => (
@@ -67,38 +67,20 @@ const getSettingsEV100 = (fNumber: number, exposureTime: number, iso: number) =>
     calculateEV100(fNumber, exposureTime, iso)
 );
 
-const decodeBase64 = (base64: string) => {
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-    const bytes: number[] = [];
-    let buffer = 0;
-    let bits = 0;
+const readFileHead = async (uri: string, length: number) => {
+    const file = new File(uri);
+    const handle = file.open(FileMode.ReadOnly);
 
-    for (const char of base64.replace(/=+$/, '')) {
-        const value = alphabet.indexOf(char);
-
-        if (value < 0) {
-            continue;
-        }
-
-        buffer = (buffer << 6) | value;
-        bits += 6;
-
-        if (bits >= 8) {
-            bits -= 8;
-            bytes.push((buffer >> bits) & 0xff);
-        }
+    try {
+        return await handle.readBytes(Math.min(length, file.size));
+    } finally {
+        handle.close();
     }
-
-    return bytes;
 };
 
 const readJpegExifIso = async (path: string) => {
     try {
-        const bytes = decodeBase64(await FileSystem.readAsStringAsync(getPhotoUri(path), {
-            encoding: FileSystem.EncodingType.Base64,
-            length: 65536,
-            position: 0,
-        }));
+        const bytes = await readFileHead(getPhotoUri(path), 65536);
 
         const u16be = (offset: number) => (bytes[offset] << 8) | bytes[offset + 1];
         let offset = 2;
@@ -253,7 +235,7 @@ const readPhotoExposureSettings = async (path: string, metadata?: Record<string,
     }
 
     const rawJpegIso = await readJpegExifIso(path);
-    const fileExif = await readAsync(getPhotoUri(path));
+    const fileExif = await readExif(getPhotoUri(path));
     const fileSettings = getExposureSettings(fileExif as ExifTags | undefined, rawJpegIso);
 
     if (!fileSettings) {
@@ -408,11 +390,14 @@ export default function CameraBackgroundPage() {
         }
     }, [focusScale, focusOpacity])
 
-    const gesture = Gesture.Tap()
-        .runOnJS(true)
-        .onEnd(({ x, y }) => {
-            focusAndExpose({ x, y });
-        })
+    const gesture = useTapGesture({
+        runOnJS: true,
+        onDeactivate: ({ x, y, canceled }) => {
+            if (!canceled) {
+                focusAndExpose({ x, y });
+            }
+        },
+    });
 
     useEffect(() => {
         androidSheetContainerLayout.value = {
@@ -657,7 +642,7 @@ export default function CameraBackgroundPage() {
             <GestureDetector gesture={gesture}>
                 <Camera
                     ref={cameraRef}
-                    style={StyleSheet.absoluteFillObject}
+                    style={StyleSheet.absoluteFill}
                     device={device}
                     isActive={isFocused && !shouldFreezeCameraPreview}
                     zoom={device.neutralZoom}
@@ -671,7 +656,7 @@ export default function CameraBackgroundPage() {
             {shouldFreezeCameraPreview && (
                 <ExpoImage
                     source={{ uri: reading.image }}
-                    style={StyleSheet.absoluteFillObject}
+                    style={StyleSheet.absoluteFill}
                     contentFit="cover"
                     pointerEvents="none"
                 />

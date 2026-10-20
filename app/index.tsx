@@ -23,7 +23,7 @@ export default function Index() {
       colors={gradientColors}
       locations={[0.1, 0.4, 0.9]}
       // dither={false}
-      style={StyleSheet.absoluteFillObject}
+      style={StyleSheet.absoluteFill}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >

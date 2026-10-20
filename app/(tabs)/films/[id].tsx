@@ -5,7 +5,7 @@ import { View, Text, Alert, Pressable, useColorScheme, FlatList, Platform } from
 import { useNavigation, useLocalSearchParams, router, useFocusEffect, Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { useFilm } from '@/hooks/useFilm';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@react-native-vector-icons/material-icons/static';
 import { getStatusColor } from '@/utils/statusColors';
 import { getFilmStatusLabel } from '@/utils/filmStatusLabels';
 import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
@@ -281,19 +281,21 @@ export default function FilmDetailPage() {
 
     return (
         <>
-            <Stack.Toolbar placement="right" >
-                <Stack.Toolbar.Button icon="plus" onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } })} />
-                <Stack.Toolbar.Menu icon="ellipsis">
-                    <Stack.Toolbar.MenuAction icon="pencil" onPress={() => handleContextMenuSelect('edit')}>{t('shared.edit')}</Stack.Toolbar.MenuAction>
+            {!isAndroid && (
+                <Stack.Toolbar placement="right" >
+                    <Stack.Toolbar.Button icon="plus" onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } })} />
+                    <Stack.Toolbar.Menu icon="ellipsis">
+                        <Stack.Toolbar.MenuAction icon="pencil" onPress={() => handleContextMenuSelect('edit')}>{t('shared.edit')}</Stack.Toolbar.MenuAction>
 
-                    {/* <Stack.Toolbar.MenuAction icon="clock" hidden={film.status !== 'in-camera'} onPress={() => null}>Mark as Developing</Stack.Toolbar.MenuAction> */}
-                    {/* <Stack.Toolbar.MenuAction icon="archivebox" hidden={film.status !== 'developing'} onPress={() => null}>Mark as Archived</Stack.Toolbar.MenuAction> */}
+                        {/* <Stack.Toolbar.MenuAction icon="clock" hidden={film.status !== 'in-camera'} onPress={() => null}>Mark as Developing</Stack.Toolbar.MenuAction> */}
+                        {/* <Stack.Toolbar.MenuAction icon="archivebox" hidden={film.status !== 'developing'} onPress={() => null}>Mark as Archived</Stack.Toolbar.MenuAction> */}
 
-                    <Stack.Toolbar.MenuAction icon="trash" destructive onPress={() => handleContextMenuSelect('delete')}>
-                        {t('shared.delete')}
-                    </Stack.Toolbar.MenuAction>
-                </Stack.Toolbar.Menu>
-            </Stack.Toolbar>
+                        <Stack.Toolbar.MenuAction icon="trash" destructive onPress={() => handleContextMenuSelect('delete')}>
+                            {t('shared.delete')}
+                        </Stack.Toolbar.MenuAction>
+                    </Stack.Toolbar.Menu>
+                </Stack.Toolbar>
+            )}
 
             <View style={{ flex: 1 }}>
                 <LinearGradient

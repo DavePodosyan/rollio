@@ -6,7 +6,7 @@ import FilmListItem from "@/components/FilmListItem";
 import EnjoyingRollio from "@/components/EnjoyingRollio";
 import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useState, useEffect } from "react";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Storage from 'expo-sqlite/kv-store';
 import * as StoreReview from 'expo-store-review';
 import { useTranslation } from 'react-i18next';
 
@@ -32,7 +32,7 @@ export default function Home() {
                 return;
             }
 
-            const lastPrompt = await AsyncStorage.getItem('last_review_prompt');
+            const lastPrompt = await Storage.getItem('last_review_prompt');
             const now = Date.now();
             const thirtyDays = 30 * 24 * 60 * 60 * 1000;
 
@@ -42,7 +42,7 @@ export default function Home() {
                     await StoreReview.requestReview();
                 }
 
-                await AsyncStorage.setItem('last_review_prompt', now.toString());
+                await Storage.setItem('last_review_prompt', now.toString());
             }
 
         });
@@ -73,9 +73,11 @@ export default function Home() {
 
     return (
         <>
-            <Stack.Toolbar placement="right">
-                <Stack.Toolbar.Button icon="plus" onPress={() => router.push('/new-film')} />
-            </Stack.Toolbar>
+            {Platform.OS !== 'android' && (
+                <Stack.Toolbar placement="right">
+                    <Stack.Toolbar.Button icon="plus" onPress={() => router.push('/new-film')} />
+                </Stack.Toolbar>
+            )}
 
             <View style={{ flex: 1 }}>
 
@@ -84,7 +86,7 @@ export default function Home() {
                     colors={gradientColors}
                     locations={[0.1, 0.4, 0.9]}
                     // dither={false}
-                    style={StyleSheet.absoluteFillObject}
+                    style={StyleSheet.absoluteFill}
                     start={{ x: 0, y: 0 }} // Optional: start from top-left
                     end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
                 >
@@ -118,7 +120,7 @@ export default function Home() {
                         contentContainerStyle={{ flexGrow: 1, paddingTop: Platform.OS === 'android' ? 24 : 20, paddingBottom: 50 }}
                         refreshing={false}
                         onRefresh={fetchFilms}
-                        ListFooterComponent={films && films.length > 0 ? <EnjoyingRollio /> : null}
+                        ListFooterComponent={films && films.length > 0 ? <EnjoyingRollio /> : undefined}
 
                     />
                 </LinearGradient>

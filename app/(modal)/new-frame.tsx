@@ -1,7 +1,7 @@
 
 import { CreateFrameInput } from "@/types";
 import { router, useNavigation, useLocalSearchParams, Stack } from "expo-router";
-import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme, PlatformColor, Platform } from "react-native";
+import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme, PlatformColor, Platform, type ViewInstance, type ScrollViewInstance, type TextInputInstance } from "react-native";
 import RulerPicker from '@/components/RulerPicker';
 import AdaptiveDatePicker from '@/components/AdaptiveDatePicker';
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
@@ -14,9 +14,9 @@ import { useFrame } from "@/hooks/useFrame";
 import { useFrames } from "@/hooks/useFrames";
 import ImageUploader from "@/components/ImageUploader";
 import { saveFrameImage, deleteFrameImage } from "@/utils/ImageService";
-import { usePreventRemove } from "@react-navigation/native";
+import { usePreventRemove } from "expo-router/react-navigation";
 import FilmSettingsFromPhoto from "@/components/FilmSettingsFromPhoto";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from '@react-native-vector-icons/material-icons/static';
 import { useTranslation } from "react-i18next";
 
 
@@ -50,7 +50,7 @@ export default function NewFrame() {
     const previousFrameData = prefillFromPreviousFrame();
     const hasPrefilled = useRef(false);
 
-    const scrollViewRef = useRef<ScrollView>(null);
+    const scrollViewRef = useRef<ScrollViewInstance>(null);
     console.log(previousFrameData);
 
     // Use aperture/shutterSpeed from light meter if provided, otherwise default to Auto
@@ -101,7 +101,7 @@ export default function NewFrame() {
     // }, [navigation, formData]);
 
 
-    usePreventRemove(hasUnsavedChanges(), ({ data }) => {
+    const disablePrevention = usePreventRemove(hasUnsavedChanges(), ({ repeat }) => {
         // ActionSheetIOS.showActionSheetWithOptions({
         //     // title: 'Discard changes?',
         //     message: 'Are you sure you want to discard your changes?',
@@ -127,7 +127,7 @@ export default function NewFrame() {
                 {
                     text: t('shared.discardChanges.discard'),
                     style: 'destructive',
-                    onPress: () => navigation.dispatch(data.action),
+                    onPress: repeat,
                 },
             ],
             {
@@ -178,7 +178,7 @@ export default function NewFrame() {
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
-    const rootViewRef = useRef<View>(null);
+    const rootViewRef = useRef<ViewInstance>(null);
     const slideAnim = useRef(new Animated.Value(0)).current; // For smooth slide in/out
 
     // Prefill form for edit
@@ -294,6 +294,7 @@ export default function NewFrame() {
             }
 
             initialDataRef.current = formData;
+            disablePrevention();
 
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             router.back();
@@ -340,7 +341,7 @@ export default function NewFrame() {
     }, [mode, handleSaveFrame, isAndroid, colorScheme]);
 
 
-    const notesInputRef = useRef<TextInput>(null);
+    const notesInputRef = useRef<TextInputInstance>(null);
     const lastFrame = frames.length > 0 ? frames[frames.length - 1] : null;
     const isLastFrame = mode === 'edit' && !!frame && lastFrame?.id === frame.id;
 
@@ -361,6 +362,7 @@ export default function NewFrame() {
                         try {
                             await destroyFrame();
                             initialDataRef.current = formData;
+                            disablePrevention();
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             router.back();
                         } catch (error) {

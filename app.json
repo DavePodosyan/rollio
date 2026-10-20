@@ -106,7 +106,8 @@
         {
           "supportedLocales": ["en", "ja", "ko"]
         }
-      ]
+      ],
+      "@react-native-vector-icons/material-icons"
     ],
     "experiments": {
       "typedRoutes": true

@@ -31,7 +31,7 @@ export const saveFrameImage = async (uri: string): Promise<string | null> => {
     const fileName = `frames/rollio_${Date.now()}_${Math.floor(Math.random() * 1000)}${image.extension || 'jpg'}`;
     const newImage = new File(Paths.document, fileName);
 
-    image.copy(newImage);
+    await image.copy(newImage);
 
     return newImage.exists ? fileName : null;
 }

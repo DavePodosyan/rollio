@@ -134,7 +134,7 @@ export default function Support() {
                 colors={gradientColors}
                 locations={[0.1, 0.4, 0.9]}
                 // dither={false}
-                style={StyleSheet.absoluteFillObject}
+                style={StyleSheet.absoluteFill}
                 start={{ x: 0, y: 0 }} // Optional: start from top-left
                 end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
             >
@@ -208,8 +208,8 @@ export default function Support() {
                                                 try {
                                                     await requestPurchase({
                                                         request: {
-                                                            ios: { sku: product.id },
-                                                            android: { skus: [product.id] }
+                                                            apple: { sku: product.id },
+                                                            google: { skus: [product.id] }
                                                         },
                                                         type: 'in-app'
                                                     });

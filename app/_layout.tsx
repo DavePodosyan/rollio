@@ -3,12 +3,12 @@ import { useFonts } from 'expo-font';
 import { SQLiteProvider } from 'expo-sqlite';
 import { initDatabase } from '@/services/database';
 import { Stack } from 'expo-router';
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native';
+import { ThemeProvider, DarkTheme, DefaultTheme } from "expo-router/react-navigation";
 import { I18nextProvider } from 'react-i18next';
 import i18n from '@/i18n';
 
@@ -26,10 +26,6 @@ export default function RootLayout() {
             SplashScreen.hideAsync();
         }
     }, [fontsLoaded]);
-
-    useEffect(() => {
-        setStatusBarStyle(colorScheme === 'dark' ? 'light' : 'dark', true);
-    }, [colorScheme]);
 
     if (!fontsLoaded) {
         return null; // Or splash component

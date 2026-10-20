@@ -1,7 +1,7 @@
 import { useFilms } from "@/hooks/useFilms";
 import { CreateFilmInput, FilmStatus } from "@/types";
 import { router, useNavigation, useLocalSearchParams, Stack } from "expo-router";
-import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme, DeviceEventEmitter, Platform, PlatformColor } from "react-native";
+import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme, DeviceEventEmitter, Platform, PlatformColor, type ViewInstance, type TextInputInstance } from "react-native";
 import RulerPicker from '@/components/RulerPicker';
 import AdaptiveDatePicker from '@/components/AdaptiveDatePicker';
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
@@ -14,8 +14,8 @@ import { useFilm } from "@/hooks/useFilm";
 import { getStatusColor } from "@/utils/statusColors";
 import { getFilmStatusLabel } from "@/utils/filmStatusLabels";
 import MySegmentedControl from "@/modules/my-segmented-control";
-import { usePreventRemove } from "@react-navigation/native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { usePreventRemove } from "expo-router/react-navigation";
+import { MaterialIcons } from '@react-native-vector-icons/material-icons/static';
 import { useTranslation } from "react-i18next";
 
 export default function NewFilm() {
@@ -74,10 +74,10 @@ export default function NewFilm() {
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
-    const rootViewRef = useRef<View>(null);
+    const rootViewRef = useRef<ViewInstance>(null);
     const slideAnim = useRef(new Animated.Value(0)).current; // For smooth slide in/out
 
-    usePreventRemove(hasUnsavedChanges(), ({ data }) => {
+    const disablePrevention = usePreventRemove(hasUnsavedChanges(), ({ repeat }) => {
         // ActionSheetIOS.showActionSheetWithOptions({
         //     // title: 'Discard changes?',
         //     message: 'Are you sure you want to discard your changes?',
@@ -106,7 +106,7 @@ export default function NewFilm() {
                 {
                     text: t('shared.discardChanges.discard'),
                     style: 'destructive',
-                    onPress: () => navigation.dispatch(data.action),
+                    onPress: repeat,
                 },
             ],
             {
@@ -218,6 +218,7 @@ export default function NewFilm() {
         }
 
         initialDataRef.current = formData;
+        disablePrevention();
         DeviceEventEmitter.emit('added_film');
 
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -261,7 +262,7 @@ export default function NewFilm() {
     }, [mode, handleSaveFilm, isAndroid, colorScheme]);
 
 
-    const cameraInputRef = useRef<TextInput>(null);
+    const cameraInputRef = useRef<TextInputInstance>(null);
 
     const renderCount = useRef(0);
     renderCount.current++;

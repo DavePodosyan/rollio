@@ -1,6 +1,6 @@
 import { calculateEV100 } from "@/utils/calculations";
 import { APERTURE_OPTIONS, SHUTTER_SPEED_OPTIONS } from "@/utils/cameraSettings";
-import { ExifTags, readAsync } from "@lodev09/react-native-exify";
+import { ExifTags, read as readExif } from "@lodev09/react-native-exify";
 import { File, Paths } from "expo-file-system";
 import { GlassContainer, GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import { useEffect, useMemo, useState } from "react";
@@ -87,7 +87,7 @@ export default function FilmSettingsFromPhoto({ filmIso, imageUri, onApplySettin
 
         (async () => {
             try {
-                calculateMatches(await readAsync(assetUri));
+                calculateMatches(await readExif(assetUri));
             } catch (error) {
                 setError(t('filmSettingsFromPhoto.exifReadErrorMessage'));
                 setSuggestions([]);
@@ -95,7 +95,7 @@ export default function FilmSettingsFromPhoto({ filmIso, imageUri, onApplySettin
         })();
     }, [assetUri, filmIso, t]);
 
-    const calculateMatches = (exif: ExifTags | undefined) => {
+    const calculateMatches = (exif: ExifTags | null | undefined) => {
         const { FNumber, ExposureTime, ISOSpeedRatings } = exif || {};
 
         const phoneIso = Array.isArray(ISOSpeedRatings)
