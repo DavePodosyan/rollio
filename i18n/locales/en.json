@@ -142,7 +142,24 @@
     "title": "Settings",
     "appLanguage": "App Language",
     "languageFootnote": "Rollio follows your device language. To use a different language just for Rollio, choose it in the Settings app.",
-    "openSettingsErrorMessage": "Could not open Settings."
+    "openSettingsErrorMessage": "Could not open Settings.",
+    "backup": {
+      "backUp": "Back Up Rollio",
+      "restore": "Restore from Backup",
+      "footnote": "A backup includes all films, frames and photos. Save it to iCloud Drive, Google Drive or anywhere else from the share sheet.",
+      "lastCreated": "Last backup created {{date}}",
+      "errorMessage": "Could not create the backup."
+    },
+    "restore": {
+      "confirmTitle": "Replace all data?",
+      "confirmMessage": "Restoring will delete all films, frames and photos currently in Rollio and replace them with this backup from {{date}} ({{count}} rolls). This cannot be undone.",
+      "confirmButton": "Delete and Restore",
+      "invalidMessage": "That file is not a Rollio backup.",
+      "tooNewMessage": "This backup was made with a newer version of Rollio. Update the app and try again.",
+      "failedMessage": "The backup could not be restored. Your current data was left unchanged.",
+      "successTitle": "Restore complete",
+      "successMessage": "{{films}} rolls and {{frames}} frames were restored."
+    }
   },
   "enjoyingRollio": {
     "cta": "Enjoying Rollio?"

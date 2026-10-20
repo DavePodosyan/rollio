@@ -6,6 +6,7 @@ import {
     Alert,
     Linking,
     Pressable,
+    ActivityIndicator,
     useColorScheme,
 } from 'react-native';
 import React from 'react';
@@ -16,6 +17,7 @@ import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as HapticFeedback from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useBackup } from '@/hooks/useBackup';
 
 // Each language is shown in its own script so it is recognisable whatever the
 // app is currently running in (the same way the iOS language picker does it).
@@ -32,6 +34,7 @@ export default function Settings() {
     const insets = useSafeAreaInsets();
     const isGlassAvailable = isLiquidGlassAvailable();
     const isDark = colorScheme === 'dark';
+    const { busy, lastBackupAt, backUp, restore, formatDate } = useBackup();
 
     const gradientColors: readonly [string, string, ...string[]] = isDark
         ? ['#09090B', '#100528', '#09090B']
@@ -106,6 +109,72 @@ export default function Settings() {
                             {t('settings.languageFootnote')}
                         </Text>
                     </View>
+
+                    <View style={{ marginBottom: 36 }}>
+                        <GlassView
+                            isInteractive={true}
+                            glassEffectStyle="regular"
+                            style={{
+                                borderRadius: 24,
+                                overflow: 'hidden',
+                                backgroundColor: isGlassAvailable ? 'transparent' : (isDark ? '#a583ef1f' : '#ffffffcc'),
+                            }}
+                        >
+                            <Pressable
+                                onPress={() => { HapticFeedback.selectionAsync(); backUp(); }}
+                                disabled={busy !== 'idle'}
+                                accessibilityRole="button"
+                                accessibilityLabel={t('settings.backup.backUp')}
+                                accessibilityState={{ disabled: busy !== 'idle', busy: busy === 'backup' }}
+                                style={({ pressed }) => [styles.row, { opacity: pressed || (busy !== 'idle' && busy !== 'backup') ? 0.6 : 1 }]}
+                            >
+                                <Text style={[styles.rowLabel, { color: textColor }]} numberOfLines={1}>
+                                    {t('settings.backup.backUp')}
+                                </Text>
+                                {busy === 'backup' ? (
+                                    <ActivityIndicator size="small" color={textColor} />
+                                ) : (
+                                    <SymbolView
+                                        name={{ ios: 'chevron.right', android: 'chevron_right' }}
+                                        size={14}
+                                        weight="semibold"
+                                        tintColor={isDark ? '#ffffff66' : '#10052866'}
+                                    />
+                                )}
+                            </Pressable>
+
+                            <View style={[styles.separator, { backgroundColor: isDark ? '#ffffff22' : '#10052822' }]} />
+
+                            <Pressable
+                                onPress={() => { HapticFeedback.selectionAsync(); restore(); }}
+                                disabled={busy !== 'idle'}
+                                accessibilityRole="button"
+                                accessibilityLabel={t('settings.backup.restore')}
+                                accessibilityState={{ disabled: busy !== 'idle', busy: busy === 'restore' }}
+                                style={({ pressed }) => [styles.row, { opacity: pressed || (busy !== 'idle' && busy !== 'restore') ? 0.6 : 1 }]}
+                            >
+                                <Text style={[styles.rowLabel, { color: textColor }]} numberOfLines={1}>
+                                    {t('settings.backup.restore')}
+                                </Text>
+                                {busy === 'restore' ? (
+                                    <ActivityIndicator size="small" color={textColor} />
+                                ) : (
+                                    <SymbolView
+                                        name={{ ios: 'chevron.right', android: 'chevron_right' }}
+                                        size={14}
+                                        weight="semibold"
+                                        tintColor={isDark ? '#ffffff66' : '#10052866'}
+                                    />
+                                )}
+                            </Pressable>
+                        </GlassView>
+
+                        <Text style={[styles.footnote, { color: textColor }]}>
+                            {lastBackupAt
+                                ? t('settings.backup.lastCreated', { date: formatDate(lastBackupAt) })
+                                : t('settings.backup.footnote')}
+                        </Text>
+                    </View>
                 </ScrollView>
             </LinearGradient>
         </View>
@@ -131,6 +200,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
         opacity: 0.55,
         maxWidth: '45%',
+    },
+    separator: {
+        height: StyleSheet.hairlineWidth,
+        marginLeft: 20,
     },
     footnote: {
         fontFamily: 'LufgaRegular',

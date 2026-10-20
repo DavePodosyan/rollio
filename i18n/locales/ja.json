@@ -142,7 +142,24 @@
     "title": "設定",
     "appLanguage": "アプリの言語",
     "languageFootnote": "Rollioはデバイスの言語設定に従います。Rollioだけ別の言語にするには、設定アプリで選択してください。",
-    "openSettingsErrorMessage": "設定を開けませんでした。"
+    "openSettingsErrorMessage": "設定を開けませんでした。",
+    "backup": {
+      "backUp": "Rollioをバックアップ",
+      "restore": "バックアップから復元",
+      "footnote": "バックアップにはすべてのフィルム、フレーム、写真が含まれます。共有シートからiCloud DriveやGoogle Driveなどに保存できます。",
+      "lastCreated": "最終バックアップ作成: {{date}}",
+      "errorMessage": "バックアップを作成できませんでした。"
+    },
+    "restore": {
+      "confirmTitle": "すべてのデータを置き換えますか？",
+      "confirmMessage": "復元すると、現在Rollioにあるすべてのフィルム、フレーム、写真が削除され、{{date}}のバックアップ（{{count}}本）に置き換えられます。この操作は取り消せません。",
+      "confirmButton": "削除して復元",
+      "invalidMessage": "このファイルはRollioのバックアップではありません。",
+      "tooNewMessage": "このバックアップは新しいバージョンのRollioで作成されました。アプリを更新してからもう一度お試しください。",
+      "failedMessage": "バックアップを復元できませんでした。現在のデータは変更されていません。",
+      "successTitle": "復元が完了しました",
+      "successMessage": "{{films}}本のフィルムと{{frames}}枚のフレームを復元しました。"
+    }
   },
   "enjoyingRollio": {
     "cta": "Rollioを楽しんでいますか？"
