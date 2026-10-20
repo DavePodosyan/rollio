@@ -1,4 +1,4 @@
-import { Platform, Pressable, StyleSheet, Switch, Text, View, useColorScheme } from 'react-native';
+import { Platform, PlatformColor, Pressable, StyleSheet, Switch, Text, View, useColorScheme } from 'react-native';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
 import * as Haptics from 'expo-haptics';
@@ -15,13 +15,15 @@ interface LocationRowProps {
     onOpenMaps: () => void;
 }
 
-const ICON_SIZE = 40;
+const ICON_COLUMN = 24;
 const GAP = 14;
+const INSET = 16;
 
 /**
- * The "Save Location" card of the frame form: a title row with the switch
- * and, once there is a fix, an address row underneath that opens Maps.
- * Styled like the Attach Image card.
+ * The "Save Location" card of the frame form, laid out like a Reminders
+ * detail row: a plain grey glyph (never tinted), title and value, the
+ * system switch; and once there is a fix, an address row underneath that
+ * opens Maps.
  */
 export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps }: LocationRowProps) {
     const { t } = useTranslation();
@@ -30,13 +32,10 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
     const isAndroid = Platform.OS === 'android';
     const isGlassAvailable = isLiquidGlassAvailable();
 
-    const accent = dark ? '#A583EF' : '#39128F';
     const textColor = dark ? '#ffffff' : '#100528';
-    // The app's soft brand lavender: the switch track and the "on" disc.
-    const lavender = '#A583EF';
-    const discOn = dark ? '#A583EF33' : '#E5E0FF';
-    const discOff = dark ? '#09090b6d' : '#e5e0ff4d';
-    const surfaceBackground = isGlassAvailable && !isAndroid ? 'transparent' : dark ? '#1c1c1e' : '#f6f6fa';
+    const secondary = '#8E8E93';
+    const tint = isAndroid ? '#0A84FF' : PlatformColor('systemBlue');
+    const surfaceBackground = isGlassAvailable && !isAndroid ? 'transparent' : dark ? '#1c1c1e' : '#ffffff';
     const surfaceBorder = dark ? '#2a2a2d' : '#e6e6ee';
     const on = status !== 'off';
     const fixed = status === 'fixed' && !!fix;
@@ -62,28 +61,15 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                 overflow: 'hidden',
             }}
         >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: GAP, paddingVertical: 14, paddingHorizontal: 16 }}>
-                <View
-                    style={{
-                        width: ICON_SIZE,
-                        height: ICON_SIZE,
-                        borderRadius: ICON_SIZE / 2,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: on ? discOn : discOff,
-                    }}
-                >
-                    <SymbolView
-                        name={{ ios: 'mappin.and.ellipse', android: 'location_on' }}
-                        size={20}
-                        tintColor={on ? accent : textColor}
-                    />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: GAP, paddingVertical: 14, paddingHorizontal: INSET }}>
+                <View style={{ width: ICON_COLUMN, alignItems: 'center' }}>
+                    <SymbolView name={{ ios: 'mappin.and.ellipse', android: 'location_on' }} size={22} tintColor={secondary} />
                 </View>
                 <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={{ fontFamily: 'LufgaMedium', fontSize: 16, lineHeight: 22, color: textColor }}>
                         {t('newFrame.location.title')}
                     </Text>
-                    <Text numberOfLines={1} style={{ fontFamily: 'LufgaRegular', fontSize: 13, lineHeight: 18, color: textColor, opacity: 0.6, marginTop: 2 }}>
+                    <Text numberOfLines={1} style={{ fontFamily: 'LufgaRegular', fontSize: 13, lineHeight: 18, color: on ? tint : secondary, marginTop: 2 }}>
                         {subtitle}
                     </Text>
                 </View>
@@ -95,8 +81,6 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             onToggle(next);
                         }}
-                        trackColor={{ true: lavender }}
-                        thumbColor="#ffffff"
                         accessibilityLabel={t('newFrame.location.title')}
                         style={{ alignSelf: 'center' }}
                     />
@@ -105,7 +89,7 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
 
             {fixed && (
                 <>
-                    <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: textColor, opacity: 0.12, marginHorizontal: 16 }} />
+                    <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: textColor, opacity: 0.12, marginLeft: INSET + ICON_COLUMN + GAP, marginRight: INSET }} />
                     <Pressable
                         onPress={onOpenMaps}
                         accessibilityRole="link"
@@ -113,21 +97,24 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                         style={({ pressed }) => ({
                             flexDirection: 'row',
                             alignItems: 'center',
-                            gap: 12,
+                            gap: GAP,
                             paddingVertical: 12,
-                            paddingHorizontal: 16,
+                            paddingHorizontal: INSET,
                             backgroundColor: pressed ? (dark ? '#ffffff14' : '#10052810') : 'transparent',
                         })}
                     >
+                        <View style={{ width: ICON_COLUMN, alignItems: 'center' }}>
+                            <SymbolView name={{ ios: 'map', android: 'map' }} size={22} tintColor={secondary} />
+                        </View>
                         <View style={{ flex: 1, minWidth: 0 }}>
                             <Text numberOfLines={2} style={{ fontFamily: 'LufgaRegular', fontSize: 14, lineHeight: 19, color: textColor }}>
                                 {fix.place ?? formatCoordinates(fix.latitude, fix.longitude)}
                             </Text>
-                            <Text numberOfLines={1} style={{ fontFamily: 'LufgaRegular', fontSize: 13, lineHeight: 18, color: accent, marginTop: 2 }}>
+                            <Text numberOfLines={1} style={{ fontFamily: 'LufgaRegular', fontSize: 13, lineHeight: 18, color: tint, marginTop: 2 }}>
                                 {t('newFrame.location.openInMaps')}
                             </Text>
                         </View>
-                        <SymbolView name={{ ios: 'chevron.forward', android: 'chevron_right' }} size={16} tintColor={textColor} style={{ opacity: 0.35 }} />
+                        <SymbolView name={{ ios: 'chevron.forward', android: 'chevron_right' }} size={16} tintColor={secondary} />
                     </Pressable>
                 </>
             )}

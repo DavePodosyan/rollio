@@ -160,37 +160,37 @@ Reference mockup: `.superpowers/brainstorm/97663-1792521514/content/location.htm
 (git-ignored; this text is authoritative). Sits in its own padded block
 (`paddingHorizontal: 20`) directly above the Attach Image block.
 
-- Surface: `GlassView` `glassEffectStyle="regular"` with the same tint and
-  fallback background as the Attach Image card (`#09090b6d` dark / `#ffffff`
-  light tint; fallback `#1c1c1e` / `#f6f6fa`, 1 pt border `#2a2a2d` /
-  `#e6e6ee` on Android). Border radius **22**. Padding 14 vertical, 16
-  horizontal. Row layout: icon circle · text block (flex 1) · switch; gap 14.
-- Icon circle: 40 × 40, radius 20. Off: background `#09090b6d` dark /
-  `#e5e0ff4d` light, glyph white dark / `#100528` light. On (any state other
-  than off): a soft lavender disc, `#A583EF33` dark / `#E5E0FF` light, with
-  the glyph in the accent (`#A583EF` dark / `#39128F` light). No solid
-  purple disc: the light theme leans on the pale lavender tints. Glyph: SF Symbol `mappin.and.ellipse` on iOS,
-  Material `location_on` on Android, size 20.
+- Modelled on the rows of the iOS Reminders detail sheet (user's reference
+  screenshots, light and dark): glyph column, title and value, system switch.
+- Surface: `GlassView` `glassEffectStyle="regular"` with the Attach Image
+  card's tint (`#09090b6d` dark / `#ffffff` light); fallback background
+  `#1c1c1e` dark / `#ffffff` light, 1 pt border `#2a2a2d` / `#e6e6ee` on
+  Android. Border radius **22**. Rows: padding 14 vertical, 16 horizontal,
+  a 24 pt glyph column, gap 14.
+- Glyph: SF Symbol `mappin.and.ellipse` on iOS, Material `location_on` on
+  Android, size 22, always secondary grey `#8E8E93`. It never changes colour
+  with the state.
 - Title "Save Location": LufgaMedium 16, white / `#100528`.
-- Subtitle: LufgaRegular 13, same colour at 60 % opacity, one line,
-  tail-truncated.
-- Switch: the platform `Switch` from React Native, track colour the brand
-  lavender `#A583EF` in both themes when on, `thumbColor` white, no custom
-  shapes.
+- Subtitle: LufgaRegular 13, one line, tail-truncated; grey `#8E8E93` when
+  off, the system blue tint (`systemBlue`, `#0A84FF` on Android) when on,
+  like a value in Reminders.
+- Switch: the platform `Switch` with its native colours (green on iOS), no
+  custom track or thumb colour, vertically centred on the row.
 - Haptics: `Haptics.impactAsync(Light)` on every flip, like other toggles.
 
 ### Open in Maps
 
 In the **fixed** state (edit mode with a stored location, or a new frame once
-a fix has arrived) the card grows a second row under a full-width hairline
-divider (16 pt insets, 12 % of the text colour): the place name, or
-`40.1872, 44.5152` when there is none, LufgaRegular 14, wrapping to **two
-lines** so it is never cut short; under it "Open in Maps" in the accent
-colour, LufgaRegular 13; a `chevron.forward` (Material `chevron_right`) at
-the trailing edge at 35 % opacity. The whole second row is the Pressable
-that opens the maps app, with a faint pressed highlight; the switch keeps
-its own hit area. (Chosen after two rejected attempts: a third text line and
-a floating chip both looked wrong, and a one-line address truncated.)
+a fix has arrived) the card grows a second row under a hairline divider
+inset to the text column (12 % of the text colour): a grey `map` glyph in
+the glyph column, then the place name, or `40.1872, 44.5152` when there is
+none, LufgaRegular 14, wrapping to **two lines** so it is never cut short;
+under it "Open in Maps" in the system blue tint, LufgaRegular 13; a grey
+`chevron.forward` (Material `chevron_right`) size 16 at the trailing edge.
+The whole second row is the Pressable that opens the maps app, with a faint
+pressed highlight; the switch keeps its own hit area. (Chosen after
+rejected attempts: a third text line, a floating chip, a solid accent disc
+and a one-line address that truncated.)
 Opening calls `Linking.openURL` directly (no
 `canOpenURL`, which would need manifest `<queries>` on Android and
 `LSApplicationQueriesSchemes` on iOS) with:
