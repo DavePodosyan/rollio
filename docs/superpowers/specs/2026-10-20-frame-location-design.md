@@ -167,14 +167,16 @@ Reference mockup: `.superpowers/brainstorm/97663-1792521514/content/location.htm
   horizontal. Row layout: icon circle · text block (flex 1) · switch; gap 14.
 - Icon circle: 40 × 40, radius 20. Off: background `#09090b6d` dark /
   `#e5e0ff4d` light, glyph white dark / `#100528` light. On (any state other
-  than off): background accent `#A583EF` dark / `#39128F` light, glyph
-  `#100528` dark / white light. Glyph: SF Symbol `mappin.and.ellipse` on iOS,
+  than off): a soft lavender disc, `#A583EF33` dark / `#E5E0FF` light, with
+  the glyph in the accent (`#A583EF` dark / `#39128F` light). No solid
+  purple disc: the light theme leans on the pale lavender tints. Glyph: SF Symbol `mappin.and.ellipse` on iOS,
   Material `location_on` on Android, size 20.
 - Title "Save Location": LufgaMedium 16, white / `#100528`.
 - Subtitle: LufgaRegular 13, same colour at 60 % opacity, one line,
   tail-truncated.
-- Switch: the platform `Switch` from React Native, track colour accent when
-  on, `thumbColor` white, no custom shapes.
+- Switch: the platform `Switch` from React Native, track colour the brand
+  lavender `#A583EF` in both themes when on, `thumbColor` white, no custom
+  shapes.
 - Haptics: `Haptics.impactAsync(Light)` on every flip, like other toggles.
 
 ### Open in Maps

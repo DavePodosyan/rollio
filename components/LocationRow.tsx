@@ -32,6 +32,10 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
 
     const accent = dark ? '#A583EF' : '#39128F';
     const textColor = dark ? '#ffffff' : '#100528';
+    // The app's soft brand lavender: the switch track and the "on" disc.
+    const lavender = '#A583EF';
+    const discOn = dark ? '#A583EF33' : '#E5E0FF';
+    const discOff = dark ? '#09090b6d' : '#e5e0ff4d';
     const surfaceBackground = isGlassAvailable && !isAndroid ? 'transparent' : dark ? '#1c1c1e' : '#f6f6fa';
     const surfaceBorder = dark ? '#2a2a2d' : '#e6e6ee';
     const on = status !== 'off';
@@ -66,13 +70,13 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                         borderRadius: ICON_SIZE / 2,
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: on ? accent : dark ? '#09090b6d' : '#e5e0ff4d',
+                        backgroundColor: on ? discOn : discOff,
                     }}
                 >
                     <SymbolView
                         name={{ ios: 'mappin.and.ellipse', android: 'location_on' }}
                         size={20}
-                        tintColor={on ? (dark ? '#100528' : '#ffffff') : textColor}
+                        tintColor={on ? accent : textColor}
                     />
                 </View>
                 <View style={{ flex: 1, minWidth: 0 }}>
@@ -91,7 +95,7 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             onToggle(next);
                         }}
-                        trackColor={{ true: accent }}
+                        trackColor={{ true: lavender }}
                         thumbColor="#ffffff"
                         accessibilityLabel={t('newFrame.location.title')}
                         style={{ alignSelf: 'center' }}
