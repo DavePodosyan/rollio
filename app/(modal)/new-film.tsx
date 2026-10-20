@@ -284,7 +284,7 @@ export default function NewFilm() {
                         <Stack.Toolbar.Button icon="xmark" onPress={() => router.back()} />
                     </Stack.Toolbar>
                     <Stack.Toolbar placement="right">
-                        <Stack.Toolbar.Button style={{ backgroundColor: 'red' }} tintColor={PlatformColor('systemBlue')} icon="checkmark" onPress={handleSaveFilm} />
+                        <Stack.Toolbar.Button variant="prominent" tintColor={PlatformColor('systemBlue')} icon="checkmark" onPress={handleSaveFilm} />
                     </Stack.Toolbar>
                 </>
             )}

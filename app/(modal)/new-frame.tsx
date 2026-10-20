@@ -405,7 +405,7 @@ export default function NewFrame() {
                     </Stack.Toolbar>
 
                     <Stack.Toolbar placement="right">
-                        <Stack.Toolbar.Button tintColor={PlatformColor('systemBlue')} icon="checkmark" onPress={handleSaveFrame} />
+                        <Stack.Toolbar.Button variant="prominent" tintColor={PlatformColor('systemBlue')} icon="checkmark" onPress={handleSaveFrame} />
                     </Stack.Toolbar>
                 </>
             )}
