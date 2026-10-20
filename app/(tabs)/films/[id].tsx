@@ -12,7 +12,7 @@ import { getFilmStatusLabel } from '@/utils/filmStatusLabels';
 import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { useFrames } from '@/hooks/useFrames';
 import FrameListItem from '@/components/FrameListItem';
-import { Frame } from '@/utils/types';
+import { Frame } from '@/types';
 import { Button, ContextMenu, Divider, Host, Section } from '@expo/ui/swift-ui';
 import { useTranslation } from 'react-i18next';
 import { DATA_RESTORED_EVENT } from '@/hooks/useBackup';
