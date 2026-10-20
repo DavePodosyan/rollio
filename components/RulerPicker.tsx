@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
-import { Dimensions, View, Text, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, Animated, FlatList, Platform } from 'react-native';
+import { View, Text, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, Animated, FlatList, Platform, LayoutChangeEvent, useWindowDimensions } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
 import { useColorScheme } from 'react-native';
@@ -19,8 +19,6 @@ export type RulerPickerProps = {
   initial: number | string;
   onChange?: (value: number | string) => void;
 };
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const TICK_THIN = 13;   // small tick height
 const TICK_THICK = 26;  // large tick height (for major stops)
@@ -51,8 +49,19 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
   const [selectedIndex, setSelectedIndex] = useState<number>(startIndex);
 
 
-  // pad so the center marker aligns with a tick
-  const sidePadding = useMemo(() => (SCREEN_WIDTH - 40 - tickWidth) / 2, [tickWidth]);
+  // Pad so the center marker aligns with a tick. The width is measured from the
+  // ruler itself (not the window) so it stays correct inside sheets and when the
+  // window resizes, e.g. on iPhone Duo. Until the first layout, estimate it from
+  // the window minus the form's 20pt horizontal padding.
+  const { width: windowWidth } = useWindowDimensions();
+  const [rulerWidth, setRulerWidth] = useState<number | null>(null);
+  const onRulerLayout = useCallback((e: LayoutChangeEvent) => {
+    setRulerWidth(e.nativeEvent.layout.width);
+  }, []);
+  const sidePadding = useMemo(
+    () => ((rulerWidth ?? windowWidth - 40) - tickWidth) / 2,
+    [rulerWidth, windowWidth, tickWidth]
+  );
 
   const scrollToIndex = useCallback((index: number, animated = true) => {
     flatListRef.current?.scrollToIndex({ index, animated }); // Center the index
@@ -242,7 +251,7 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
         })()}
       </Text>
 
-      <View style={[styles.container, { height }]}>
+      <View style={[styles.container, { height }]} onLayout={onRulerLayout}>
         <Animated.FlatList
           ref={flatListRef}
           initialScrollIndex={startIndex}
@@ -273,6 +282,7 @@ export default RulerPicker;
 
 const styles = StyleSheet.create({
   container: {
+    width: '100%',
     justifyContent: 'center',
     borderRadius: 34,
     overflow: 'hidden',

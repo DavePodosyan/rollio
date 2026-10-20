@@ -23,6 +23,7 @@ import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as HapticFeedback from 'expo-haptics';
 import * as Application from 'expo-application';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const productSkus = [
     'support.1',
@@ -40,6 +41,8 @@ type PlatformSymbol = {
 export default function Support() {
     const { t } = useTranslation();
     const colorScheme = useColorScheme();
+    // See films/index.tsx: pad content for side rails (iPhone Duo, Split View).
+    const insets = useSafeAreaInsets();
     const isGlassAvailable = isLiquidGlassAvailable();
 
     const gradientColors: readonly [string, string, ...string[]] = colorScheme === 'dark'
@@ -141,8 +144,8 @@ export default function Support() {
                 <ScrollView contentInsetAdjustmentBehavior="automatic"
                     style={{
                         paddingTop: 10,
-                        paddingLeft: 18,
-                        paddingRight: 18,
+                        paddingLeft: 18 + insets.left,
+                        paddingRight: 18 + insets.right,
                     }}>
 
 

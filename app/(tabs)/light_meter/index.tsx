@@ -16,6 +16,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { File, FileMode } from 'expo-file-system';
 import { deleteTempFile } from '@/utils/ImageService';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const platformColor = (iosName: string, androidName: string) => (
     PlatformColor(Platform.OS === 'ios' ? iosName : androidName)
@@ -255,6 +256,10 @@ const ANDROID_READING_SHEET_COLLAPSED_DETENT = 0.52;
 export default function CameraBackgroundPage() {
     const { t } = useTranslation();
     const colorScheme = useColorScheme();
+    // Keep interactive controls clear of side rails (iPhone Duo, Split View).
+    // The camera preview itself is background and may extend under them.
+    const insets = useSafeAreaInsets();
+    const containerInsetStyle = { paddingLeft: 10 + insets.left, paddingRight: 10 + insets.right };
     const { height: windowHeight } = useWindowDimensions();
     const isFocused = useIsFocused();
     const isGlassAvailable = isLiquidGlassAvailable();
@@ -560,7 +565,7 @@ export default function CameraBackgroundPage() {
     if (!hasPermission) {
         // Camera permissions are not granted
         return (
-            <View style={[styles.container, { justifyContent: 'center' }]}>
+            <View style={[styles.container, containerInsetStyle, { justifyContent: 'center' }]}>
                 <LinearGradient
                     // colors={['#09090B', '#100528', '#09090B']}
                     colors={gradientColors}
@@ -614,7 +619,7 @@ export default function CameraBackgroundPage() {
 
     if (!device) {
         return (
-            <View style={[styles.container, { justifyContent: 'center' }]}>
+            <View style={[styles.container, containerInsetStyle, { justifyContent: 'center' }]}>
                 <LinearGradient
                     // colors={['#09090B', '#100528', '#09090B']}
                     colors={gradientColors}
@@ -638,7 +643,7 @@ export default function CameraBackgroundPage() {
     // }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, containerInsetStyle]}>
             <GestureDetector gesture={gesture}>
                 <Camera
                     ref={cameraRef}

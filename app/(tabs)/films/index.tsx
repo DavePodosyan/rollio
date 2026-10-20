@@ -9,12 +9,17 @@ import { useCallback, useState, useEffect, useRef } from "react";
 import Storage from 'expo-sqlite/kv-store';
 import * as StoreReview from 'expo-store-review';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Home() {
     const colorScheme = useColorScheme();
     const { t } = useTranslation();
     const { films, loading, error, fetchFilms } = useFilms();
     const [ready, setReady] = useState(false);
+    // Horizontal insets are non-zero when iOS places the toolbar/tab rail on a
+    // side edge (iPhone Duo inner display, Split View). Scroll views only offset
+    // for them; content width has to be padded explicitly.
+    const insets = useSafeAreaInsets();
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -125,7 +130,7 @@ export default function Home() {
                         contentInsetAdjustmentBehavior="automatic"
                         scrollEventThrottle={16}
 
-                        contentContainerStyle={{ flexGrow: 1, paddingTop: Platform.OS === 'android' ? 24 : 20, paddingBottom: 50 }}
+                        contentContainerStyle={{ flexGrow: 1, paddingTop: Platform.OS === 'android' ? 24 : 20, paddingBottom: 50, paddingLeft: insets.left, paddingRight: insets.right }}
                         refreshing={false}
                         onRefresh={fetchFilms}
                         ListFooterComponent={films && films.length > 0 ? <EnjoyingRollio /> : undefined}

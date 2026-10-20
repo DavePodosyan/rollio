@@ -2,6 +2,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback } from 'react';
 import { View, Text, Alert, Pressable, useColorScheme, FlatList, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useLocalSearchParams, router, useFocusEffect, Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { useFilm } from '@/hooks/useFilm';
@@ -31,6 +32,8 @@ export default function FilmDetailPage() {
     // console.log(frames);
 
     const navigation = useNavigation();
+    // See films/index.tsx: pad content for side rails (iPhone Duo, Split View).
+    const insets = useSafeAreaInsets();
 
 
     function handleContextMenuSelect(action: string) {
@@ -343,7 +346,7 @@ export default function FilmDetailPage() {
                         )}
                         contentInsetAdjustmentBehavior="automatic"
                         scrollEventThrottle={16}
-                        contentContainerStyle={{ paddingTop: Platform.OS === 'android' ? 24 : 20, paddingLeft: 18, paddingRight: 18, paddingBottom: 50 }}
+                        contentContainerStyle={{ paddingTop: Platform.OS === 'android' ? 24 : 20, paddingLeft: 18 + insets.left, paddingRight: 18 + insets.right, paddingBottom: 50 }}
                         refreshing={false}
                         onRefresh={() => {
                             refreshFilm();
