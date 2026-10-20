@@ -1,10 +1,10 @@
-import { Platform, Pressable, Switch, Text, View, useColorScheme } from 'react-native';
+import { Platform, Pressable, StyleSheet, Switch, Text, View, useColorScheme } from 'react-native';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 
-import { fixedSubtitle, type FrameFix } from '@/services/frameLocation';
+import { fixedSubtitle, formatCoordinates, type FrameFix } from '@/services/frameLocation';
 import type { LocationStatus } from '@/hooks/useFrameLocation';
 
 interface LocationRowProps {
@@ -15,9 +15,14 @@ interface LocationRowProps {
     onOpenMaps: () => void;
 }
 
-const withAlpha = (hex: string, alpha: number) => hex + Math.round(alpha * 255).toString(16).padStart(2, '0');
+const ICON_SIZE = 40;
+const GAP = 14;
 
-/** The "Save Location" row of the frame form; styled like the Attach Image card. */
+/**
+ * The "Save Location" card of the frame form: a title row with the switch
+ * and, once there is a fix, an address row underneath that opens Maps.
+ * Styled like the Attach Image card.
+ */
 export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps }: LocationRowProps) {
     const { t } = useTranslation();
     const colorScheme = useColorScheme();
@@ -30,10 +35,10 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
     const surfaceBackground = isGlassAvailable && !isAndroid ? 'transparent' : dark ? '#1c1c1e' : '#f6f6fa';
     const surfaceBorder = dark ? '#2a2a2d' : '#e6e6ee';
     const on = status !== 'off';
-
     const fixed = status === 'fixed' && !!fix;
+
     const subtitle = fixed
-        ? fixedSubtitle(fix, { accuracy: (meters) => t('newFrame.location.accuracy', { meters }) })
+        ? fixedSubtitle(fix, { on: t('newFrame.location.on'), accuracy: (meters) => t('newFrame.location.accuracy', { meters }) })
         : status === 'finding'
             ? t('newFrame.location.finding')
             : status === 'waiting'
@@ -41,29 +46,24 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                 : t('newFrame.location.off');
 
     return (
-        <View>
         <GlassView
             isInteractive={true}
             glassEffectStyle="regular"
             tintColor={dark ? '#09090b6d' : '#ffffff'}
             style={{
                 borderRadius: 22,
-                paddingVertical: 14,
-                paddingHorizontal: 16,
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 14,
                 borderWidth: isAndroid ? 1 : 0,
                 borderColor: surfaceBorder,
                 backgroundColor: surfaceBackground,
+                overflow: 'hidden',
             }}
         >
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: GAP, paddingVertical: 14, paddingHorizontal: 16 }}>
                 <View
                     style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 20,
+                        width: ICON_SIZE,
+                        height: ICON_SIZE,
+                        borderRadius: ICON_SIZE / 2,
                         alignItems: 'center',
                         justifyContent: 'center',
                         backgroundColor: on ? accent : dark ? '#09090b6d' : '#e5e0ff4d',
@@ -83,42 +83,47 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                         {subtitle}
                     </Text>
                 </View>
+                <Switch
+                    value={enabled}
+                    onValueChange={(next) => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        onToggle(next);
+                    }}
+                    trackColor={{ true: accent }}
+                    thumbColor="#ffffff"
+                    accessibilityLabel={t('newFrame.location.title')}
+                />
             </View>
-            <Switch
-                value={enabled}
-                onValueChange={(next) => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    onToggle(next);
-                }}
-                trackColor={{ true: accent }}
-                thumbColor="#ffffff"
-                accessibilityLabel={t('newFrame.location.title')}
-            />
+
+            {fixed && (
+                <>
+                    <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: textColor, opacity: 0.12, marginLeft: 16 + ICON_SIZE + GAP }} />
+                    <Pressable
+                        onPress={onOpenMaps}
+                        accessibilityRole="link"
+                        accessibilityLabel={t('newFrame.location.openInMaps')}
+                        style={({ pressed }) => ({
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 12,
+                            paddingVertical: 12,
+                            paddingLeft: 16 + ICON_SIZE + GAP,
+                            paddingRight: 16,
+                            backgroundColor: pressed ? (dark ? '#ffffff14' : '#10052810') : 'transparent',
+                        })}
+                    >
+                        <View style={{ flex: 1, minWidth: 0 }}>
+                            <Text numberOfLines={2} style={{ fontFamily: 'LufgaMedium', fontSize: 15, lineHeight: 20, color: textColor }}>
+                                {fix.place ?? formatCoordinates(fix.latitude, fix.longitude)}
+                            </Text>
+                            <Text numberOfLines={1} style={{ fontFamily: 'LufgaRegular', fontSize: 13, lineHeight: 18, color: accent, marginTop: 2 }}>
+                                {t('newFrame.location.openInMaps')}
+                            </Text>
+                        </View>
+                        <SymbolView name={{ ios: 'chevron.forward', android: 'chevron_right' }} size={16} tintColor={textColor} style={{ opacity: 0.35 }} />
+                    </Pressable>
+                </>
+            )}
         </GlassView>
-        {fixed && (
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
-                <Pressable
-                    onPress={onOpenMaps}
-                    accessibilityRole="link"
-                    hitSlop={6}
-                    style={({ pressed }) => ({
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 6,
-                        paddingVertical: 6,
-                        paddingHorizontal: 12,
-                        borderRadius: 16,
-                        backgroundColor: withAlpha(accent, dark ? 0.2 : 0.12),
-                        opacity: pressed ? 0.7 : 1,
-                    })}
-                >
-                    <SymbolView name={{ ios: 'arrow.up.right', android: 'open_in_new' }} size={14} tintColor={accent} />
-                    <Text style={{ fontFamily: 'LufgaMedium', fontSize: 13, lineHeight: 18, color: accent }}>
-                        {t('newFrame.location.openInMaps')}
-                    </Text>
-                </Pressable>
-            </View>
-        )}
-        </View>
     );
 }

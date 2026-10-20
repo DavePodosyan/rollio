@@ -84,6 +84,7 @@
     "location": {
       "title": "位置情報を保存",
       "off": "オフ",
+      "on": "オン",
       "finding": "位置情報を取得中…",
       "waiting": "GPSを待機中",
       "accuracy": "±{{meters}} m",

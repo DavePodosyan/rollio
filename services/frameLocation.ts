@@ -99,12 +99,6 @@ export const fixToFields = (fix: FrameFix | null): LocationFields =>
         ? { latitude: fix.latitude, longitude: fix.longitude, location_accuracy: fix.accuracy, place: fix.place }
         : { latitude: null, longitude: null, location_accuracy: null, place: null };
 
-/**
- * The row's subtitle in its fixed state: the place (or the coordinates when
- * there is none), followed by the accuracy when it is known.
- */
-export const fixedSubtitle = (fix: FrameFix, strings: { accuracy: (meters: number) => string }): string => {
-    const parts = [fix.place ?? formatCoordinates(fix.latitude, fix.longitude)];
-    if (fix.accuracy !== null) parts.push(strings.accuracy(Math.round(fix.accuracy)));
-    return parts.join(' · ');
-};
+/** The title row's subtitle in the fixed state: "On", plus the accuracy when known. */
+export const fixedSubtitle = (fix: FrameFix, strings: { on: string; accuracy: (meters: number) => string }): string =>
+    fix.accuracy !== null ? `${strings.on} · ${strings.accuracy(Math.round(fix.accuracy))}` : strings.on;

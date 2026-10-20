@@ -84,6 +84,7 @@
     "location": {
       "title": "위치 저장",
       "off": "꺼짐",
+      "on": "켜짐",
       "finding": "위치 찾는 중…",
       "waiting": "GPS 대기 중",
       "accuracy": "±{{meters}} m",

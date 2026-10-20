@@ -84,6 +84,7 @@
     "location": {
       "title": "Save Location",
       "off": "Off",
+      "on": "On",
       "finding": "Finding location…",
       "waiting": "Waiting for GPS",
       "accuracy": "±{{meters}} m",

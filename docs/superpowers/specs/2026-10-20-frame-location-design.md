@@ -129,7 +129,7 @@ off.)
 | off       | "Off"                                           |
 | finding   | "Finding location…" (first 10 s without any fix) |
 | waiting   | "Waiting for GPS" (after 10 s, still no fix)    |
-| fixed     | `<place> · ±12 m`, or `40.1872, 44.5152 · ±12 m` when there is no place name; the accuracy part is dropped when unknown |
+| fixed     | "On · ±12 m" ("On" alone when accuracy is unknown); the address itself goes in a second row, see "Open in Maps" |
 | denied    | shown as off, after the alert                   |
 
 **Switching off** clears the pending request and the captured fix; the frame
@@ -180,13 +180,16 @@ Reference mockup: `.superpowers/brainstorm/97663-1792521514/content/location.htm
 ### Open in Maps
 
 In the **fixed** state (edit mode with a stored location, or a new frame once
-a fix has arrived) a small chip appears under the row, right-aligned, 8 pt
-below it: glyph `arrow.up.right` (Material `open_in_new`) size 14 and the
-label "Open in Maps", LufgaMedium 13 in the accent colour, on a pill (radius
-16, padding 6 vertical / 12 horizontal) tinted with the accent at 20 %
-(dark) / 12 % (light). The row itself is not tappable; the switch keeps its
-own hit area. (Chosen over a tappable row and over a third line of text,
-which truncated.) Opening calls `Linking.openURL` directly (no
+a fix has arrived) the card grows a second row under a hairline divider
+(indented to the text column, 12 % of the text colour): the place name, or
+`40.1872, 44.5152` when there is none, LufgaMedium 15, wrapping to **two
+lines** so it is never cut short; under it "Open in Maps" in the accent
+colour, LufgaRegular 13; a `chevron.forward` (Material `chevron_right`) at
+the trailing edge at 35 % opacity. The whole second row is the Pressable
+that opens the maps app, with a faint pressed highlight; the switch keeps
+its own hit area. (Chosen after two rejected attempts: a third text line and
+a floating chip both looked wrong, and a one-line address truncated.)
+Opening calls `Linking.openURL` directly (no
 `canOpenURL`, which would need manifest `<queries>` on Android and
 `LSApplicationQueriesSchemes` on iOS) with:
 
