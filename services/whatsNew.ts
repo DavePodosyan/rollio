@@ -28,6 +28,12 @@ export const FIRST_TRACKED_VERSION = '0.0.0';
 /** Newest release first. Add an entry per release worth announcing. */
 export const WHATS_NEW: WhatsNewRelease[] = [
     {
+        version: '2.3.0',
+        items: [
+            { sf: 'mappin.and.ellipse', md: 'location-on', titleKey: 'whatsNew.releases.2_3_0.location.title', bodyKey: 'whatsNew.releases.2_3_0.location.body' },
+        ],
+    },
+    {
         version: '2.2.0',
         items: [
             { sf: 'icloud.and.arrow.up', md: 'cloud-upload', titleKey: 'whatsNew.releases.2_2_0.backup.title', bodyKey: 'whatsNew.releases.2_2_0.backup.body' },
