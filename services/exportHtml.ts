@@ -86,7 +86,7 @@ body {
 /* Only the strip is unbreakable; its notes are block boxes that may continue on
    the next page, so a note of any length is never clipped. */
 .unit { margin-top: 18pt; }
-.strip { break-inside: avoid; page-break-inside: avoid; break-after: avoid; page-break-after: avoid; border-top: 1pt solid #D9D7E2; border-bottom: 1pt solid #D9D7E2; padding: 3pt 0; }
+.strip { break-inside: avoid; page-break-inside: avoid; border-top: 1pt solid #D9D7E2; border-bottom: 1pt solid #D9D7E2; padding: 3pt 0; }
 .sprockets { display: flex; justify-content: space-between; height: 6pt; padding: 0 6pt; }
 .sprockets i { display: block; width: 6pt; height: 6pt; background: #E6E4EE; }
 .row { display: grid; grid-template-columns: repeat(${FRAMES_PER_STRIP}, 1fr); gap: 8pt; padding: 9pt 9pt 6pt; }
