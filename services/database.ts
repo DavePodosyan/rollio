@@ -2,6 +2,9 @@ import { CreateFilmInput, Film, Frame, FilmStatus, CreateFrameInput } from '@/ty
 import { type SQLiteDatabase } from 'expo-sqlite';
 import { deleteFrameImage } from '@/utils/ImageService';
 
+/** Schema version the app expects; bump together with a new migrateToVN. */
+export const TARGET_VERSION = 3;
+
 export const initDatabase = async (db: SQLiteDatabase) => {
     await db.execAsync(`
       PRAGMA journal_mode = 'wal';
@@ -33,7 +36,6 @@ export const initDatabase = async (db: SQLiteDatabase) => {
     `);
 
     const [{ user_version: currentVersion }] = await db.getAllAsync<{ user_version: number }>('PRAGMA user_version');
-    const TARGET_VERSION = 3;
 
     if (currentVersion < TARGET_VERSION) {
         console.log(`Migrating database from version ${currentVersion} to ${TARGET_VERSION}...`);
