@@ -7,6 +7,7 @@ import EnjoyingRollio from "@/components/EnjoyingRollio";
 import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useState, useEffect, useRef } from "react";
 import Storage from 'expo-sqlite/kv-store';
+import { DATA_RESTORED_EVENT } from '@/hooks/useBackup';
 import * as StoreReview from 'expo-store-review';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -60,6 +61,14 @@ export default function Home() {
 
         });
 
+        return () => subscription.remove();
+    }, []);
+
+    // A restore replaces every row, so refetch even if this tab is not focused.
+    useEffect(() => {
+        const subscription = DeviceEventEmitter.addListener(DATA_RESTORED_EVENT, () => {
+            fetchFilms();
+        });
         return () => subscription.remove();
     }, []);
 

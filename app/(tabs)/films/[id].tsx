@@ -1,7 +1,7 @@
 
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback } from 'react';
-import { View, Text, Alert, Pressable, useColorScheme, FlatList, Platform } from 'react-native';
+import { View, Text, Alert, Pressable, useColorScheme, FlatList, Platform, DeviceEventEmitter } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useLocalSearchParams, router, useFocusEffect, Stack } from 'expo-router';
 import { useEffect } from 'react';
@@ -15,6 +15,8 @@ import FrameListItem from '@/components/FrameListItem';
 import { Frame } from '@/utils/types';
 import { Button, ContextMenu, Divider, Host, Section } from '@expo/ui/swift-ui';
 import { useTranslation } from 'react-i18next';
+import { DATA_RESTORED_EVENT } from '@/hooks/useBackup';
+import { StackActions } from 'expo-router/react-navigation';
 
 export default function FilmDetailPage() {
     const { id, title } = useLocalSearchParams<{ id: string, title: string }>();
@@ -34,6 +36,16 @@ export default function FilmDetailPage() {
     const navigation = useNavigation();
     // See films/index.tsx: pad content for side rails (iPhone Duo, Split View).
     const insets = useSafeAreaInsets();
+
+    // After a restore this film may no longer exist; leave rather than show stale data.
+    useEffect(() => {
+        const subscription = DeviceEventEmitter.addListener(DATA_RESTORED_EVENT, () => {
+            // popToTop stays inside the Films stack; a plain goBack could bubble
+            // up to the tab navigator and switch tabs.
+            navigation.dispatch(StackActions.popToTop());
+        });
+        return () => subscription.remove();
+    }, [navigation]);
 
 
     function handleContextMenuSelect(action: string) {
