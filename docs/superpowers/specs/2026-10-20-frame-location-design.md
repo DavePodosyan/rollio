@@ -180,8 +180,8 @@ Reference mockup: `.superpowers/brainstorm/97663-1792521514/content/location.htm
 ### Open in Maps
 
 In the **fixed** state (edit mode with a stored location, or a new frame once
-a fix has arrived) the card grows a second row under a hairline divider
-(indented to the text column, 12 % of the text colour): the place name, or
+a fix has arrived) the card grows a second row under a full-width hairline
+divider (16 pt insets, 12 % of the text colour): the place name, or
 `40.1872, 44.5152` when there is none, LufgaMedium 15, wrapping to **two
 lines** so it is never cut short; under it "Open in Maps" in the accent
 colour, LufgaRegular 13; a `chevron.forward` (Material `chevron_right`) at

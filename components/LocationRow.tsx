@@ -83,21 +83,25 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                         {subtitle}
                     </Text>
                 </View>
-                <Switch
-                    value={enabled}
-                    onValueChange={(next) => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        onToggle(next);
-                    }}
-                    trackColor={{ true: accent }}
-                    thumbColor="#ffffff"
-                    accessibilityLabel={t('newFrame.location.title')}
-                />
+                {/* UISwitch draws 51×31 inside a taller native frame; centre it by hand. */}
+                <View style={{ height: 31, justifyContent: 'center', alignSelf: 'center' }}>
+                    <Switch
+                        value={enabled}
+                        onValueChange={(next) => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            onToggle(next);
+                        }}
+                        trackColor={{ true: accent }}
+                        thumbColor="#ffffff"
+                        accessibilityLabel={t('newFrame.location.title')}
+                        style={{ alignSelf: 'center' }}
+                    />
+                </View>
             </View>
 
             {fixed && (
                 <>
-                    <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: textColor, opacity: 0.12, marginLeft: 16 + ICON_SIZE + GAP }} />
+                    <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: textColor, opacity: 0.12, marginHorizontal: 16 }} />
                     <Pressable
                         onPress={onOpenMaps}
                         accessibilityRole="link"
@@ -107,8 +111,7 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                             alignItems: 'center',
                             gap: 12,
                             paddingVertical: 12,
-                            paddingLeft: 16 + ICON_SIZE + GAP,
-                            paddingRight: 16,
+                            paddingHorizontal: 16,
                             backgroundColor: pressed ? (dark ? '#ffffff14' : '#10052810') : 'transparent',
                         })}
                     >
