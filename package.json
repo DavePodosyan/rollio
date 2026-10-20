@@ -10,6 +10,8 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "test:db": "for f in tests/db/test-*.mjs; do node --no-warnings \"$f\" || exit 1; done",
+    "test:export": "for f in tests/export/test-*.mjs; do node --no-warnings \"$f\" || exit 1; done",
+    "test:unit": "npm run test:db && npm run test:export",
     "lint": "expo lint"
   },
   "jest": {
