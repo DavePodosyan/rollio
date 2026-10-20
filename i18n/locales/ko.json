@@ -23,6 +23,7 @@
   "tabs": {
     "films": "필름",
     "lightMeter": "노출계",
+    "settings": "설정",
     "support": "지원"
   },
   "filmStatus": {
@@ -136,6 +137,13 @@
     "writeReview": "리뷰 작성",
     "shareApp": "앱 공유",
     "version": "버전 {{version}} ({{build}})"
+  },
+  "settings": {
+    "title": "설정",
+    "languageHeading": "언어",
+    "appLanguage": "앱 언어",
+    "languageFootnote": "Rollio는 기기 언어 설정을 따릅니다. Rollio에서만 다른 언어를 사용하려면 설정 앱에서 선택하세요.",
+    "openSettingsErrorMessage": "설정을 열 수 없습니다."
   },
   "enjoyingRollio": {
     "cta": "Rollio가 마음에 드시나요?"

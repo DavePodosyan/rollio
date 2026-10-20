@@ -23,6 +23,7 @@
   "tabs": {
     "films": "Films",
     "lightMeter": "Light Meter",
+    "settings": "Settings",
     "support": "Support"
   },
   "filmStatus": {
@@ -136,6 +137,13 @@
     "writeReview": "Write a Review",
     "shareApp": "Share the App",
     "version": "Version {{version}} ({{build}})"
+  },
+  "settings": {
+    "title": "Settings",
+    "languageHeading": "Language",
+    "appLanguage": "App Language",
+    "languageFootnote": "Rollio follows your device language. To use a different language just for Rollio, choose it in the Settings app.",
+    "openSettingsErrorMessage": "Could not open Settings."
   },
   "enjoyingRollio": {
     "cta": "Enjoying Rollio?"

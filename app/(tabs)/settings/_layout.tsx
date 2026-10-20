@@ -1,0 +1,35 @@
+import { isLiquidGlassAvailable } from "expo-glass-effect";
+import { Stack } from "expo-router";
+import { Platform, useColorScheme } from "react-native";
+import { useTranslation } from "react-i18next";
+
+export default function SettingsLayout() {
+    const isGlassAvailable = isLiquidGlassAvailable();
+    const colorScheme = useColorScheme();
+    const { t } = useTranslation();
+    const isAndroid = Platform.OS === "android";
+    const androidBackgroundColor = colorScheme === 'dark' ? '#09090B' : '#EFF0F4';
+
+    return (
+        <Stack screenOptions={{
+            headerShown: true,
+            headerBackVisible: true,
+            headerLargeTitle: !isAndroid,
+            headerTransparent: !isAndroid,
+            headerTintColor: colorScheme === 'dark' ? '#fff' : '#100528',
+            headerStyle: { backgroundColor: isAndroid ? androidBackgroundColor : "transparent" },
+            headerLargeStyle: { backgroundColor: isAndroid ? androidBackgroundColor : "transparent" },
+            headerTitleStyle: {
+                fontFamily: 'LufgaMedium',
+                color: colorScheme === 'dark' ? '#fff' : '#100528',
+                fontSize: isAndroid ? 22 : undefined,
+            },
+            headerLargeTitleStyle: { fontFamily: 'LufgaMedium', color: colorScheme === 'dark' ? '#fff' : '#100528' },
+            headerBlurEffect: !isAndroid && !isGlassAvailable ? "systemMaterialDark" : undefined,
+            title: "",
+            contentStyle: { backgroundColor: isAndroid ? androidBackgroundColor : "transparent" },
+        }}>
+            <Stack.Screen name="index" options={{ title: t('settings.title') }} />
+        </Stack>
+    );
+}

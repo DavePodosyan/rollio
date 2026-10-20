@@ -36,6 +36,11 @@ export default function TabsLayout() {
         <NativeTabs.Trigger.Label>{t('tabs.lightMeter')}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="settings">
+        <NativeTabs.Trigger.Icon sf="gearshape.fill" md="settings" />
+        <NativeTabs.Trigger.Label>{t('tabs.settings')}</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="support">
         <NativeTabs.Trigger.Icon sf="heart.fill" md="favorite" />
         <NativeTabs.Trigger.Label>{t('tabs.support')}</NativeTabs.Trigger.Label>
