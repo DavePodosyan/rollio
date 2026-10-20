@@ -116,7 +116,7 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                         })}
                     >
                         <View style={{ flex: 1, minWidth: 0 }}>
-                            <Text numberOfLines={2} style={{ fontFamily: 'LufgaMedium', fontSize: 15, lineHeight: 20, color: textColor }}>
+                            <Text numberOfLines={2} style={{ fontFamily: 'LufgaRegular', fontSize: 14, lineHeight: 19, color: textColor }}>
                                 {fix.place ?? formatCoordinates(fix.latitude, fix.longitude)}
                             </Text>
                             <Text numberOfLines={1} style={{ fontFamily: 'LufgaRegular', fontSize: 13, lineHeight: 18, color: accent, marginTop: 2 }}>
