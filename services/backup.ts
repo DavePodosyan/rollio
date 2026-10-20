@@ -86,6 +86,29 @@ export const isStaleCacheEntry = (name: string, isDirectory: boolean): boolean =
     return name.endsWith(BACKUP_EXTENSION) || name.startsWith(PICKED_PREFIX);
 };
 
+/**
+ * Export folders that can go while the app is in use: every `export-*` except
+ * the newest, which the app the user just shared to may still be reading.
+ * Names sort by their timestamp suffix.
+ */
+export const staleExportDirs = (names: string[]): string[] => {
+    const exports = names.filter((n) => n.startsWith(EXPORT_PREFIX)).sort();
+    return exports.slice(0, -1);
+};
+
+/** Sweeps older export folders only; backup/restore work dirs may be live. */
+export const cleanupStaleExports = (): void => {
+    try {
+        const dirs = Paths.cache.list().filter((e): e is Directory => e instanceof Directory);
+        const stale = new Set(staleExportDirs(dirs.map((d) => d.name)));
+        for (const dir of dirs) {
+            if (stale.has(dir.name)) dir.delete();
+        }
+    } catch (err) {
+        console.warn('Could not clean up old export folders:', err);
+    }
+};
+
 export const cleanupStaleArchives = (): void => {
     try {
         for (const entry of Paths.cache.list()) {

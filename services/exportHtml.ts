@@ -83,8 +83,10 @@ body {
 .title { font-weight: 500; font-size: 22pt; line-height: 1.1; letter-spacing: -0.02em; margin: 0; }
 .sub { font-size: 8.5pt; color: #6B6877; margin-top: 6pt; letter-spacing: 0.04em; }
 .chip { font-family: Menlo, "SF Mono", "Roboto Mono", monospace; font-size: 7.5pt; letter-spacing: 0.1em; text-transform: uppercase; border: 1pt solid #100528; padding: 4pt 7pt; border-radius: 2pt; white-space: nowrap; flex-shrink: 0; }
-.unit { margin-top: 18pt; break-inside: avoid; page-break-inside: avoid; }
-.strip { border-top: 1pt solid #D9D7E2; border-bottom: 1pt solid #D9D7E2; padding: 3pt 0; }
+/* Only the strip is unbreakable; its notes are block boxes that may continue on
+   the next page, so a note of any length is never clipped. */
+.unit { margin-top: 18pt; }
+.strip { break-inside: avoid; page-break-inside: avoid; break-after: avoid; page-break-after: avoid; border-top: 1pt solid #D9D7E2; border-bottom: 1pt solid #D9D7E2; padding: 3pt 0; }
 .sprockets { display: flex; justify-content: space-between; height: 6pt; padding: 0 6pt; }
 .sprockets i { display: block; width: 6pt; height: 6pt; background: #E6E4EE; }
 .row { display: grid; grid-template-columns: repeat(${FRAMES_PER_STRIP}, 1fr); gap: 8pt; padding: 9pt 9pt 6pt; }
@@ -95,9 +97,9 @@ body {
 .tile { width: 100%; aspect-ratio: 3 / 2; display: flex; align-items: center; justify-content: center; font-size: 9pt; color: #B9B6C6; background: #FAFAFC; border: 1pt dashed #D9D7E2; border-radius: 1pt; }
 .cap { font-family: Menlo, "SF Mono", "Roboto Mono", monospace; font-variant-numeric: tabular-nums; font-size: 7.5pt; color: #6B6877; margin-top: 4pt; letter-spacing: 0.02em; }
 .notes { margin-top: 10pt; }
-.note { display: flex; align-items: baseline; gap: 6pt; margin-top: 2pt; }
-.n { flex-shrink: 0; width: 18pt; font-family: Menlo, "SF Mono", "Roboto Mono", monospace; font-variant-numeric: tabular-nums; font-size: 7.5pt; color: #C8901F; }
-.text { flex: 1; min-width: 0; font-size: 8.5pt; color: #4A4858; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.note { display: block; padding-left: 24pt; margin-top: 2pt; }
+.n { float: left; margin-left: -24pt; width: 18pt; font-family: Menlo, "SF Mono", "Roboto Mono", monospace; font-variant-numeric: tabular-nums; font-size: 7.5pt; color: #C8901F; }
+.text { display: block; font-size: 8.5pt; color: #4A4858; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
 .no-frames { text-align: center; color: #8E8E93; margin: 36pt 0 9pt; }
 .foot { margin-top: 24pt; display: flex; justify-content: space-between; font-size: 7.5pt; color: #8E8E93; letter-spacing: 0.1em; text-transform: uppercase; }
 `;

@@ -9,7 +9,7 @@ import i18n from '@/i18n';
 import type { Film, Frame } from '@/types';
 import { getAutoValueLabel } from '@/utils/cameraSettingsLabels';
 import { getFilmStatusLabel } from '@/utils/filmStatusLabels';
-import { EXPORT_PREFIX, cleanupStaleArchives } from '@/services/backup';
+import { EXPORT_PREFIX, cleanupStaleExports } from '@/services/backup';
 import { CSV_BOM, buildFilmCsv, exportFileName } from '@/services/exportCsv';
 import { buildContactSheetHtml, formatShotDates, type SheetFrame, type SheetLabels } from '@/services/exportHtml';
 
@@ -120,7 +120,9 @@ const buildLabels = (film: Film, frameCount: number): SheetLabels => {
 // ---------------------------------------------------------------------------
 
 const createOutputDir = (): Directory => {
-    cleanupStaleArchives();
+    // Only older exports are swept here; a backup or restore may be running in
+    // another tab and must keep its working folders.
+    cleanupStaleExports();
     const dir = new Directory(Paths.cache, `${EXPORT_PREFIX}${Date.now()}`);
     dir.create();
     return dir;

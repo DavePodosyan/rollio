@@ -8,6 +8,10 @@ import type { File } from 'expo-file-system';
 
 export type ExportBusy = 'idle' | ExportKind;
 
+// iOS cannot present the share sheet while the busy modal is still animating
+// away; give the dismissal a moment first.
+const MODAL_DISMISS_DELAY_MS = 500;
+
 /** Busy state and error alerts around the film export; mirrors useBackup. */
 export const useFilmExport = () => {
     const { t } = useTranslation();
@@ -33,6 +37,7 @@ export const useFilmExport = () => {
             setBusy('idle');
         }
         try {
+            await new Promise((resolve) => setTimeout(resolve, MODAL_DISMISS_DELAY_MS));
             await shareExportedFile(file, kind);
         } catch (err) {
             console.warn(`Sharing the ${kind} failed:`, err);

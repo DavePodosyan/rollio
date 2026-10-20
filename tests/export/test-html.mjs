@@ -160,4 +160,14 @@ assert.ok(buildContactSheetHtml(makeInput(range(1), { platform: 'android' })).in
     assert.equal(formatShotDates([], film, 'en-US'), fmt.format(new Date('2026-09-01T08:00:00Z')));
 }
 
+// notes fragment across pages: only the strip is unbreakable, notes are block
+// boxes with a hanging indent (flex rows are sliced mid-line by WebKit print)
+{
+    const html = buildContactSheetHtml(makeInput(range(4)));
+    assert.ok(/\.strip \{[^}]*break-inside: avoid/.test(html));
+    assert.ok(!/\.unit \{[^}]*break-inside/.test(html));
+    assert.ok(!/\.note \{[^}]*display: flex/.test(html));
+    assert.ok(/\.note \{[^}]*padding-left: 24pt/.test(html));
+}
+
 console.log('ok');
