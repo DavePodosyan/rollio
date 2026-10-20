@@ -2,6 +2,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { SQLiteProvider } from 'expo-sqlite';
 import { initDatabase } from '@/services/database';
+import { cleanupStaleArchives } from '@/services/backup';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -26,6 +27,12 @@ export default function RootLayout() {
             SplashScreen.hideAsync();
         }
     }, [fontsLoaded]);
+
+    // Backup archives are left in the cache after sharing (the receiving app may
+    // still be reading them); sweep them on the next launch instead.
+    useEffect(() => {
+        cleanupStaleArchives();
+    }, []);
 
     if (!fontsLoaded) {
         return null; // Or splash component

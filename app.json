@@ -104,10 +104,15 @@
       [
         "expo-localization",
         {
-          "supportedLocales": ["en", "ja", "ko"]
+          "supportedLocales": [
+            "en",
+            "ja",
+            "ko"
+          ]
         }
       ],
-      "@react-native-vector-icons/material-icons"
+      "@react-native-vector-icons/material-icons",
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true
