@@ -289,14 +289,16 @@ export default function NewFilm() {
                 </>
             )}
 
-            {/* Padded to stay clear of the vertical toolbar rail on iPhone Duo / Split View. */}
-            <View ref={rootViewRef} onLayout={sideRail.onLayout} style={{ flex: 1, paddingLeft: sideRail.left, paddingRight: sideRail.right }}>
+            <View ref={rootViewRef} onLayout={sideRail.onLayout} style={{ flex: 1 }}>
 
                 <ScrollView
                     style={{ padding: 0, flex: 1 }}
                     keyboardShouldPersistTaps="handled"
                     contentInsetAdjustmentBehavior="automatic"
-
+                    // Pad the content, not the scroll view: the inner content stays clear of the
+                    // side toolbar rail on iPhone Duo / Split View while the scroll view (and its
+                    // header edge effect) still spans the full width.
+                    contentContainerStyle={{ paddingLeft: sideRail.left, paddingRight: sideRail.right }}
                 >
 
                     <View style={{ alignItems: 'center', justifyContent: 'center', borderRadius: 32 }}>
