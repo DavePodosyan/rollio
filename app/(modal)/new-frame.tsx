@@ -265,32 +265,32 @@ export default function NewFrame() {
     const handleSaveFrame = useCallback(async () => {
 
         try {
-            let dataToSave = { ...formData };
+            const dataToSave = { ...formData };
 
-            // Delete the old image if it was replaced or removed
-            if (mode === 'edit' && frame?.image) {
-                const imageChanged = dataToSave.image !== frame.image;
-                if (imageChanged) {
-                    await deleteFrameImage(frame.image);
-                }
-            }
-
+            // Copy a freshly picked image into app storage before touching the database.
+            let savedImagePath: string | null = null;
             if (dataToSave.image && dataToSave.image.startsWith('file://')) {
-                //upload image to storage and get path 
-                await saveFrameImage(dataToSave.image).then((path) => {
-                    dataToSave.image = path;
-                    console.log('image paate:', path);
-
-                });
+                savedImagePath = await saveFrameImage(dataToSave.image);
+                dataToSave.image = savedImagePath;
             }
 
-            console.log(dataToSave);
+            try {
+                if (mode === 'edit' && frame) {
+                    await updateFrame!(dataToSave);
+                } else {
+                    await addFrame(dataToSave);
+                }
+            } catch (error) {
+                // The row was not written, so don't keep the orphaned copy.
+                if (savedImagePath) {
+                    await deleteFrameImage(savedImagePath);
+                }
+                throw error;
+            }
 
-
-            if (mode === 'edit' && frame) {
-                await updateFrame!(dataToSave);
-            } else {
-                await addFrame(dataToSave);
+            // Only once the row points elsewhere is the old image safe to remove.
+            if (mode === 'edit' && frame?.image && dataToSave.image !== frame.image) {
+                await deleteFrameImage(frame.image);
             }
 
             initialDataRef.current = formData;

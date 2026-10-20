@@ -119,6 +119,18 @@ const migrateImagePaths = async (db: SQLiteDatabase) => {
     }
 }
 
+/**
+ * Runs `work` inside a transaction and returns its result.
+ * expo-sqlite's withTransactionAsync resolves to void, so the result is captured here.
+ */
+const withTransaction = async <T>(db: SQLiteDatabase, work: () => Promise<T>): Promise<T> => {
+    let result: T | undefined;
+    await db.withTransactionAsync(async () => {
+        result = await work();
+    });
+    return result as T;
+}
+
 export const getFilms = async (db: SQLiteDatabase): Promise<Film[]> => {
     if (!db) throw new Error('Database not provided');
 
@@ -236,16 +248,17 @@ export const updateFilm = async (db: SQLiteDatabase, id: number, input: Partial<
 export const deleteFilm = async (db: SQLiteDatabase, id: number): Promise<void> => {
     if (!db) throw new Error('Database not provided');
 
-    //delete frames images
     const frames: Frame[] = await getFramesByFilmId(db, id);
+
+    // Frames are removed by ON DELETE CASCADE. Only touch the filesystem once the
+    // row is gone, so a failed delete never leaves frames pointing at missing files.
+    await db.runAsync(`DELETE FROM films WHERE id = ?`, [id]);
 
     for (const frame of frames) {
         if (frame.image) {
             await deleteFrameImage(frame.image);
         }
     }
-
-    await db.runAsync(`DELETE FROM films WHERE id = ?`, [id]);
 }
 
 export const getFramesByFilmId = async (db: SQLiteDatabase, film_id: number): Promise<Frame[]> => {
@@ -270,43 +283,46 @@ export const getFrameById = async (db: SQLiteDatabase, id: number): Promise<Fram
 export const createFrame = async (db: SQLiteDatabase, input: CreateFrameInput): Promise<Frame> => {
     if (!db) throw new Error('Database not provided');
 
-    const result = await db.runAsync(
-        `
-            INSERT INTO frames (
-                film_id,
-                lens,
-                aperture,
-                shutter_speed,
-                image,
-                frame_no,
-                note,
-                created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `,
-        [
-            input.film_id,
-            input.lens || null,
-            input.aperture || "Auto",
-            input.shutter_speed || "Auto",
-            input.image || null,
-            input.frame_no,
-            input.note || null,
-            input.created_at,
-        ]
-    );
+    // Insert the frame and bump the film's frame_count atomically.
+    return withTransaction(db, async () => {
+        const result = await db.runAsync(
+            `
+                INSERT INTO frames (
+                    film_id,
+                    lens,
+                    aperture,
+                    shutter_speed,
+                    image,
+                    frame_no,
+                    note,
+                    created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `,
+            [
+                input.film_id,
+                input.lens || null,
+                input.aperture || "Auto",
+                input.shutter_speed || "Auto",
+                input.image || null,
+                input.frame_no,
+                input.note || null,
+                input.created_at,
+            ]
+        );
 
-    const id = Number(result.lastInsertRowId);
+        const id = Number(result.lastInsertRowId);
 
-    await db.runAsync(
-        `UPDATE films SET frame_count = frame_count + 1 WHERE id = ?`,
-        [input.film_id]
-    );
+        await db.runAsync(
+            `UPDATE films SET frame_count = frame_count + 1 WHERE id = ?`,
+            [input.film_id]
+        );
 
-    const created = await getFrameById(db, id);
+        const created = await getFrameById(db, id);
 
-    if (!created) throw new Error('Failed to retrieve created frame');
+        if (!created) throw new Error('Failed to retrieve created frame');
 
-    return created;
+        return created;
+    });
 };
 
 export const updateFrame = async (db: SQLiteDatabase, id: number, input: Partial<Omit<Frame, 'id'>>): Promise<Frame> => {
@@ -349,31 +365,31 @@ export const updateFrame = async (db: SQLiteDatabase, id: number, input: Partial
 export const deleteFrame = async (db: SQLiteDatabase, id: number): Promise<void> => {
     if (!db) throw new Error('Database not provided');
 
-    //delete frame image
     const frame = await getFrameById(db, id);
 
     if (!frame) return;
 
-    if (frame && frame.image) {
+    await withTransaction(db, async () => {
+        await db.runAsync(`DELETE FROM frames WHERE id = ?`, [id]);
+
+        await db.runAsync(
+            `
+                UPDATE films
+                SET frame_count = (
+                    SELECT COUNT(*)
+                    FROM frames
+                    WHERE film_id = ?
+                )
+                WHERE id = ?
+            `,
+            [frame.film_id, frame.film_id]
+        );
+    });
+
+    // Only remove the file once the row is gone.
+    if (frame.image) {
         await deleteFrameImage(frame.image);
     }
-
-    await db.runAsync(`DELETE FROM frames WHERE id = ?`, [id]);
-
-    await db.runAsync(
-        `
-            UPDATE films
-            SET frame_count = (
-                SELECT COUNT(*)
-                FROM frames
-                WHERE film_id = ?
-            )
-            WHERE id = ?
-        `,
-        [frame.film_id, frame.film_id]
-    );
-
-
 };
 
 export const getUniqueFilmNames = async (db: SQLiteDatabase): Promise<string[]> => {
