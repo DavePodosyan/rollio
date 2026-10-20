@@ -15,7 +15,10 @@ registerHooks({
             return { url: pathToFileURL(path.join(HERE, 'stub-expo-file-system.mjs')).href, shortCircuit: true };
         }
         if (specifier === 'expo-sqlite') {
-            return { url: pathToFileURL(path.join(HERE, 'stub-empty.mjs')).href, shortCircuit: true };
+            return { url: pathToFileURL(path.join(HERE, 'stub-native.mjs')).href, shortCircuit: true };
+        }
+        if (['react-native', 'expo-sqlite/kv-store', 'react-native-zip-archive', 'expo-sharing', 'expo-application'].includes(specifier)) {
+            return { url: pathToFileURL(path.join(HERE, 'stub-native.mjs')).href, shortCircuit: true };
         }
         if (specifier === '@/types') {
             return { url: pathToFileURL(path.join(HERE, 'stub-types.mjs')).href, shortCircuit: true };

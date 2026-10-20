@@ -163,6 +163,22 @@
       "framesCount_other": "프레임 {{count}}개"
     }
   },
+  "export": {
+    "menu": "내보내기…",
+    "pdf": "PDF로 내보내기…",
+    "csv": "CSV로 내보내기…",
+    "preparingPdf": "PDF 준비 중…",
+    "preparingCsv": "CSV 준비 중…",
+    "errorMessage": "이 필름을 내보낼 수 없습니다.",
+    "sheet": {
+      "iso": "ISO {{iso}}",
+      "exposures": "{{count}}장",
+      "noPhoto": "—",
+      "noFrames": "아직 기록된 프레임이 없습니다",
+      "framesCount_other": "프레임 {{count}}개",
+      "exportedOn": "내보낸 날짜 {{date}}"
+    }
+  },
   "enjoyingRollio": {
     "cta": "Rollio가 마음에 드시나요?"
   },

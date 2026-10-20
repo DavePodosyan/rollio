@@ -40,6 +40,8 @@ const SET_ASIDE_DIR = `${FRAMES_DIR}-restore-backup`;
 const STAGING_PREFIX = 'backup-';
 const UNPACK_PREFIX = 'restore-';
 const PICKED_PREFIX = 'restore-input-';
+/** Per-export output folders (PDF/CSV) written by services/exportFilm.ts. */
+export const EXPORT_PREFIX = 'export-';
 
 // NOTE: in expo-file-system 58 `copy`, `move`, `write` and `text` are async
 // and must be awaited; `create`, `delete`, `list` and `exists` are sync.
@@ -74,16 +76,20 @@ const countFiles = (dir: Directory): number => dir.list().filter((e) => e instan
 /**
  * Removes archives and working folders left in the cache by earlier backups
  * and restores. Archives are kept after sharing because the receiving app may
- * still be reading them; working folders only survive a crash.
+ * still be reading them; working folders only survive a crash. Export
+ * folders (PDF/CSV) are swept here too, for the same reason.
  */
+export const isStaleCacheEntry = (name: string, isDirectory: boolean): boolean => {
+    if (isDirectory) {
+        return name.startsWith(STAGING_PREFIX) || name.startsWith(UNPACK_PREFIX) || name.startsWith(EXPORT_PREFIX);
+    }
+    return name.endsWith(BACKUP_EXTENSION) || name.startsWith(PICKED_PREFIX);
+};
+
 export const cleanupStaleArchives = (): void => {
     try {
         for (const entry of Paths.cache.list()) {
-            const isArchive = entry instanceof File && entry.name.endsWith(BACKUP_EXTENSION);
-            const isWorkDir = entry instanceof Directory
-                && (entry.name.startsWith(STAGING_PREFIX) || entry.name.startsWith(UNPACK_PREFIX));
-            const isPickedCopy = entry instanceof File && entry.name.startsWith(PICKED_PREFIX);
-            if (isArchive || isWorkDir || isPickedCopy) {
+            if (isStaleCacheEntry(entry.name, entry instanceof Directory)) {
                 entry.delete();
             }
         }

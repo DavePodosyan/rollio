@@ -163,6 +163,22 @@
       "framesCount_other": "フレーム{{count}}枚"
     }
   },
+  "export": {
+    "menu": "書き出し…",
+    "pdf": "PDFを書き出す…",
+    "csv": "CSVを書き出す…",
+    "preparingPdf": "PDFを準備中…",
+    "preparingCsv": "CSVを準備中…",
+    "errorMessage": "このフィルムを書き出せませんでした。",
+    "sheet": {
+      "iso": "ISO {{iso}}",
+      "exposures": "{{count}}枚撮り",
+      "noPhoto": "—",
+      "noFrames": "まだコマが記録されていません",
+      "framesCount_other": "{{count}}コマ",
+      "exportedOn": "書き出し日 {{date}}"
+    }
+  },
   "enjoyingRollio": {
     "cta": "Rollioを楽しんでいますか？"
   },

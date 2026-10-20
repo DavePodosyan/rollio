@@ -165,6 +165,23 @@
       "framesCount_other": "{{count}} frames"
     }
   },
+  "export": {
+    "menu": "Export…",
+    "pdf": "Export PDF…",
+    "csv": "Export CSV…",
+    "preparingPdf": "Preparing PDF…",
+    "preparingCsv": "Preparing CSV…",
+    "errorMessage": "Could not export this film.",
+    "sheet": {
+      "iso": "ISO {{iso}}",
+      "exposures": "{{count}} exp",
+      "noPhoto": "—",
+      "noFrames": "No frames logged yet",
+      "framesCount_one": "{{count}} frame",
+      "framesCount_other": "{{count}} frames",
+      "exportedOn": "Exported {{date}}"
+    }
+  },
   "enjoyingRollio": {
     "cta": "Enjoying Rollio?"
   },
