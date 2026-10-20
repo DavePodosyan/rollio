@@ -14,6 +14,7 @@ import { useSharedValue } from 'react-native-reanimated';
 import { ExifTags, read as readExif } from '@lodev09/react-native-exify';
 import { Image as ExpoImage } from 'expo-image';
 import { File, FileMode } from 'expo-file-system';
+import { deleteTempFile } from '@/utils/ImageService';
 import { useTranslation } from 'react-i18next';
 
 const platformColor = (iosName: string, androidName: string) => (
@@ -300,6 +301,18 @@ export default function CameraBackgroundPage() {
         ],
     });
     const cameraRef = useRef<Camera>(null);
+
+    // VisionCamera writes each capture to the OS temp dir and never removes it.
+    // By the time a new capture happens, the previous one has either been copied
+    // into app storage (frame saved) or abandoned, so it is safe to delete then.
+    const tempPhotoPathRef = useRef<string | null>(null);
+    const releasePreviousTempPhoto = useCallback(() => {
+        if (tempPhotoPathRef.current) {
+            deleteTempFile(getPhotoUri(tempPhotoPathRef.current));
+            tempPhotoPathRef.current = null;
+        }
+    }, []);
+    useEffect(() => releasePreviousTempPhoto, [releasePreviousTempPhoto]);
     const buttonRotation = useRef(new Animated.Value(0)).current;
     const androidSheetSnapPoints = useMemo(
         () => [`${Math.round(androidSheetDetent * 100)}%`],
@@ -476,6 +489,9 @@ export default function CameraBackgroundPage() {
                 Alert.alert(t('shared.error'), t('lightMeter.takePhotoErrorMessage'));
                 return;
             }
+
+            releasePreviousTempPhoto();
+            tempPhotoPathRef.current = photo.path;
 
             const exposureSettings = await readPhotoExposureSettings(photo.path, photo.metadata as Record<string, unknown> | undefined);
 

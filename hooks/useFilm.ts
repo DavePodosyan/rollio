@@ -3,15 +3,16 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { getFilmById, deleteFilm, updateFilm as dbUpdateFilm } from '@/services/database';
 import { CreateFilmInput, Film } from '@/types';
 
-export const useFilm = (id: number) => {
+/** Pass `null` when there is no film to load (e.g. the "new film" form). */
+export const useFilm = (id: number | null) => {
     const db = useSQLiteContext();
     const [film, setFilm] = useState<Film | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(id !== null);
     const [error, setError] = useState<string | null>(null);
 
     // Fetch the film by ID
     useEffect(() => {
-        if (!db) return;
+        if (!db || id === null) return;
         (async () => {
             try {
                 const data = await getFilmById(db, id);
@@ -25,7 +26,7 @@ export const useFilm = (id: number) => {
     }, [db, id]);
 
     const refreshFilm = useCallback(async () => {
-        if (!db) return;
+        if (!db || id === null) return;
         try {
             // setLoading(true);
             const data = await getFilmById(db, id);
@@ -39,7 +40,7 @@ export const useFilm = (id: number) => {
 
     // Delete film logic
     const destroyFilm = useCallback(async () => {
-        if (!db) throw new Error('Database not initialized');
+        if (!db || id === null) throw new Error('Database not initialized');
         try {
             setLoading(true);
             setError(null);

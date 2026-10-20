@@ -11,6 +11,18 @@ export const deleteFrameImage = async (relativePath: string): Promise<void> => {
     }
 };
 
+/** Removes a temporary file by absolute URI (camera captures, picker copies). */
+export const deleteTempFile = (uri: string): void => {
+    try {
+        const file = new File(uri);
+        if (file.exists) {
+            file.delete();
+        }
+    } catch (err) {
+        console.warn('Error deleting temp file:', err);
+    }
+};
+
 const ensureFramesDirectoryExists = async () => {
     const directory = new Directory(Paths.document, 'frames');
 
@@ -28,7 +40,7 @@ export const saveFrameImage = async (uri: string): Promise<string | null> => {
         return null;
     }
 
-    const fileName = `frames/rollio_${Date.now()}_${Math.floor(Math.random() * 1000)}${image.extension || 'jpg'}`;
+    const fileName = `frames/rollio_${Date.now()}_${Math.floor(Math.random() * 1000)}${image.extension || '.jpg'}`;
     const newImage = new File(Paths.document, fileName);
 
     await image.copy(newImage);

@@ -30,10 +30,9 @@ export default function NewFilm() {
     const glassSuggestionFallbackColor = colorScheme === 'dark' ? '#2C2C2E' : '#F2F2F7';
     const navigation = useNavigation();
     const { mode = 'new', id } = useLocalSearchParams<{ mode?: 'edit', id?: string }>();
-    const isReady = mode === 'edit' ? useRef(false) : useRef(true);
+    const isReady = useRef(mode !== 'edit');
 
-
-    const { film, updateFilm, loading: filmLoading } = mode === 'edit' && id ? useFilm(Number(id)) : { film: null };
+    const { film, updateFilm, loading: filmLoading } = useFilm(mode === 'edit' && id ? Number(id) : null);
 
     const {
         filmNames,

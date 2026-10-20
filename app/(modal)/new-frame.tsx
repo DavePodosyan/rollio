@@ -41,11 +41,11 @@ export default function NewFrame() {
         shutterSpeed?: string,
         image?: string,
     }>();
-    const isReady = mode === 'edit' ? useRef(false) : useRef(true);
+    const isReady = useRef(mode !== 'edit');
 
     const { frames, addFrame, loading, lensNames, fetchUniqueLensNames, prefillFromPreviousFrame } = useFrames(Number(filmId));
 
-    const { frame, loading: frameLoading, updateFrame, destroyFrame } = mode === 'edit' ? useFrame(Number(frameId)) : {};
+    const { frame, updateFrame, destroyFrame } = useFrame(mode === 'edit' && frameId ? Number(frameId) : null);
 
     const previousFrameData = prefillFromPreviousFrame();
     const hasPrefilled = useRef(false);
@@ -267,7 +267,7 @@ export default function NewFrame() {
 
             try {
                 if (mode === 'edit' && frame) {
-                    await updateFrame!(dataToSave);
+                    await updateFrame(dataToSave);
                 } else {
                     await addFrame(dataToSave);
                 }
@@ -295,7 +295,7 @@ export default function NewFrame() {
             Alert.alert(t('shared.error'), t('newFrame.saveErrorMessage'));
         }
 
-    }, [formData, addFrame]);
+    }, [formData, mode, frame, updateFrame, addFrame, disablePrevention, t]);
 
     useEffect(() => {
         fetchUniqueLensNames();

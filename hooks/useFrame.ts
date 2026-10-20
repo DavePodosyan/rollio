@@ -4,15 +4,16 @@ import { getFrameById, deleteFrame, updateFrame as dbUpdateFrame } from '@/servi
 import { CreateFrameInput, Frame } from '@/types';
 
 
-export const useFrame = (id: number) => {
+/** Pass `null` when there is no frame to load (e.g. the "new frame" form). */
+export const useFrame = (id: number | null) => {
     const db = useSQLiteContext();
     const [frame, setFrame] = useState<Frame | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(id !== null);
     const [error, setError] = useState<string | null>(null);
 
     // Fetch the frame by ID
     useEffect(() => {
-        if (!db) return;
+        if (!db || id === null) return;
         (async () => {
             try {
                 const data = await getFrameById(db, id);
@@ -26,7 +27,7 @@ export const useFrame = (id: number) => {
     }, [db, id]);
 
     const refreshFrame = useCallback(async () => {
-        if (!db) return;
+        if (!db || id === null) return;
         try {
             setLoading(true);
             const data = await getFrameById(db, id);
@@ -40,7 +41,7 @@ export const useFrame = (id: number) => {
 
     // Delete frame logic
     const destroyFrame = useCallback(async () => {
-        if (!db) throw new Error('Database not initialized');
+        if (!db || id === null) throw new Error('Database not initialized');
         try {
             setLoading(true);
             setError(null);
