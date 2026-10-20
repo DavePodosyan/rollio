@@ -80,7 +80,21 @@
     },
     "shutterSpeedLabel": "シャッタースピード",
     "lensPlaceholder": "レンズ（任意）",
-    "notePlaceholder": "メモ（任意）"
+    "notePlaceholder": "メモ（任意）",
+    "location": {
+      "title": "位置情報を保存",
+      "off": "オフ",
+      "finding": "位置情報を取得中…",
+      "waiting": "GPSを待機中",
+      "accuracy": "±{{meters}} m",
+      "openInMaps": "マップで開く",
+      "frameLabel": "フレーム {{number}}",
+      "permission": {
+        "title": "位置情報の許可が必要です",
+        "message": "このフレームの撮影場所を保存するには、設定で位置情報へのアクセスを許可してください。"
+      },
+      "openMapsError": "マップアプリを開けませんでした。"
+    }
   },
   "lightMeter": {
     "cameraPermissionMessage": "カメラを表示するための許可が必要です。",
@@ -236,6 +250,12 @@
     "version": "バージョン {{version}}",
     "continue": "続ける",
     "releases": {
+      "2_3_0": {
+        "location": {
+          "title": "撮影場所を残す",
+          "body": "フレームの「位置情報を保存」をオンにすると、GPSの位置が記録されます。変更するまで次のフレームにも引き継がれ、ロールにはピンとして表示され、マップアプリで開けて、CSVにも含まれます。"
+        }
+      },
       "2_2_0": {
         "backup": {
           "title": "バックアップと復元",

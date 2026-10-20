@@ -80,7 +80,21 @@
     },
     "shutterSpeedLabel": "셔터 스피드",
     "lensPlaceholder": "렌즈 (선택 사항)",
-    "notePlaceholder": "메모 (선택 사항)"
+    "notePlaceholder": "메모 (선택 사항)",
+    "location": {
+      "title": "위치 저장",
+      "off": "꺼짐",
+      "finding": "위치 찾는 중…",
+      "waiting": "GPS 대기 중",
+      "accuracy": "±{{meters}} m",
+      "openInMaps": "지도에서 열기",
+      "frameLabel": "프레임 {{number}}",
+      "permission": {
+        "title": "위치 권한 필요",
+        "message": "이 프레임의 촬영 위치를 저장하려면 설정에서 위치 접근을 허용해 주세요."
+      },
+      "openMapsError": "지도 앱을 열 수 없습니다."
+    }
   },
   "lightMeter": {
     "cameraPermissionMessage": "카메라를 표시하기 위한 권한이 필요합니다.",
@@ -236,6 +250,12 @@
     "version": "버전 {{version}}",
     "continue": "계속",
     "releases": {
+      "2_3_0": {
+        "location": {
+          "title": "촬영한 곳을 남기세요",
+          "body": "프레임에서 '위치 저장'을 켜면 GPS 위치가 기록됩니다. 바꾸기 전까지 다음 프레임에도 이어지고, 롤에는 핀으로 표시되며, 지도 앱에서 열 수 있고 CSV에도 포함됩니다."
+        }
+      },
       "2_2_0": {
         "backup": {
           "title": "백업 및 복원",

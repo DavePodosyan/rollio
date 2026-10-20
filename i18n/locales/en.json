@@ -80,7 +80,21 @@
     },
     "shutterSpeedLabel": "Shutter Speed",
     "lensPlaceholder": "Lens (optional)",
-    "notePlaceholder": "Note (optional)"
+    "notePlaceholder": "Note (optional)",
+    "location": {
+      "title": "Save Location",
+      "off": "Off",
+      "finding": "Finding location…",
+      "waiting": "Waiting for GPS",
+      "accuracy": "±{{meters}} m",
+      "openInMaps": "Open in Maps",
+      "frameLabel": "Frame {{number}}",
+      "permission": {
+        "title": "Location Access Needed",
+        "message": "Allow location access in Settings to save where this frame was shot."
+      },
+      "openMapsError": "Could not open a maps app."
+    }
   },
   "lightMeter": {
     "cameraPermissionMessage": "We need your permission to show the camera",
@@ -239,6 +253,12 @@
     "version": "Version {{version}}",
     "continue": "Continue",
     "releases": {
+      "2_3_0": {
+        "location": {
+          "title": "Save where you shot",
+          "body": "Switch on Save Location on a frame to keep its GPS spot. It stays on for the next frames until you change it, shows as a pin on the roll, opens in your maps app, and goes into the CSV."
+        }
+      },
       "2_2_0": {
         "backup": {
           "title": "Back up and restore",

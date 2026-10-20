@@ -2,6 +2,7 @@
   "ios": {
     "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
     "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos.",
-    "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos."
+    "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos.",
+    "NSLocationWhenInUseUsageDescription": "$(PRODUCT_NAME) saves where each frame was shot, only when you switch Save Location on for a frame."
   }
 }

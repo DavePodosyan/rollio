@@ -14,7 +14,7 @@ Rollio does not require you to create an account or sign in. There is no cloud s
 
 ## 3. Permissions
 
-Rollio may request access to your device's storage to save data locally. These permissions are used solely to allow the app to function and are never used to collect personal information.
+Rollio may request access to your device's storage to save data locally. These permissions are used solely to allow the app to function and are never used to collect personal information. Rollio asks for location access only when you switch Save Location on for a frame. The coordinates are stored on your device next to that frame and leave it only in backups and CSV exports you create yourself.
 
 ## 4. Third-Party Services
 
