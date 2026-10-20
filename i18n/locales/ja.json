@@ -140,7 +140,6 @@
   },
   "settings": {
     "title": "設定",
-    "languageHeading": "言語",
     "appLanguage": "アプリの言語",
     "languageFootnote": "Rollioはデバイスの言語設定に従います。Rollioだけ別の言語にするには、設定アプリで選択してください。",
     "openSettingsErrorMessage": "設定を開けませんでした。"

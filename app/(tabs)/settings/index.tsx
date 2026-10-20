@@ -69,10 +69,6 @@ export default function Settings() {
                     }}
                 >
                     <View style={{ marginBottom: 36 }}>
-                        <Text style={[styles.sectionHeading, { color: textColor }]}>
-                            {t('settings.languageHeading')}
-                        </Text>
-
                         <GlassView
                             isInteractive={true}
                             glassEffectStyle="regular"
@@ -89,14 +85,6 @@ export default function Settings() {
                                 accessibilityValue={{ text: currentLanguageName }}
                                 style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}
                             >
-                                <View style={[styles.iconBadge, { backgroundColor: isDark ? '#5E5CE6' : '#5856D6' }]}>
-                                    <SymbolView
-                                        name={{ ios: 'globe', android: 'language' }}
-                                        size={20}
-                                        tintColor="#ffffff"
-                                    />
-                                </View>
-
                                 <Text style={[styles.rowLabel, { color: textColor }]} numberOfLines={1}>
                                     {t('settings.appLanguage')}
                                 </Text>
@@ -125,26 +113,13 @@ export default function Settings() {
 }
 
 const styles = StyleSheet.create({
-    sectionHeading: {
-        fontFamily: 'LufgaMedium',
-        fontSize: 18,
-        marginBottom: 12,
-    },
     row: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
         paddingVertical: 14,
-        paddingLeft: 16,
-        paddingRight: 18,
+        paddingHorizontal: 20,
         minHeight: 64,
-    },
-    iconBadge: {
-        width: 34,
-        height: 34,
-        borderRadius: 9,
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     rowLabel: {
         flex: 1,

@@ -140,7 +140,6 @@
   },
   "settings": {
     "title": "Settings",
-    "languageHeading": "Language",
     "appLanguage": "App Language",
     "languageFootnote": "Rollio follows your device language. To use a different language just for Rollio, choose it in the Settings app.",
     "openSettingsErrorMessage": "Could not open Settings."
