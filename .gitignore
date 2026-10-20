@@ -42,3 +42,5 @@ yarn-error.*
 app-example
 /ios
 /android
+# Superpowers scratch (plans, brainstorm mockups)
+.superpowers/
