@@ -1,6 +1,6 @@
 import { openDb, database, fsStub, check, done } from './harness.mjs';
 
-const { initDatabase, createFilm, createFrame, deleteFrame, deleteFilm, getFilmById, getFramesByFilmId } = database;
+const { initDatabase, createFilm, createFrame, updateFrame, deleteFrame, deleteFilm, getFilmById, getFramesByFilmId } = database;
 
 async function fresh() {
     const db = openDb();
@@ -70,6 +70,25 @@ console.log('\ndeleteFilm: files removed only after the row is gone');
     try { await deleteFilm(db2, film2.id); } catch { threw = true; }
     check(threw, 'deleteFilm rejects when the row delete fails');
     check(fsStub.deleted.length === 0, 'no files deleted when the row delete failed');
+}
+
+console.log('\nlocation: rounded, both-or-neither, clearable');
+{
+    const { db, film } = await fresh();
+    const a = await createFrame(db, { ...frameInput(film.id, 1), latitude: 40.18723456, longitude: 44.51523456, location_accuracy: 12.34, place: 'Mashtots Ave, Yerevan' });
+    check(a.latitude === 40.187235 && a.longitude === 44.515235, 'coordinates rounded to 6 decimals');
+    check(a.location_accuracy === 12.3 && a.place === 'Mashtots Ave, Yerevan', 'accuracy rounded to 1 decimal, place kept');
+    const b = await createFrame(db, { ...frameInput(film.id, 2), latitude: 40.1 });
+    check(b.latitude === null && b.longitude === null && b.location_accuracy === null && b.place === null, 'latitude alone stores nothing');
+    const c = await createFrame(db, frameInput(film.id, 3));
+    check(c.latitude === null && c.longitude === null, 'no location by default');
+    const cleared = await updateFrame(db, a.id, { latitude: null, longitude: null, location_accuracy: null, place: null });
+    check(cleared.latitude === null && cleared.place === null, 'updateFrame clears the location');
+    const kept = await updateFrame(db, a.id, { latitude: 1.5, longitude: 2.5, location_accuracy: null, place: null });
+    check(kept.latitude === 1.5 && kept.longitude === 2.5 && kept.location_accuracy === null, 'updateFrame stores a location with unknown accuracy');
+    let threw = false;
+    try { await updateFrame(db, 99999, { latitude: null, longitude: null, location_accuracy: null, place: null }); } catch { threw = true; }
+    check(threw, 'updateFrame on a missing id throws');
 }
 
 done();

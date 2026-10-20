@@ -3,7 +3,7 @@ import { type SQLiteDatabase } from 'expo-sqlite';
 import { deleteFrameImage } from '@/utils/ImageService';
 
 /** Schema version the app expects; bump together with a new migrateToVN. */
-export const TARGET_VERSION = 3;
+export const TARGET_VERSION = 4;
 
 export const initDatabase = async (db: SQLiteDatabase) => {
     await db.execAsync(`
@@ -31,6 +31,10 @@ export const initDatabase = async (db: SQLiteDatabase) => {
         frame_no INTEGER NOT NULL,
         note TEXT DEFAULT NULL,
         created_at DATETIME NOT NULL,
+        latitude REAL DEFAULT NULL,
+        longitude REAL DEFAULT NULL,
+        location_accuracy REAL DEFAULT NULL,
+        place TEXT DEFAULT NULL,
         FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE CASCADE
     );
     `);
@@ -46,6 +50,10 @@ export const initDatabase = async (db: SQLiteDatabase) => {
 
         if (currentVersion < 3) {
             await migrateToV3(db);
+        }
+
+        if (currentVersion < 4) {
+            await migrateToV4(db);
         }
 
         await db.execAsync(`PRAGMA user_version = ${TARGET_VERSION}`);
@@ -80,14 +88,32 @@ const migrateToV3 = async (db: SQLiteDatabase) => {
     console.log('Migration to version 3 completed.');
 }
 
-const addMissingColumns = async (db: SQLiteDatabase) => {
-    const columnsToAdd = [
-        { table: 'films', column: 'expected_shots', definition: 'INTEGER NOT NULL DEFAULT 36' },
-        { table: 'films', column: 'push_pull', definition: 'INTEGER NOT NULL DEFAULT 0' },
-        { table: 'frames', column: 'lens', definition: 'TEXT DEFAULT NULL' },
-        { table: 'frames', column: 'image', definition: 'TEXT DEFAULT NULL' },
-    ];
+/** Adds the per-frame location columns (2.3.0). Idempotent. */
+const migrateToV4 = async (db: SQLiteDatabase) => {
+    console.log('Applying migration to version 4...');
 
+    await addMissingColumns(db, LOCATION_COLUMNS);
+
+    console.log('Migration to version 4 completed.');
+}
+
+type ColumnSpec = { table: string; column: string; definition: string };
+
+const V3_COLUMNS: ColumnSpec[] = [
+    { table: 'films', column: 'expected_shots', definition: 'INTEGER NOT NULL DEFAULT 36' },
+    { table: 'films', column: 'push_pull', definition: 'INTEGER NOT NULL DEFAULT 0' },
+    { table: 'frames', column: 'lens', definition: 'TEXT DEFAULT NULL' },
+    { table: 'frames', column: 'image', definition: 'TEXT DEFAULT NULL' },
+];
+
+const LOCATION_COLUMNS: ColumnSpec[] = [
+    { table: 'frames', column: 'latitude', definition: 'REAL DEFAULT NULL' },
+    { table: 'frames', column: 'longitude', definition: 'REAL DEFAULT NULL' },
+    { table: 'frames', column: 'location_accuracy', definition: 'REAL DEFAULT NULL' },
+    { table: 'frames', column: 'place', definition: 'TEXT DEFAULT NULL' },
+];
+
+const addMissingColumns = async (db: SQLiteDatabase, columnsToAdd: ColumnSpec[] = V3_COLUMNS) => {
     for (const { table, column, definition } of columnsToAdd) {
         const existingColumns = await db.getAllAsync<{ name: string }>(`PRAGMA table_info(${table})`);
 
@@ -275,8 +301,32 @@ export const getFrameById = async (db: SQLiteDatabase, id: number): Promise<Fram
     return frame || null;
 }
 
+type LocationInput = { latitude?: number | null; longitude?: number | null; location_accuracy?: number | null; place?: string | null };
+type LocationColumns = { latitude: number | null; longitude: number | null; location_accuracy: number | null; place: string | null };
+
+const roundTo = (value: number, decimals: number) => {
+    const factor = 10 ** decimals;
+    return Math.round(value * factor) / factor;
+};
+
+/**
+ * A location is both coordinates or nothing: with either missing, all four
+ * columns are stored as NULL. Coordinates keep 6 decimals, accuracy 1.
+ */
+const normalizeLocation = (input: LocationInput): LocationColumns => {
+    const { latitude, longitude, location_accuracy, place } = input;
+    if (typeof latitude !== 'number' || !Number.isFinite(latitude) || typeof longitude !== 'number' || !Number.isFinite(longitude)) {
+        return { latitude: null, longitude: null, location_accuracy: null, place: null };
+    }
+    const accuracy = typeof location_accuracy === 'number' && Number.isFinite(location_accuracy) ? roundTo(location_accuracy, 1) : null;
+    const label = place ? place.trim() : '';
+    return { latitude: roundTo(latitude, 6), longitude: roundTo(longitude, 6), location_accuracy: accuracy, place: label || null };
+};
+
 export const createFrame = async (db: SQLiteDatabase, input: CreateFrameInput): Promise<Frame> => {
     if (!db) throw new Error('Database not provided');
+
+    const location = normalizeLocation(input);
 
     // Insert the frame and bump the film's frame_count atomically.
     return withTransaction(db, async () => {
@@ -290,8 +340,12 @@ export const createFrame = async (db: SQLiteDatabase, input: CreateFrameInput): 
                     image,
                     frame_no,
                     note,
-                    created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    created_at,
+                    latitude,
+                    longitude,
+                    location_accuracy,
+                    place)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
             [
                 input.film_id,
@@ -302,6 +356,10 @@ export const createFrame = async (db: SQLiteDatabase, input: CreateFrameInput): 
                 input.frame_no,
                 input.note || null,
                 input.created_at,
+                location.latitude,
+                location.longitude,
+                location.location_accuracy,
+                location.place,
             ]
         );
 
@@ -326,7 +384,7 @@ export const updateFrame = async (db: SQLiteDatabase, id: number, input: Partial
     const existing = await getFrameById(db, id);
     if (!existing) throw new Error('Frame with id ' + id + ' not found');
 
-    const updated = { ...existing, ...input } as Frame;
+    const updated = { ...existing, ...input, ...normalizeLocation({ ...existing, ...input }) } as Frame;
 
     await db.runAsync(
         `
@@ -338,7 +396,11 @@ export const updateFrame = async (db: SQLiteDatabase, id: number, input: Partial
                 image = ?,
                 frame_no = ?,
                 note = ?,
-                created_at = ?
+                created_at = ?,
+                latitude = ?,
+                longitude = ?,
+                location_accuracy = ?,
+                place = ?
             WHERE id = ?
         `,
         [
@@ -350,6 +412,10 @@ export const updateFrame = async (db: SQLiteDatabase, id: number, input: Partial
             updated.frame_no,
             updated.note,
             updated.created_at,
+            updated.latitude,
+            updated.longitude,
+            updated.location_accuracy,
+            updated.place,
             id,
         ]
     );

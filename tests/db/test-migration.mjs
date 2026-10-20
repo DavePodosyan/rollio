@@ -22,7 +22,7 @@ console.log('Scenario A: early 1.x schema (no expected_shots/push_pull/lens/imag
         INSERT INTO frames (film_id, aperture, shutter_speed, frame_no, created_at) VALUES (1, '0', '1/125', 1, '2024-01-01');
     `);
     await initDatabase(db);
-    check(userVersion(db) === 3, 'user_version is 3');
+    check(userVersion(db) === 4, 'user_version is 4');
     const f = columns(db, 'films'), fr = columns(db, 'frames');
     check(f.includes('expected_shots') && f.includes('push_pull'), 'films gained expected_shots and push_pull');
     check(fr.includes('lens') && fr.includes('image'), 'frames gained lens and image');
@@ -66,11 +66,11 @@ console.log('\nScenario B: late 1.x schema with absolute file:// image paths, us
     check(imgs[1] === 'frames/rollio_2.jpg', 'already-relative path untouched');
     check(imgs[2] === null, 'NULL image untouched');
     check(imgs[3] === 'file:///somewhere/else/x.jpg', 'absolute path without /frames/ left alone');
-    check(userVersion(db) === 3, 'user_version is 3');
+    check(userVersion(db) === 4, 'user_version is 4');
 
     // Idempotence: running again must be a no-op
     await initDatabase(db);
-    check(userVersion(db) === 3, 'second run keeps version 3');
+    check(userVersion(db) === 4, 'second run keeps version 4');
     check(columns(db, 'frames').filter(c => c === 'image').length === 1, 'no duplicate columns on re-run');
 }
 
@@ -81,7 +81,7 @@ console.log('\nScenario C: 2.0 database already at user_version 2');
     db.raw.exec('PRAGMA user_version = 2');
     db.raw.exec(`INSERT INTO films (title, iso, frame_count, created_at) VALUES ('Gold', 200, 0, '2025-01-01')`);
     await initDatabase(db);
-    check(userVersion(db) === 3, 'upgraded 2 -> 3 without error');
+    check(userVersion(db) === 4, 'upgraded 2 -> 4 without error');
     check(db.raw.prepare('SELECT COUNT(*) AS n FROM films').get().n === 1, 'data preserved');
 }
 
@@ -89,8 +89,39 @@ console.log('\nScenario D: fresh install');
 {
     const db = openDb();
     await initDatabase(db);
-    check(userVersion(db) === 3, 'fresh database starts at version 3');
+    check(userVersion(db) === 4, 'fresh database starts at version 4');
     check(columns(db, 'films').includes('expected_shots'), 'fresh schema has all columns');
+}
+
+console.log('\nScenario C: v3 schema (2.2.0) gains the location columns');
+{
+    const db = openDb();
+    db.raw.exec(`
+        CREATE TABLE films (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            title TEXT NOT NULL, iso INTEGER NOT NULL, camera TEXT DEFAULT NULL,
+            expected_shots INTEGER NOT NULL DEFAULT 36, push_pull INTEGER NOT NULL DEFAULT 0,
+            status TEXT NOT NULL DEFAULT 'in-camera', frame_count INTEGER NOT NULL,
+            created_at DATETIME NOT NULL, completed_at DATETIME
+        );
+        CREATE TABLE frames (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            film_id INTEGER NOT NULL, lens TEXT DEFAULT NULL, aperture TEXT NOT NULL, shutter_speed TEXT NOT NULL,
+            image TEXT DEFAULT NULL, frame_no INTEGER NOT NULL, note TEXT DEFAULT NULL, created_at DATETIME NOT NULL,
+            FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE CASCADE
+        );
+        PRAGMA user_version = 3;
+        INSERT INTO films (title, iso, frame_count, created_at) VALUES ('Portra', 400, 1, '2024-01-01');
+        INSERT INTO frames (film_id, aperture, shutter_speed, frame_no, created_at) VALUES (1, 'f/2', '1/125', 1, '2024-01-01');
+    `);
+    await initDatabase(db);
+    check(userVersion(db) === 4, 'user_version is 4');
+    const fr = columns(db, 'frames');
+    check(['latitude', 'longitude', 'location_accuracy', 'place'].every((c) => fr.includes(c)), 'frames gained the four location columns');
+    const frame = db.raw.prepare('SELECT * FROM frames').get();
+    check(frame.latitude === null && frame.longitude === null && frame.location_accuracy === null && frame.place === null, 'existing frame has NULL location');
+    await initDatabase(db);
+    check(userVersion(db) === 4, 'running the migration twice is harmless');
 }
 
 done();

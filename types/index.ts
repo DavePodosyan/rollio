@@ -37,6 +37,13 @@ export interface Frame {
     created_at: string;
     lens: string | null;
     image: string | null;
+    /** WGS84 degrees, 6 decimals; both set or both null. */
+    latitude: number | null;
+    longitude: number | null;
+    /** Horizontal accuracy in metres, 1 decimal; null when unknown. */
+    location_accuracy: number | null;
+    /** Short reverse-geocoded label; null when none. */
+    place: string | null;
 }
 
 export interface CreateFrameInput {
@@ -48,4 +55,8 @@ export interface CreateFrameInput {
     created_at: string;
     lens?: string | null;
     image: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    location_accuracy?: number | null;
+    place?: string | null;
 }
