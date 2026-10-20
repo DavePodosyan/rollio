@@ -211,10 +211,16 @@ export default function NewFilm() {
         }
 
 
-        if (mode === 'edit' && film) {
-            await updateFilm(formData);
-        } else {
-            await addNewFilm({ ...formData, title });
+        try {
+            if (mode === 'edit' && film) {
+                await updateFilm(formData);
+            } else {
+                await addNewFilm({ ...formData, title });
+            }
+        } catch (error) {
+            console.error('Failed to save film', error);
+            Alert.alert(t('shared.error'), t('newFilm.saveErrorMessage'));
+            return;
         }
 
         initialDataRef.current = formData;
@@ -224,7 +230,7 @@ export default function NewFilm() {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         router.back();
 
-    }, [formData, addNewFilm]);
+    }, [formData, mode, film, updateFilm, addNewFilm, disablePrevention, t]);
 
     useEffect(() => {
         fetchUniqueFilmNames();

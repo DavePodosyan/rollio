@@ -57,6 +57,8 @@
   "newFilm": {
     "addTitle": "新しいフィルムを追加",
     "editTitle": "フィルムを編集",
+    "saveErrorMessage": "フィルムを保存できませんでした。",
+    "deleteErrorMessage": "フィルムを削除できませんでした。",
     "missingName": {
       "title": "フィルム名がありません",
       "message": "フィルムロールの名前を入力してください。"

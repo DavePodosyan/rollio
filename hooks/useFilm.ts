@@ -47,6 +47,7 @@ export const useFilm = (id: number) => {
             setFilm(null); // optionally clear local state after delete
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to delete film');
+            throw err; // Re-throw so the UI knows it failed
         } finally {
             setLoading(false);
         }
@@ -56,27 +57,14 @@ export const useFilm = (id: number) => {
         if (!db || !film) throw new Error('Database or film not available');
 
         try {
+            setError(null);
             const updatedFilm = await dbUpdateFilm(db, film.id, formData);
 
             setFilm(updatedFilm);
         } catch (err) {
-            console.log(err);
-
+            setError(err instanceof Error ? err.message : 'Failed to update film');
+            throw err; // Re-throw so the UI (Modal) knows it failed
         }
-        // try {
-        //     setLoading(true);
-        //     setError(null);
-        //     const updatedFilm = { ...film, ...formData } as Film;
-        //     // Assuming there's an updateFilm function in the database service
-        //     // await updateFilm(db, updatedFilm);
-        //     console.log(updatedFilm);
-
-        //     setFilm(updatedFilm);
-        // } catch (err) {
-        //     setError(err instanceof Error ? err.message : 'Failed to update film');
-        // } finally {
-        //     setLoading(false);
-        // }
     }, [db, film]);
 
     return { film, loading, error, destroyFilm, updateFilm, refreshFilm };

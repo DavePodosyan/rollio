@@ -57,6 +57,8 @@
   "newFilm": {
     "addTitle": "Add New Film",
     "editTitle": "Edit Film",
+    "saveErrorMessage": "Could not save the film.",
+    "deleteErrorMessage": "Could not delete the film.",
     "missingName": {
       "title": "Missing film name",
       "message": "Please enter a name for the film roll."

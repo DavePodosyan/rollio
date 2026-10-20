@@ -57,6 +57,8 @@
   "newFilm": {
     "addTitle": "새 필름 추가",
     "editTitle": "필름 편집",
+    "saveErrorMessage": "필름을 저장할 수 없습니다.",
+    "deleteErrorMessage": "필름을 삭제할 수 없습니다.",
     "missingName": {
       "title": "필름 이름 누락",
       "message": "필름 롤의 이름을 입력하세요."

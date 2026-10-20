@@ -66,9 +66,13 @@ export default function FilmDetailPage() {
     }
 
     async function deleteFilm() {
-        // Implement film deletion logic here
-        await destroyFilm();
-        console.log('Film deleted:', film?.id);
+        try {
+            await destroyFilm();
+        } catch (error) {
+            console.error('Failed to delete film', error);
+            Alert.alert(t('shared.error'), t('newFilm.deleteErrorMessage'));
+            return;
+        }
         navigation.goBack();
     }
 

@@ -38,6 +38,7 @@ export const useFilms = (autoFetch = true) => {
             await createFilm(db, input);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to add film');
+            throw err; // Re-throw so the UI (Modal) knows it failed
         } finally {
             setLoading(false);
         }
