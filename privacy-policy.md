@@ -18,7 +18,7 @@ Rollio may request access to your device's storage to save data locally. These p
 
 ## 4. Third-Party Services
 
-Rollio does not use any third-party analytics, tracking tools, or ad services.
+Rollio does not use any third-party analytics, tracking tools, or ad services. The only outside service it talks to is your operating system's geocoding service (Apple on iOS, Google on Android), which turns a saved location's coordinates into a place name; Rollio sends it only the coordinates of a frame you chose to save a location for.
 
 ## 5. Changes to This Policy
 

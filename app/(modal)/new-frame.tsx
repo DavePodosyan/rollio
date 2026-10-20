@@ -271,7 +271,10 @@ export default function NewFrame() {
     const saveFrame = useCallback(async () => {
 
         try {
-            const dataToSave = { ...formData, ...location.fields() };
+            // Decide the late fill from what is actually written, not from a
+            // fix that may land while the save awaits.
+            const savedLocation = location.fields();
+            const dataToSave = { ...formData, ...savedLocation };
 
             // Copy a freshly picked image into app storage before touching the database.
             let savedImagePath: string | null = null;
@@ -283,10 +286,10 @@ export default function NewFrame() {
             try {
                 if (mode === 'edit' && frame) {
                     await updateFrame(dataToSave);
-                    location.fillWhenReady(frame.id);
+                    location.fillWhenReady(frame.id, savedLocation);
                 } else {
                     const created = await addFrame(dataToSave);
-                    location.fillWhenReady(created.id);
+                    location.fillWhenReady(created.id, savedLocation);
                 }
             } catch (error) {
                 // The row was not written, so don't keep the orphaned copy.
@@ -387,6 +390,7 @@ export default function NewFrame() {
                     style: 'destructive',
                     onPress: async () => {
                         try {
+                            location.cancelFill(frame.id);
                             await destroyFrame();
                             initialDataRef.current = formData;
                             disablePrevention();

@@ -145,7 +145,11 @@ resolves, the hook writes latitude, longitude, accuracy and (when it can) place
 onto that frame row by id. The film screen already refreshes on focus, so the
 pin appears on the next visit at the latest. If it never resolves, the frame
 simply has no location. (This runs past the form's unmount; the database
-connection is app-wide so that is safe.)
+connection is app-wide so that is safe.) Pending fills are kept in a
+registry keyed by frame id (`services/lateFill.ts`): saving that frame
+again, with or without a location, or deleting it, cancels the older fill,
+so a stale fix can never overwrite a later choice. The late-fill decision is
+made from the fields actually written, not from the live fix.
 
 **Unsaved-changes guard.** The form's "discard changes?" comparison ignores the
 four location fields. Flipping the switch counts as a change; a fix arriving
@@ -254,7 +258,9 @@ app, and goes into the CSV." Icon `mappin.and.ellipse` / `location-on`.
 3 (Permissions) gains a sentence: location is requested only when the user
 switches Save Location on for a frame, the coordinates are stored on the
 device next to that frame, and they leave the device only in the user's own
-backups and CSV exports. The App Store privacy and Play Data Safety answers
+backups and CSV exports. Section 4 (Third-party services) names the operating system's geocoding
+service as the one outside service, receiving only the coordinates of frames
+the user chose to save a location for. The App Store privacy and Play Data Safety answers
 are updated by the owner in the consoles at submission time (location: not
 collected, since nothing leaves the device to the developer).
 

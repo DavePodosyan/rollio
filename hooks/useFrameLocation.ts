@@ -6,10 +6,10 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useTranslation } from 'react-i18next';
 
 import { updateFrame } from '@/services/database';
+import { cancelLateFill, scheduleLateFill } from '@/services/lateFill';
 import {
     FINDING_TIMEOUT_MS,
     LAST_KNOWN_MAX_AGE_MS,
-    LATE_FILL_TIMEOUT_MS,
     LOCATION_CHOICE_KEY,
     fixToFields,
     hasLocation,
@@ -219,23 +219,27 @@ export const useFrameLocation = ({ mode, frame }: { mode: 'new' | 'edit'; frame:
     const fields = useCallback((): LocationFields => fixToFields(enabledRef.current ? fixRef.current : null), []);
 
     /**
-     * For a frame saved while still finding: keeps the pending request alive
-     * for a while and writes the fix onto the row when it arrives. Runs past
-     * the form's unmount; the database connection is app-wide.
+     * Called right after a frame is saved with `saved` (what `fields()`
+     * returned at save time). Any older pending fill for that frame is
+     * dropped: a re-save, with or without a location, supersedes it. If the
+     * frame was saved without coordinates while the row is on, the pending
+     * request is kept alive for a while and its fix written onto the row
+     * when it arrives. Runs past the form's unmount; the database connection
+     * is app-wide.
      */
-    const fillWhenReady = useCallback((frameId: number) => {
+    const fillWhenReady = useCallback((frameId: number, saved: LocationFields) => {
+        cancelLateFill(frameId);
         const capture = captureRef.current;
-        if (!enabledRef.current || fixRef.current || !capture) return;
+        if (!enabledRef.current || hasLocation(saved) || !capture) return;
         capture.claimed = true;
-        const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), LATE_FILL_TIMEOUT_MS));
-        Promise.race([capture.promise, timeout])
-            .then(async (late) => {
-                if (!late) return;
-                const place = await lookUpPlace(late);
-                await updateFrame(db, frameId, fixToFields({ ...late, place }));
-            })
-            .catch((err) => console.warn('Could not attach the late location fix:', err));
+        scheduleLateFill(frameId, capture.promise, async (late) => {
+            const place = await lookUpPlace(late);
+            await updateFrame(db, frameId, fixToFields({ ...late, place }));
+        });
     }, [db]);
+
+    /** Deleting a frame drops any fill still waiting for it. */
+    const cancelFill = useCallback((frameId: number) => cancelLateFill(frameId), []);
 
     const openInMaps = useCallback(async (label: string) => {
         const current = fixRef.current;
@@ -254,5 +258,5 @@ export const useFrameLocation = ({ mode, frame }: { mode: 'new' | 'edit'; frame:
 
     const status: LocationStatus = !enabled ? 'off' : fix ? 'fixed' : waiting ? 'waiting' : 'finding';
 
-    return { ready, enabled, status, fix, toggle, fields, fillWhenReady, openInMaps };
+    return { ready, enabled, status, fix, toggle, fields, fillWhenReady, cancelFill, openInMaps };
 };
