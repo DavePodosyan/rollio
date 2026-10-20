@@ -39,6 +39,14 @@ assert.equal(count(buildContactSheetHtml(makeInput(range(9))), /class="strip"/g)
 assert.equal(count(buildContactSheetHtml(makeInput(range(8))), /class="strip"/g), 2);
 assert.equal(count(buildContactSheetHtml(makeInput([])), /class="strip"/g), 0);
 
+// sprocket holes are plain elements (print engines mishandle CSS gradients)
+{
+    const html = buildContactSheetHtml(makeInput(range(4)));
+    assert.equal(count(html, /class="sprockets"/g), 2);
+    assert.equal(count(html, /<i><\/i>/g), 2 * 28);
+    assert.ok(!html.includes('repeating-linear-gradient'));
+}
+
 // sorts frames and pads numbers
 {
     const html = buildContactSheetHtml(makeInput([frame(3), frame(100), frame(1)]));

@@ -84,10 +84,9 @@ body {
 .sub { font-size: 8.5pt; color: #6B6877; margin-top: 6pt; letter-spacing: 0.04em; }
 .chip { font-family: Menlo, "SF Mono", "Roboto Mono", monospace; font-size: 7.5pt; letter-spacing: 0.1em; text-transform: uppercase; border: 1pt solid #100528; padding: 4pt 7pt; border-radius: 2pt; white-space: nowrap; flex-shrink: 0; }
 .unit { margin-top: 18pt; break-inside: avoid; page-break-inside: avoid; }
-.strip { position: relative; border-top: 1pt solid #D9D7E2; border-bottom: 1pt solid #D9D7E2; padding: 9pt 0; }
-.strip::before, .strip::after { content: ''; position: absolute; left: 0; right: 0; height: 6pt; background: repeating-linear-gradient(90deg, transparent 0 7px, #E6E4EE 7px 13px, transparent 13px 19px); }
-.strip::before { top: 0; }
-.strip::after { bottom: 0; }
+.strip { border-top: 1pt solid #D9D7E2; border-bottom: 1pt solid #D9D7E2; padding: 3pt 0; }
+.sprockets { display: flex; justify-content: space-between; height: 6pt; padding: 0 6pt; }
+.sprockets i { display: block; width: 6pt; height: 6pt; background: #E6E4EE; }
 .row { display: grid; grid-template-columns: repeat(${FRAMES_PER_STRIP}, 1fr); gap: 8pt; padding: 9pt 9pt 6pt; }
 .cell { display: flex; flex-direction: column; min-width: 0; }
 .edge { height: 11pt; line-height: 11pt; font-family: Menlo, "SF Mono", "Roboto Mono", monospace; font-variant-numeric: tabular-nums; font-size: 7.5pt; letter-spacing: 0.12em; color: #100528; display: flex; align-items: center; }
@@ -104,6 +103,11 @@ body {
 `;
 
 const padNumber = (n: number) => String(n).padStart(2, '0');
+
+// Sprocket holes are real elements rather than a CSS gradient: WebKit's print
+// path rendered the gradient as solid black blocks.
+const SPROCKETS_PER_ROW = 28;
+const sprockets = `<div class="sprockets">${'<i></i>'.repeat(SPROCKETS_PER_ROW)}</div>`;
 
 const renderCell = (frame: SheetFrame, labels: SheetLabels): string => {
     const caption = [labels.aperture(frame.aperture), labels.shutter(frame.shutter_speed), frame.lens]
@@ -123,7 +127,7 @@ const renderUnit = (strip: SheetFrame[], labels: SheetLabels): string => {
         .filter((frame) => frame.note && frame.note.trim().length > 0)
         .map((frame) => `<div class="note"><span class="n">${padNumber(frame.frame_no)}</span><span class="text">${escapeHtml(frame.note as string)}</span></div>`);
     const notesBlock = notes.length ? `<div class="notes">${notes.join('')}</div>` : '';
-    return `<section class="unit"><div class="strip"><div class="row">${cells.join('')}</div></div>${notesBlock}</section>`;
+    return `<section class="unit"><div class="strip">${sprockets}<div class="row">${cells.join('')}</div>${sprockets}</div>${notesBlock}</section>`;
 };
 
 export const buildContactSheetHtml = (input: ContactSheetInput): string => {
