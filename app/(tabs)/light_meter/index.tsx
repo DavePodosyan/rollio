@@ -152,7 +152,7 @@ const readJpegExifIso = async (path: string) => {
 
         return readShortValue(isoEntry, read32(isoEntry + 4));
     } catch (error) {
-        console.log('Raw EXIF ISO read failed:', error);
+        console.warn('Raw EXIF ISO read failed:', error);
         return undefined;
     }
 };
@@ -380,7 +380,7 @@ export default function CameraBackgroundPage() {
             }).start(() => setFocusPoint(null));
         } catch (e) {
             // Focus may fail if camera is not ready or point is out of bounds
-            console.log('Focus failed:', e)
+            console.warn('Focus failed:', e);
             // Fade out on error too
             Animated.timing(focusOpacity, {
                 toValue: 0,
@@ -477,18 +477,11 @@ export default function CameraBackgroundPage() {
                 return;
             }
 
-            console.log('Photo captured:', photo);
-            console.log('Photo metadata:', photo.metadata);
-
             const exposureSettings = await readPhotoExposureSettings(photo.path, photo.metadata as Record<string, unknown> | undefined);
-            console.log('Extracted exposure settings:', exposureSettings);
-            console.log('Exposure settings source:', exposureSettings?.source);
-            console.log('Exposure EXIF tags:', exposureSettings?.debugTags);
-            
+
             if (!exposureSettings) {
                 setLoading(false);
-                console.log('Invalid EXIF data: missing aperture, shutter speed, or ISO');
-                console.log('Full metadata:', photo.metadata);
+                console.warn('Invalid EXIF data: missing aperture, shutter speed, or ISO', photo.metadata);
                 Alert.alert(t('shared.error'), t('lightMeter.readCameraDataErrorMessage'));
                 return;
             }
@@ -497,8 +490,9 @@ export default function CameraBackgroundPage() {
             const ev100 = exposureSettings.ev100;
 
             setLoading(false);
-            console.log('Light meter diagnostics:', {
+            if (__DEV__) console.log('Light meter diagnostics:', {
                 camera: cameraDiagnostics,
+                exif: exposureSettings.debugTags,
                 photo: {
                     width: photo.width,
                     height: photo.height,
@@ -519,16 +513,6 @@ export default function CameraBackgroundPage() {
                     rawJpegIso: 'rawJpegIso' in exposureSettings ? exposureSettings.rawJpegIso : undefined,
                     derivedIsoFromBrightness: exposureSettings.derivedIsoFromBrightness,
                 },
-            });
-            console.log({
-                params: {
-                    title: `EV ${ev100.toFixed(2)}`,
-                    ev: ev100.toFixed(2),
-                    aperture: fNumber,
-                    shutterSpeed: exposureTime,
-                    iso: phoneIso,
-                    image: getPhotoUri(photo.path)
-                }
             });
 
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

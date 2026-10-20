@@ -147,20 +147,8 @@ export default function NewFilm() {
             };
 
             isReady.current = true;
-
-            console.log(formData.status);
-            console.log(film.status);
-
-
-            console.log(statusValues.indexOf(formData.status));
-
         }
     }, [mode, film]);
-
-    useEffect(() => {
-        console.log(formData.status);
-
-    }, [formData]);
 
     useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
@@ -174,17 +162,11 @@ export default function NewFilm() {
             } else {
                 setKeyboardHeight(e.endCoordinates.height);
             }
-
-            console.log('show keyboard');
-
         });
 
         const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
             setKeyboardVisible(false);
             setKeyboardHeight(0);
-            console.log('hide keyboard');
-
-            // setSuggestions([]);
         });
 
         return () => {
@@ -203,7 +185,6 @@ export default function NewFilm() {
 
     const handleSaveFilm = useCallback(async () => {
         const title = formData.title?.trim();
-        console.log(formData);
 
         if (!title) {
             Alert.alert(t('newFilm.missingName.title'), t('newFilm.missingName.message'));
@@ -269,10 +250,6 @@ export default function NewFilm() {
 
 
     const cameraInputRef = useRef<TextInputInstance>(null);
-
-    const renderCount = useRef(0);
-    renderCount.current++;
-    useEffect(() => console.log('Render count:', renderCount.current));
 
     // Memoize these so the array reference stays the same between renders
     const statusValues = useMemo(() => Object.values(FilmStatus), []);
@@ -404,8 +381,6 @@ export default function NewFilm() {
                             initial={formData.iso}
                             values={ISO_OPTIONS} // Example push/pull values
                             onChange={(value) => {
-                                // put it into your CreateFilmInput form state
-                                console.log('Selected ISO:', typeof value);
                                 setFormData(prev => ({ ...prev, iso: Number(value) }));
                             }}
                         />
@@ -415,8 +390,6 @@ export default function NewFilm() {
                             initial={formData.push_pull}
                             values={PUSH_PULL_OPTIONS} // Example push/pull values
                             onChange={(value) => {
-                                // put it into your CreateFilmInput form state
-                                console.log('Selected Push/Pull:', typeof value);
                                 setFormData(prev => ({ ...prev, push_pull: Number(value) }));
                             }}
                         />
@@ -426,8 +399,6 @@ export default function NewFilm() {
                             initial={formData.expected_shots}
                             values={EXPECTED_SHOTS} // Example expected shots values
                             onChange={(value) => {
-                                // put it into your CreateFilmInput form state
-                                console.log('Selected Expected Shots:', typeof value);
                                 setFormData(prev => ({ ...prev, expected_shots: Number(value) }));
                             }}
                         />

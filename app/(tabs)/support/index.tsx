@@ -200,7 +200,6 @@ export default function Support() {
                                         <Pressable
                                             key={product.id}
                                             onPress={async () => {
-                                                console.log('Pressed');
                                                 HapticFeedback.selectionAsync();
                                                 setPurchaseInProgress({ status: true, sku: product.id });
                                                 //wait 2 seconds
@@ -215,7 +214,7 @@ export default function Support() {
                                                     });
                                                 } catch (err) {
                                                     setPurchaseInProgress({ status: false, sku: '' });
-                                                    console.log('Purchase request failed:', err);
+                                                    console.warn('Purchase request failed:', err);
                                                 }
                                             }}
                                             disabled={purchaseInProgress.status}

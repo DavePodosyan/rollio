@@ -34,8 +34,6 @@ export default function FilmDetailPage() {
 
 
     function handleContextMenuSelect(action: string) {
-        console.log('Selected action from context menu:', action);
-        // Handle actions like edit, delete, share, etc.
         switch (action) {
             case 'edit':
                 router.push({

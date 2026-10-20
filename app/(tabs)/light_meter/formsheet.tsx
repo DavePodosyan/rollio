@@ -304,9 +304,6 @@ export function LightMeterReadingSheet({
     const [selectedShutter, setSelectedShutter] = useState(initialShutterStr);
     const [selectedIso, setSelectedIso] = useState(initialIsoNum);
 
-    console.log(selectedAperture, selectedShutter, selectedIso);
-
-
     const [isSheetExpanded, setIsSheetExpanded] = useState(false);
     const [showFullStopsOnly, setShowFullStopsOnly] = useState(true);
 

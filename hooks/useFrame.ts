@@ -62,7 +62,7 @@ export const useFrame = (id: number) => {
 
             setFrame(updatedFrame);
         } catch (err) {
-            console.log(err);
+            setError(err instanceof Error ? err.message : 'Failed to update frame');
             throw err;
         }
     }, [db, frame]);

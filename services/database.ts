@@ -3,8 +3,6 @@ import { type SQLiteDatabase } from 'expo-sqlite';
 import { deleteFrameImage } from '@/utils/ImageService';
 
 export const initDatabase = async (db: SQLiteDatabase) => {
-    console.log('Initializing database...');
-
     await db.execAsync(`
       PRAGMA journal_mode = 'wal';
       PRAGMA foreign_keys = ON;
@@ -49,8 +47,6 @@ export const initDatabase = async (db: SQLiteDatabase) => {
         }
 
         await db.execAsync(`PRAGMA user_version = ${TARGET_VERSION}`);
-    } else {
-        console.log('Database is up to date.');
     }
 };
 
@@ -212,9 +208,6 @@ export const updateFilm = async (db: SQLiteDatabase, id: number, input: Partial<
     if (!existing) throw new Error('Film with id ' + id + ' not found');
 
     const updated = { ...existing, ...input } as Film;
-
-    console.log(updated);
-
 
     await db.runAsync(
         `

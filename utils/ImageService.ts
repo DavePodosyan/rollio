@@ -7,7 +7,7 @@ export const deleteFrameImage = async (relativePath: string): Promise<void> => {
             file.delete();
         }
     } catch (err) {
-        console.log('Error deleting image:', err);
+        console.warn('Error deleting image:', err);
     }
 };
 

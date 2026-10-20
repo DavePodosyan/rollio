@@ -51,7 +51,6 @@ export default function NewFrame() {
     const hasPrefilled = useRef(false);
 
     const scrollViewRef = useRef<ScrollViewInstance>(null);
-    console.log(previousFrameData);
 
     // Use aperture/shutterSpeed from light meter if provided, otherwise default to Auto
     const [formData, setFormData] = useState<CreateFrameInput>({
@@ -169,8 +168,6 @@ export default function NewFrame() {
                 ...(hasLightMeterShutter && { shutter_speed: initialShutter }),
                 ...(image && { image }), // Preserve image from light meter if provided
             };
-
-            console.log('Prefilled form data with previous frame data:', initialDataRef.current);
         }
     }, [previousFrameData, mode, initialAperture, initialShutter, image]);
 
@@ -235,17 +232,11 @@ export default function NewFrame() {
             } else {
                 setKeyboardHeight(e.endCoordinates.height);
             }
-
-            console.log('show keyboard');
-
         });
 
         const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
             setKeyboardVisible(false);
             setKeyboardHeight(0);
-            console.log('hide keyboard');
-
-            // setSuggestions([]);
         });
 
         return () => {
@@ -376,10 +367,6 @@ export default function NewFrame() {
         );
     }, [destroyFrame, formData, frame, t]);
 
-    const renderCount = useRef(0);
-    renderCount.current++;
-    useEffect(() => console.log('Render count:', renderCount.current));
-
     // Loading: Show spinner if edit + fetching
     if (loading || !isReady.current) {
         return (
@@ -431,7 +418,6 @@ export default function NewFrame() {
                             initial={formData.aperture}
                             values={APERTURE_OPTIONS} // Example push/pull values
                             onChange={(value) => {
-                                console.log('Selected aperture:', value);
                                 setFormData(prev => ({ ...prev, aperture: String(value) }));
                             }}
                         />
@@ -441,7 +427,6 @@ export default function NewFrame() {
                             initial={formData.shutter_speed}
                             values={SHUTTER_SPEED_OPTIONS} // Example push/pull values
                             onChange={(value) => {
-                                console.log('Selected shutter speed:', value);
                                 setFormData(prev => ({ ...prev, shutter_speed: String(value) }));
                             }}
                         />
@@ -510,10 +495,8 @@ export default function NewFrame() {
                     </View>
                     <View style={{ padding: 20 }}>
                         <ImageUploader value={formData.image} onChange={(image) => {
-                            console.log(image)
                             setFormData(prev => ({ ...prev, image }))
-                        }
-                        } />
+                        }} />
                     </View>
                     {(!initialAperture && !initialShutter) && (
                         <View style={{ padding: 20 }}>
@@ -522,8 +505,6 @@ export default function NewFrame() {
                                 filmIso={Number(iso)}
                                 // filmIso={fi}
                                 onApplySettings={(settings) => {
-                                    console.log(settings);
-
                                     setFormData(prev => ({
                                         ...prev,
                                         aperture: String(settings.aperture),
