@@ -135,8 +135,12 @@ off.)
 **Switching off** clears the pending request and the captured fix; the frame
 saves with NULL location (in edit mode this removes a stored location).
 
-**Saving while still finding/waiting.** The frame saves at once without
-coordinates. The in-flight request keeps running for up to 60 s more; if it
+**Saving while still finding/waiting.** Tapping save first shows an alert,
+"Location not found yet" / "Rollio is still looking for your position. Save
+now and it keeps looking for a minute, adding the spot to this frame when it
+arrives.", with **Keep Waiting** (cancel) and **Save Anyway**. On Save
+Anyway the frame saves at once without coordinates. The in-flight request
+keeps running for up to 60 s more; if it
 resolves, the hook writes latitude, longitude, accuracy and (when it can) place
 onto that frame row by id. The film screen already refreshes on focus, so the
 pin appears on the next visit at the latest. If it never resolves, the frame

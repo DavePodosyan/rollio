@@ -94,7 +94,13 @@
         "title": "Location Access Needed",
         "message": "Allow location access in Settings to save where this frame was shot."
       },
-      "openMapsError": "Could not open a maps app."
+      "openMapsError": "Could not open a maps app.",
+      "notYet": {
+        "title": "Location not found yet",
+        "message": "Rollio is still looking for your position. Save now and it keeps looking for a minute, adding the spot to this frame when it arrives.",
+        "wait": "Keep Waiting",
+        "save": "Save Anyway"
+      }
     }
   },
   "lightMeter": {

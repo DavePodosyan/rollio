@@ -268,7 +268,7 @@ export default function NewFrame() {
         Keyboard.dismiss();
     };
 
-    const handleSaveFrame = useCallback(async () => {
+    const saveFrame = useCallback(async () => {
 
         try {
             const dataToSave = { ...formData, ...location.fields() };
@@ -314,6 +314,24 @@ export default function NewFrame() {
         }
 
     }, [formData, mode, frame, updateFrame, addFrame, disablePrevention, t, location]);
+
+    // Saving while the row is still looking for a fix: say so, offer to wait.
+    // "Save Anyway" keeps the late fill running (see useFrameLocation).
+    const handleSaveFrame = useCallback(() => {
+        if (location.enabled && (location.status === 'finding' || location.status === 'waiting')) {
+            Alert.alert(
+                t('newFrame.location.notYet.title'),
+                t('newFrame.location.notYet.message'),
+                [
+                    { text: t('newFrame.location.notYet.wait'), style: 'cancel' },
+                    { text: t('newFrame.location.notYet.save'), onPress: () => { saveFrame(); } },
+                ],
+                { cancelable: true }
+            );
+            return;
+        }
+        saveFrame();
+    }, [location.enabled, location.status, saveFrame, t]);
 
     useEffect(() => {
         fetchUniqueLensNames();
