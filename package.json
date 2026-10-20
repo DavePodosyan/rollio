@@ -12,7 +12,8 @@
     "test:db": "for f in tests/db/test-*.mjs; do node --no-warnings \"$f\" || exit 1; done",
     "test:export": "for f in tests/export/test-*.mjs; do node --no-warnings \"$f\" || exit 1; done",
     "test:unit": "for f in tests/*/test-*.mjs; do node --no-warnings \"$f\" || exit 1; done",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "postinstall": "patch-package"
   },
   "jest": {
     "preset": "jest-expo"
@@ -75,6 +76,7 @@
     "eslint-config-expo": "~58.0.4",
     "jest": "~30.5.2",
     "jest-expo": "~58.0.11",
+    "patch-package": "^8.0.1",
     "typescript": "~6.0.3"
   },
   "private": true

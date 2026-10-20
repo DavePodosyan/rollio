@@ -1,0 +1,54 @@
+diff --git a/node_modules/expo-sharing/android/src/main/java/expo/modules/sharing/SharingModule.kt b/node_modules/expo-sharing/android/src/main/java/expo/modules/sharing/SharingModule.kt
+index 69ccba6..d3f6c52 100644
+--- a/node_modules/expo-sharing/android/src/main/java/expo/modules/sharing/SharingModule.kt
++++ b/node_modules/expo-sharing/android/src/main/java/expo/modules/sharing/SharingModule.kt
+@@ -36,12 +36,15 @@ class SharingModule : Module() {
+         val mimeType = params.mimeType
+           ?: URLConnection.guessContentTypeFromName(fileToShare.name)
+           ?: "*/*"
+-        val intent = Intent.createChooser(
+-          createSharingIntent(contentUri, mimeType),
+-          params.dialogTitle
+-        )
++        val sharingIntent = createSharingIntent(contentUri, mimeType)
++        val intent = Intent.createChooser(sharingIntent, params.dialogTitle)
++        // Query the ACTION_SEND intent, not the chooser wrapper: the chooser
++        // resolves only to the system chooser activity, so the grants below
++        // never reached the apps the user can pick. Some share sheets (MIUI)
++        // do not forward the caller's URI grant, and the target app then
++        // cannot open the file at all.
+         val resInfoList = context.packageManager.queryIntentActivities(
+-          intent,
++          sharingIntent,
+           PackageManager.MATCH_DEFAULT_ONLY
+         )
+         resInfoList.forEach {
+diff --git a/node_modules/expo-sharing/expo-module.config.json b/node_modules/expo-sharing/expo-module.config.json
+index 9e56c84..1e2f843 100644
+--- a/node_modules/expo-sharing/expo-module.config.json
++++ b/node_modules/expo-sharing/expo-module.config.json
+@@ -1,14 +1,16 @@
+ {
+-  "platforms": ["apple", "android"],
++  "platforms": [
++    "apple",
++    "android"
++  ],
+   "apple": {
+-    "modules": ["SharingModule"]
++    "modules": [
++      "SharingModule"
++    ]
+   },
+   "android": {
+-    "modules": ["expo.modules.sharing.SharingModule"],
+-    "publication": {
+-      "groupId": "host.exp.exponent",
+-      "artifactId": "expo.modules.sharing",
+-      "repository": "local-maven-repo"
+-    }
++    "modules": [
++      "expo.modules.sharing.SharingModule"
++    ]
+   }
+ }
