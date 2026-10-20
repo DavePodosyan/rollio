@@ -1,8 +1,8 @@
 {
   "ios": {
-    "NSCameraUsageDescription": "$(PRODUCT_NAME)にはカメラへのアクセスが必要です。",
-    "NSPhotoLibraryUsageDescription": "$(PRODUCT_NAME)に写真へのアクセスを許可します。",
-    "NSPhotoLibraryAddUsageDescription": "$(PRODUCT_NAME)に写真の保存を許可します。",
-    "NSLocationWhenInUseUsageDescription": "$(PRODUCT_NAME)は、フレームの「位置情報を保存」をオンにしたときだけ、撮影場所を保存します。"
+    "NSCameraUsageDescription": "Rollioにはカメラへのアクセスが必要です。",
+    "NSPhotoLibraryUsageDescription": "Rollioに写真へのアクセスを許可します。",
+    "NSPhotoLibraryAddUsageDescription": "Rollioに写真の保存を許可します。",
+    "NSLocationWhenInUseUsageDescription": "Rollioは、フレームの「位置情報を保存」をオンにしたときだけ、撮影場所を保存します。"
   }
 }

@@ -1,8 +1,8 @@
 {
   "ios": {
-    "NSCameraUsageDescription": "$(PRODUCT_NAME)이(가) 노출 측정 및 프레임 촬영을 위해 카메라를 사용합니다.",
-    "NSPhotoLibraryUsageDescription": "$(PRODUCT_NAME)이(가) 프레임에 이미지를 첨부하기 위해 사진 라이브러리에 접근합니다.",
-    "NSPhotoLibraryAddUsageDescription": "$(PRODUCT_NAME)이(가) 이미지를 사진 라이브러리에 저장합니다.",
-    "NSLocationWhenInUseUsageDescription": "$(PRODUCT_NAME)은(는) 프레임의 '위치 저장'을 켠 경우에만 촬영 위치를 저장합니다."
+    "NSCameraUsageDescription": "Rollio이(가) 노출 측정 및 프레임 촬영을 위해 카메라를 사용합니다.",
+    "NSPhotoLibraryUsageDescription": "Rollio이(가) 프레임에 이미지를 첨부하기 위해 사진 라이브러리에 접근합니다.",
+    "NSPhotoLibraryAddUsageDescription": "Rollio이(가) 이미지를 사진 라이브러리에 저장합니다.",
+    "NSLocationWhenInUseUsageDescription": "Rollio은(는) 프레임의 '위치 저장'을 켠 경우에만 촬영 위치를 저장합니다."
   }
 }
