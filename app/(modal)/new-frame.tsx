@@ -18,6 +18,7 @@ import { usePreventRemove } from "expo-router/react-navigation";
 import FilmSettingsFromPhoto from "@/components/FilmSettingsFromPhoto";
 import { MaterialIcons } from '@react-native-vector-icons/material-icons/static';
 import { useTranslation } from "react-i18next";
+import { useSideRailInsets } from '@/hooks/useSideRailInsets';
 
 
 export default function NewFrame() {
@@ -176,6 +177,7 @@ export default function NewFrame() {
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const rootViewRef = useRef<ViewInstance>(null);
+    const sideRail = useSideRailInsets(rootViewRef);
     const slideAnim = useRef(new Animated.Value(0)).current; // For smooth slide in/out
 
     // Prefill form for edit
@@ -392,7 +394,8 @@ export default function NewFrame() {
                 </>
             )}
 
-            <View ref={rootViewRef} style={{ flex: 1 }}>
+            {/* Padded to stay clear of the vertical toolbar rail on iPhone Duo / Split View. */}
+            <View ref={rootViewRef} onLayout={sideRail.onLayout} style={{ flex: 1, paddingLeft: sideRail.left, paddingRight: sideRail.right }}>
 
                 <ScrollView
                     ref={scrollViewRef}

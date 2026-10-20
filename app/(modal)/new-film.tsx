@@ -17,6 +17,7 @@ import MySegmentedControl from "@/modules/my-segmented-control";
 import { usePreventRemove } from "expo-router/react-navigation";
 import { MaterialIcons } from '@react-native-vector-icons/material-icons/static';
 import { useTranslation } from "react-i18next";
+import { useSideRailInsets } from '@/hooks/useSideRailInsets';
 
 export default function NewFilm() {
     const { t } = useTranslation();
@@ -74,6 +75,7 @@ export default function NewFilm() {
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const rootViewRef = useRef<ViewInstance>(null);
+    const sideRail = useSideRailInsets(rootViewRef);
     const slideAnim = useRef(new Animated.Value(0)).current; // For smooth slide in/out
 
     const disablePrevention = usePreventRemove(hasUnsavedChanges(), ({ repeat }) => {
@@ -287,7 +289,8 @@ export default function NewFilm() {
                 </>
             )}
 
-            <View ref={rootViewRef} style={{ flex: 1 }}>
+            {/* Padded to stay clear of the vertical toolbar rail on iPhone Duo / Split View. */}
+            <View ref={rootViewRef} onLayout={sideRail.onLayout} style={{ flex: 1, paddingLeft: sideRail.left, paddingRight: sideRail.right }}>
 
                 <ScrollView
                     style={{ padding: 0, flex: 1 }}
