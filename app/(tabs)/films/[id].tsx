@@ -17,6 +17,8 @@ import { Button, ContextMenu, Divider, Host, Section } from '@expo/ui/swift-ui';
 import { useTranslation } from 'react-i18next';
 import { DATA_RESTORED_EVENT } from '@/hooks/useBackup';
 import { StackActions } from 'expo-router/react-navigation';
+import { useFilmExport } from '@/hooks/useFilmExport';
+import BusyOverlay from '@/components/BusyOverlay';
 
 export default function FilmDetailPage() {
     const { id, title } = useLocalSearchParams<{ id: string, title: string }>();
@@ -30,6 +32,7 @@ export default function FilmDetailPage() {
 
     const { film, loading, error, destroyFilm, refreshFilm } = useFilm(Number(id));
     const { frames, loading: framesLoading, error: framesError, refresh: refreshFrames } = useFrames(Number(id));
+    const { busy: exportBusy, exportPdf, exportCsv } = useFilmExport();
 
     // console.log(frames);
 
@@ -89,6 +92,16 @@ export default function FilmDetailPage() {
         navigation.goBack();
     }
 
+    // Android alerts show at most three buttons, so export lives one level down.
+    const handleAndroidExportPress = useCallback(() => {
+        if (!film) return;
+        Alert.alert(t('export.menu'), undefined, [
+            { text: t('export.pdf'), onPress: () => exportPdf(film, frames) },
+            { text: t('export.csv'), onPress: () => exportCsv(film, frames) },
+            { text: t('shared.cancel'), style: 'cancel' },
+        ], { cancelable: true });
+    }, [film, frames, exportPdf, exportCsv, t]);
+
     const handleAndroidMenuPress = useCallback(() => {
         Alert.alert(t('rollDetail.filmActionsTitle'), undefined, [
             {
@@ -96,16 +109,16 @@ export default function FilmDetailPage() {
                 onPress: () => handleContextMenuSelect('edit'),
             },
             {
+                text: t('export.menu'),
+                onPress: handleAndroidExportPress,
+            },
+            {
                 text: t('shared.delete'),
                 style: 'destructive',
                 onPress: () => handleContextMenuSelect('delete'),
             },
-            {
-                text: t('shared.cancel'),
-                style: 'cancel',
-            },
-        ]);
-    }, [film?.id, t]);
+        ], { cancelable: true });
+    }, [film?.id, t, handleAndroidExportPress]);
 
     useFocusEffect(
         useCallback(() => {
@@ -303,6 +316,8 @@ export default function FilmDetailPage() {
                     <Stack.Toolbar.Button icon="plus" onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } })} />
                     <Stack.Toolbar.Menu icon="ellipsis">
                         <Stack.Toolbar.MenuAction icon="pencil" onPress={() => handleContextMenuSelect('edit')}>{t('shared.edit')}</Stack.Toolbar.MenuAction>
+                        <Stack.Toolbar.MenuAction icon="doc.richtext" onPress={() => exportPdf(film, frames)}>{t('export.pdf')}</Stack.Toolbar.MenuAction>
+                        <Stack.Toolbar.MenuAction icon="tablecells" onPress={() => exportCsv(film, frames)}>{t('export.csv')}</Stack.Toolbar.MenuAction>
 
                         {/* <Stack.Toolbar.MenuAction icon="clock" hidden={film.status !== 'in-camera'} onPress={() => null}>Mark as Developing</Stack.Toolbar.MenuAction> */}
                         {/* <Stack.Toolbar.MenuAction icon="archivebox" hidden={film.status !== 'developing'} onPress={() => null}>Mark as Archived</Stack.Toolbar.MenuAction> */}
@@ -368,6 +383,10 @@ export default function FilmDetailPage() {
 
                     />
                 </LinearGradient>
+                <BusyOverlay
+                    visible={exportBusy !== 'idle'}
+                    label={exportBusy === 'pdf' ? t('export.preparingPdf') : t('export.preparingCsv')}
+                />
             </View>
         </>
     );

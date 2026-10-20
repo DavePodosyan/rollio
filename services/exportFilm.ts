@@ -15,8 +15,10 @@ import { buildContactSheetHtml, formatShotDates, type SheetFrame, type SheetLabe
 
 // Native glue for the film export: resolves fonts, thumbnails, labels and
 // dates, renders the contact sheet with expo-print, writes the files into a
-// per-export cache folder and hands them to the share sheet. The documents
-// themselves are built by the pure modules exportHtml.ts / exportCsv.ts.
+// per-export cache folder and hands them to the share sheet. Rendering and
+// sharing are separate steps so the caller can drop its busy state before the
+// share sheet comes up. The documents themselves are built by the pure
+// modules exportHtml.ts / exportCsv.ts.
 
 const PAGE = { width: 595, height: 842 } as const; // A4 in points
 const PAGE_MARGIN = 36;
@@ -160,11 +162,6 @@ export const renderContactSheet = async (film: Film, frames: Frame[]): Promise<F
     return target;
 };
 
-export const exportFilmPdf = async (film: Film, frames: Frame[]): Promise<void> => {
-    const file = await renderContactSheet(film, frames);
-    await shareAsync(file.uri, { UTI: 'com.adobe.pdf', mimeType: 'application/pdf', dialogTitle: file.name });
-};
-
 // ---------------------------------------------------------------------------
 // CSV
 // ---------------------------------------------------------------------------
@@ -179,7 +176,14 @@ export const writeFilmCsv = async (film: Film, frames: Frame[]): Promise<File> =
     return target;
 };
 
-export const exportFilmCsv = async (film: Film, frames: Frame[]): Promise<void> => {
-    const file = await writeFilmCsv(film, frames);
-    await shareAsync(file.uri, { UTI: 'public.comma-separated-values-text', mimeType: 'text/csv', dialogTitle: file.name });
+export type ExportKind = 'pdf' | 'csv';
+
+const SHARE_OPTIONS: Record<ExportKind, { UTI: string; mimeType: string }> = {
+    pdf: { UTI: 'com.adobe.pdf', mimeType: 'application/pdf' },
+    csv: { UTI: 'public.comma-separated-values-text', mimeType: 'text/csv' },
+};
+
+/** Hands a rendered export to the share sheet; resolves when the sheet closes. */
+export const shareExportedFile = async (file: File, kind: ExportKind): Promise<void> => {
+    await shareAsync(file.uri, { ...SHARE_OPTIONS[kind], dialogTitle: file.name });
 };
