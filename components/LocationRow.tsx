@@ -4,7 +4,7 @@ import { SymbolView } from 'expo-symbols';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 
-import { fixedSubtitle, formatCoordinates, type FrameFix } from '@/services/frameLocation';
+import { fixedSubtitle, formatCoordinates, placeLines, type FrameFix } from '@/services/frameLocation';
 import type { LocationStatus } from '@/hooks/useFrameLocation';
 
 interface LocationRowProps {
@@ -107,7 +107,7 @@ export default function LocationRow({ enabled, status, fix, onToggle, onOpenMaps
                             <SymbolView name={{ ios: 'map', android: 'map' }} size={22} tintColor={secondary} />
                         </View>
                         <Text style={{ flex: 1, minWidth: 0, fontFamily: 'LufgaRegular', fontSize: 15, lineHeight: 21, color: textColor }}>
-                            {fix.place ?? formatCoordinates(fix.latitude, fix.longitude)}
+                            {fix.place ? placeLines(fix.place).join('\n') : formatCoordinates(fix.latitude, fix.longitude)}
                         </Text>
                         <SymbolView name={{ ios: 'arrow.up.right', android: 'open_in_new' }} size={16} tintColor={secondary} />
                     </Pressable>

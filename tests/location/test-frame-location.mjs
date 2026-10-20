@@ -43,6 +43,11 @@ assert.equal(L.mapsUrl({ ...args, platform: 'web' }), 'https://www.google.com/ma
 assert.equal(L.mapsUrl({ ...args, label: 'Ave, "B" & Ç', platform: 'ios' }), 'maps://?ll=40.187235,44.515235&q=Ave%2C%20%22B%22%20%26%20%C3%87');
 assert.equal(L.mapsUrl({ ...args, label: 'a(b)', platform: 'android' }), 'geo:40.187235,44.515235?q=40.187235,44.515235(a%28b%29)');
 
+// placeLines: street on its own line, city and country together
+assert.deepEqual(L.placeLines('Spandauer Straße, Berlin, Germany'), ['Spandauer Straße', 'Berlin, Germany']);
+assert.deepEqual(L.placeLines('Yerevan, Armenia'), ['Yerevan', 'Armenia']);
+assert.deepEqual(L.placeLines('Armenia'), ['Armenia']);
+
 // fixToFields
 assert.deepEqual(L.fixToFields({ latitude: 1, longitude: 2, accuracy: 3, place: 'x' }), { latitude: 1, longitude: 2, location_accuracy: 3, place: 'x' });
 assert.deepEqual(L.fixToFields(null), { latitude: null, longitude: null, location_accuracy: null, place: null });

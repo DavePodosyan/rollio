@@ -184,8 +184,9 @@ In the **fixed** state (edit mode with a stored location, or a new frame once
 a fix has arrived) the card grows a second row under a full-width hairline
 divider (12 % of the text colour), modelled on the address row of a
 Reminders location: a grey `map` glyph in the glyph column, then the place
-name, or `40.1872, 44.5152` when there is none, LufgaRegular 15 / 21,
-wrapping to **as many lines as it needs**; no label; a grey
+name with the street on its own line and the city and country on the next
+(`placeLines`), or `40.1872, 44.5152` when there is none, LufgaRegular
+15 / 21, wrapping further if it must; no label; a grey
 `arrow.up.right` (Material `open_in_new`) size 16 at the trailing edge says
 it opens elsewhere. The whole second row is the Pressable that opens the
 maps app (accessibility label "Open in Maps"), with a faint pressed

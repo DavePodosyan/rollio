@@ -95,6 +95,16 @@ export const mapsUrl = (args: {
     }
 };
 
+/**
+ * The stored label split for display: the street (first part) on its own
+ * line, the city and country together on the next. A label without commas
+ * is one line.
+ */
+export const placeLines = (place: string): string[] => {
+    const parts = place.split(', ');
+    return parts.length > 1 ? [parts[0], parts.slice(1).join(', ')] : [place];
+};
+
 export const fixToFields = (fix: FrameFix | null): LocationFields =>
     fix
         ? { latitude: fix.latitude, longitude: fix.longitude, location_accuracy: fix.accuracy, place: fix.place }
