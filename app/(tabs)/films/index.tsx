@@ -5,7 +5,7 @@ import { router, Stack, useFocusEffect, useNavigation } from "expo-router";
 import FilmListItem from "@/components/FilmListItem";
 import EnjoyingRollio from "@/components/EnjoyingRollio";
 import { LinearGradient } from "expo-linear-gradient";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import Storage from 'expo-sqlite/kv-store';
 import * as StoreReview from 'expo-store-review';
 import { useTranslation } from 'react-i18next';
@@ -24,11 +24,19 @@ export default function Home() {
         return () => cancelAnimationFrame(frame);
     }, []);
 
+    // The listener below is registered once, so it reads the current count from a
+    // ref instead of the `films` closure (which would always be the initial []).
+    const filmCountRef = useRef(0);
+    useEffect(() => {
+        filmCountRef.current = films.length;
+    }, [films]);
+
     useEffect(() => {
         // Subscribe to the event
         const subscription = DeviceEventEmitter.addListener('added_film', async () => {
 
-            if (films.length < 1) {
+            // Don't ask for a review right after the very first roll.
+            if (filmCountRef.current < 1) {
                 return;
             }
 
