@@ -3,6 +3,8 @@ import { Redirect } from "expo-router";
 import { useNavigation } from "expo-router";
 import { useEffect } from "react";
 import { useColorScheme, StyleSheet } from "react-native";
+import { readLaunchTab } from "@/hooks/useLaunchTab";
+import { launchTabHref } from "@/services/launchTab";
 
 export default function Index() {
   const colorScheme = useColorScheme();
@@ -27,7 +29,7 @@ export default function Index() {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <Redirect href="/(tabs)/films" />
+      <Redirect href={launchTabHref(readLaunchTab())} />
     </LinearGradient>
 
   );

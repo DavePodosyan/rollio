@@ -166,6 +166,10 @@
     "appLanguage": "App Language",
     "languageFootnote": "Rollio follows your device language. To use a different language just for Rollio, choose it in the Settings app.",
     "openSettingsErrorMessage": "Could not open Settings.",
+    "launchTab": {
+      "title": "Open on Launch",
+      "footnote": "Rollio opens on this tab when you launch it."
+    },
     "backup": {
       "backUp": "Back Up Rollio",
       "restore": "Restore from Backup",

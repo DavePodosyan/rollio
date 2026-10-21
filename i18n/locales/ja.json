@@ -166,6 +166,10 @@
     "appLanguage": "アプリの言語",
     "languageFootnote": "Rollioはデバイスの言語設定に従います。Rollioだけ別の言語にするには、設定アプリで選択してください。",
     "openSettingsErrorMessage": "設定を開けませんでした。",
+    "launchTab": {
+      "title": "起動時に開くタブ",
+      "footnote": "Rollioを起動したときにこのタブが開きます。"
+    },
     "backup": {
       "backUp": "Rollioをバックアップ",
       "restore": "バックアップから復元",

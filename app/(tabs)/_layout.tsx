@@ -3,12 +3,15 @@ import { isLiquidGlassAvailable } from 'expo-glass-effect';
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { Platform, PlatformColor, useColorScheme } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useWhatsNew } from '@/hooks/useWhatsNew';
 
 export default function TabsLayout() {
   // const colorScheme = useColorScheme();
   const isGlassAvailable = isLiquidGlassAvailable();
   const colorScheme = useColorScheme();
   const { t } = useTranslation();
+  // Here rather than on a screen so the sheet shows whichever tab the app opens on.
+  useWhatsNew();
   const isAndroid = Platform.OS === 'android';
   const androidTabBarBackground = colorScheme === 'dark' ? '#09090B' : '#EFF0F4';
   const androidInactiveColor = colorScheme === 'dark' ? '#9A96A8' : '#6B6877';
