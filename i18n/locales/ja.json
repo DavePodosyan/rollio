@@ -150,6 +150,7 @@
     "shareDialogTitle": "Rollioをシェア",
     "shareSubject": "Rollio - フィルム写真アプリ",
     "shareErrorMessage": "アプリのシェアに失敗しました。後でもう一度お試しください。",
+    "purchaseErrorMessage": "購入を完了できませんでした。請求はされていません。",
     "aboutTitle": "Rollioについて",
     "passionProjectBody": "Rollioは、フィルム写真コミュニティへの愛から生まれた情熱的なプロジェクトです。このアプリを気に入っていただき、感謝の意を示したい場合は、以下から少額の支援を行うことができます。",
     "supportHeading": "プロジェクトを支援する",

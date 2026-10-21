@@ -150,6 +150,7 @@
     "shareDialogTitle": "Share Rollio",
     "shareSubject": "Rollio - Film Photography App",
     "shareErrorMessage": "Failed to share the app. Please try again later.",
+    "purchaseErrorMessage": "The purchase could not be completed. You were not charged.",
     "aboutTitle": "About Rollio",
     "passionProjectBody": "Rollio is a passion project built with love for the film photography community. If you enjoy using the app and want to show your appreciation, you can make a small contribution below.",
     "supportHeading": "Support the Project",

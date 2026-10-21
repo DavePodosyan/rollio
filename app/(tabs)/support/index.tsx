@@ -82,24 +82,26 @@ export default function Support() {
     } = useIAP({
         onPurchaseSuccess: async (purchase) => {
             setPurchaseInProgress({ status: false, sku: '' });
-            // Only process if transactionId is new
-            if (purchase?.transactionId && !processedTransactionIdsRef.current.has(purchase.transactionId)) {
-                try {
-                    await finishTransaction({ purchase, isConsumable: true });
-                    processedTransactionIdsRef.current.add(purchase.transactionId);
-                    Alert.alert(t('support.thankYou.title'), t('support.thankYou.message'));
-                } catch (e) {
-                    console.error('Error finishing transaction:', e);
-                }
-            } else {
-                // Ignore duplicate or invalid purchases
-                console.log('Purchase already processed or invalid:', purchase?.transactionId);
+            // Keyed on the purchase token (always present) rather than the
+            // store order id, which Play leaves empty for promo and test
+            // purchases; an unfinished Android tip is refunded after 3 days.
+            const key = purchase.purchaseToken ?? purchase.id;
+            if (processedTransactionIdsRef.current.has(key)) {
+                return;
+            }
+            try {
+                await finishTransaction({ purchase, isConsumable: true });
+                processedTransactionIdsRef.current.add(key);
+                Alert.alert(t('support.thankYou.title'), t('support.thankYou.message'));
+            } catch (e) {
+                console.error('Error finishing transaction:', e);
             }
         },
         onPurchaseError: (error) => {
             setPurchaseInProgress({ status: false, sku: '' });
             if (error.code !== ErrorCode.UserCancelled) {
                 console.error('Purchase failed:', error);
+                Alert.alert(t('shared.error'), t('support.purchaseErrorMessage'));
             }
         },
     });

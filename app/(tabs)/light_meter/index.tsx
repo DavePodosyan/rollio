@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Platform, PlatformColor, ActivityIndicator, Alert, Linking, Animated, useColorScheme, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Platform, PlatformColor, ActivityIndicator, Alert, BackHandler, Linking, Animated, useColorScheme, useWindowDimensions } from 'react-native';
 import { Camera, Point, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 import { useIsFocused } from "expo-router/react-navigation";
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
@@ -279,6 +279,17 @@ export default function CameraBackgroundPage() {
     const [loading, setLoading] = useState(false);
     const [permissionRequested, setPermissionRequested] = useState(false);
     const [reading, setReading] = useState<LightMeterReadingParams | null>(null);
+
+    // Android: the hardware Back button closes the reading sheet instead of
+    // switching tabs and leaving the frozen preview behind.
+    useEffect(() => {
+        if (Platform.OS !== 'android' || !reading) return;
+        const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+            bottomSheetRef.current?.close();
+            return true;
+        });
+        return () => subscription.remove();
+    }, [reading]);
     const [androidSheetDetent, setAndroidSheetDetent] = useState(ANDROID_READING_SHEET_COLLAPSED_DETENT);
     const bottomSheetRef = useRef<BottomSheet>(null);
     const shouldFreezeCameraPreview = isAndroid && reading?.image;
