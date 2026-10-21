@@ -28,10 +28,15 @@ export const FIRST_TRACKED_VERSION = '0.0.0';
 /** Newest release first. Add an entry per release worth announcing. */
 export const WHATS_NEW: WhatsNewRelease[] = [
     {
+        version: '2.3.1',
+        items: [
+            { sf: 'sun.max', md: 'light-mode', titleKey: 'whatsNew.releases.2_3_1.launchTab.title', bodyKey: 'whatsNew.releases.2_3_1.launchTab.body' },
+        ],
+    },
+    {
         version: '2.3.0',
         items: [
             { sf: 'mappin.and.ellipse', md: 'location-on', titleKey: 'whatsNew.releases.2_3_0.location.title', bodyKey: 'whatsNew.releases.2_3_0.location.body' },
-            { sf: 'sun.max', md: 'light-mode', titleKey: 'whatsNew.releases.2_3_0.launchTab.title', bodyKey: 'whatsNew.releases.2_3_0.launchTab.body' },
         ],
     },
     {
