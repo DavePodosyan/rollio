@@ -1,10 +1,3 @@
-Open on Launch
-Use Rollio mostly to meter? In Settings, set Open on Launch to Light Meter and the app starts there. Films stays the default.
+New: Open on Launch. Use Rollio mostly to meter? In Settings, set Open on Launch to Light Meter and the app starts there. Films stays the default.
 
-Fixes
-• The roll list shows the right shot count after you edit a roll
-• Frames saved from the light meter are numbered correctly, even several in a row
-• Editing a frame right after saving it no longer drops a location that was still being found
-• Shutter speeds in CSV exports no longer turn into dates in Numbers, Excel or Sheets
-• No more "Discard changes?" on a form you did not touch
-• The review prompt no longer appears after editing a roll
+Also includes bug fixes and stability improvements.

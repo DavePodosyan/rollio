@@ -1,0 +1,50 @@
+<en-US>
+New: Open on Launch. Choose in Settings whether Rollio starts on Films or the Light Meter, handy if you mostly use the app to meter.
+
+Also includes bug fixes and stability improvements.
+</en-US>
+<da-DK>
+Nyt: Open on Launch. Vælg i Indstillinger, om Rollio skal starte på Film eller Lysmåler, praktisk hvis du mest bruger appen til at måle lys.
+
+Indeholder også fejlrettelser og forbedret stabilitet.
+</da-DK>
+<de-DE>
+Neu: Open on Launch. Lege in den Einstellungen fest, ob Rollio mit Filme oder dem Belichtungsmesser startet, praktisch, wenn du die App vor allem zum Messen nutzt.
+
+Außerdem Fehlerbehebungen und Verbesserungen der Stabilität.
+</de-DE>
+<fi-FI>
+Uutta: Open on Launch. Valitse asetuksista, avautuuko Rollio Filmit- vai Valotusmittari-välilehteen. Kätevää, jos käytät sovellusta lähinnä valotuksen mittaamiseen.
+
+Lisäksi virheenkorjauksia ja vakauden parannuksia.
+</fi-FI>
+<fr-FR>
+Nouveau : Open on Launch. Choisissez dans Réglages si Rollio s'ouvre sur Films ou sur le Posemètre, pratique si vous utilisez surtout l'app pour mesurer la lumière.
+
+Comprend aussi des corrections de bugs et des améliorations de stabilité.
+</fr-FR>
+<ja-JP>
+新機能：起動時に開くタブ。設定でフィルムと露出計のどちらから起動するかを選べます。主に露出計として使う方に便利です。
+
+そのほか、不具合の修正と安定性の向上を行いました。
+</ja-JP>
+<ko-KR>
+새 기능: 실행 시 열 탭. 설정에서 Rollio를 필름 또는 노출계 중 어느 탭에서 시작할지 고를 수 있습니다. 주로 노출계로 쓴다면 편리합니다.
+
+그 밖에 버그 수정과 안정성 개선이 포함되어 있습니다.
+</ko-KR>
+<nl-NL>
+Nieuw: Open on Launch. Kies in Instellingen of Rollio start op Films of op de Lichtmeter, handig als je de app vooral gebruikt om licht te meten.
+
+Bevat ook bugfixes en stabiliteitsverbeteringen.
+</nl-NL>
+<no-NO>
+Nytt: Open on Launch. Velg i Innstillinger om Rollio skal starte på Filmer eller Lysmåler, praktisk hvis du mest bruker appen til å måle lys.
+
+Inneholder også feilrettinger og bedre stabilitet.
+</no-NO>
+<sv-SE>
+Nytt: Open on Launch. Välj i Inställningar om Rollio ska öppnas på Filmer eller Ljusmätare, praktiskt om du mest använder appen för att mäta ljus.
+
+Innehåller även buggfixar och stabilitetsförbättringar.
+</sv-SE>
