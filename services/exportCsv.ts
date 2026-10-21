@@ -12,6 +12,12 @@ const field = (value: string | number | null | undefined): string => {
 };
 
 /**
+ * "1/30" opens as a date in Excel, Numbers and Sheets; the unit keeps it a
+ * shutter speed, the same way the app shows it.
+ */
+const shutterCell = (value: string): string => (value === 'Auto' ? value : `${value}s`);
+
+/**
  * One row per frame, sorted by frame number, with the film's columns repeated
  * on every row so several rolls can be concatenated. RFC 4180 quoting, CRLF.
  */
@@ -19,7 +25,7 @@ export const buildFilmCsv = (film: Film, frames: Frame[]): string => {
     const sorted = [...frames].sort((a, b) => a.frame_no - b.frame_no);
     const rows = sorted.map((frame) => [
         film.title, film.camera, film.iso, film.push_pull, film.status,
-        frame.frame_no, frame.created_at, frame.aperture, frame.shutter_speed, frame.lens, frame.note, frame.latitude, frame.longitude,
+        frame.frame_no, frame.created_at, frame.aperture, shutterCell(frame.shutter_speed), frame.lens, frame.note, frame.latitude, frame.longitude,
     ].map(field).join(','));
     return CSV_BOM + [COLUMNS.join(','), ...rows].map((line) => line + '\r\n').join('');
 };

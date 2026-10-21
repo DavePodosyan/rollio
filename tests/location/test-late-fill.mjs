@@ -73,6 +73,25 @@ const deferred = () => {
     assert.equal(hasPendingLateFill(5), false);
 }
 
+// cancelled while the write is busy (reverse geocoding): the write can tell
+{
+    const d = deferred();
+    const lookup = deferred();
+    const writes = [];
+    scheduleLateFill(7, d.promise, async (f, stillWanted) => {
+        await lookup.promise;
+        if (!stillWanted()) return;
+        writes.push(f);
+    }, 1000);
+    d.resolve(fix);
+    await tick();
+    cancelLateFill(7);
+    lookup.resolve();
+    await tick();
+    assert.deepEqual(writes, []);
+    assert.equal(hasPendingLateFill(7), false);
+}
+
 // a failing write (frame deleted meanwhile) is swallowed, not thrown
 {
     const d = deferred();

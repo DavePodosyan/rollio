@@ -39,7 +39,12 @@ export default function Home() {
 
     useEffect(() => {
         // Subscribe to the event
-        const subscription = DeviceEventEmitter.addListener('added_film', async () => {
+        const subscription = DeviceEventEmitter.addListener('added_film', async (event?: { mode?: string }) => {
+
+            // Only adding a roll counts; the form emits for edits too.
+            if (event?.mode === 'edit') {
+                return;
+            }
 
             // Don't ask for a review right after the very first roll.
             if (filmCountRef.current < 1) {
@@ -52,11 +57,11 @@ export default function Home() {
 
             if (!lastPrompt || (now - parseInt(lastPrompt)) > thirtyDays) {
 
+                // Only a prompt that could show uses up the 30-day window.
                 if (await StoreReview.hasAction()) {
                     await StoreReview.requestReview();
+                    await Storage.setItem('last_review_prompt', now.toString());
                 }
-
-                await Storage.setItem('last_review_prompt', now.toString());
             }
 
         });

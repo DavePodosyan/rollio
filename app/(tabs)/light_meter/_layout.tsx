@@ -19,7 +19,7 @@ export default function HomeLayout() {
             headerShown: false,
             contentStyle: { backgroundColor: "transparent" },
 
-        }}> {/* Hide root header; show per-screen */}
+        }}>
             <Stack.Screen name="index" />
 
             <Stack.Screen

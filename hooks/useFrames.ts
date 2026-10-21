@@ -15,6 +15,7 @@ export const useFrames = (filmId: number) => {
     const [frames, setFrames] = useState<Frame[]>([]);
     const [lensNames, setLensNames] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
+    const [loaded, setLoaded] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // 1. READ (Wrapped in useCallback so we can reuse it)
@@ -27,7 +28,7 @@ export const useFrames = (filmId: number) => {
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load frames');
         } finally {
-            // setLoading(false);
+            setLoaded(true);
         }
     }, [db, filmId]);
 
@@ -102,6 +103,7 @@ export const useFrames = (filmId: number) => {
         frames,
         lensNames,
         loading,
+        loaded,
         error,
         addFrame,
         editFrame,

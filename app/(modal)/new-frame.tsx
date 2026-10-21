@@ -46,7 +46,7 @@ export default function NewFrame() {
     }>();
     const isReady = useRef(mode !== 'edit');
 
-    const { frames, addFrame, loading, lensNames, fetchUniqueLensNames, prefillFromPreviousFrame } = useFrames(Number(filmId));
+    const { frames, loaded: framesLoaded, addFrame, loading, lensNames, fetchUniqueLensNames, prefillFromPreviousFrame } = useFrames(Number(filmId));
 
     const { frame, updateFrame, destroyFrame } = useFrame(mode === 'edit' && frameId ? Number(frameId) : null);
 
@@ -65,8 +65,10 @@ export default function NewFrame() {
 
     const scrollViewRef = useRef<ScrollViewInstance>(null);
 
-    // Use aperture/shutterSpeed from light meter if provided, otherwise default to Auto
-    const [formData, setFormData] = useState<CreateFrameInput>({
+    // Use aperture/shutterSpeed from light meter if provided, otherwise default to Auto.
+    // One object for both the form and its "unchanged" baseline, so the timestamp
+    // matches and an untouched form never counts as edited.
+    const [initialFrame] = useState<CreateFrameInput>(() => ({
         film_id: Number(filmId),
         aperture: initialAperture || "Auto",
         shutter_speed: initialShutter || "Auto",
@@ -75,18 +77,9 @@ export default function NewFrame() {
         created_at: new Date().toISOString(),
         lens: null,
         image: image || null,
-    });
-
-    const initialDataRef = useRef<CreateFrameInput>({
-        film_id: Number(filmId),
-        aperture: initialAperture || "Auto",
-        shutter_speed: initialShutter || "Auto",
-        frame_no: frameCount ? Number(frameCount) + 1 : 1,
-        note: null,
-        created_at: new Date().toISOString(),
-        lens: null,
-        image: image || null,
-    });
+    }));
+    const [formData, setFormData] = useState<CreateFrameInput>(initialFrame);
+    const initialDataRef = useRef<CreateFrameInput>(initialFrame);
 
     const hasUnsavedChanges = useCallback(() => {
         if (!initialDataRef.current) return false;
@@ -185,6 +178,16 @@ export default function NewFrame() {
         }
     }, [previousFrameData, mode, initialAperture, initialShutter, image]);
 
+    // The frame number comes from the film's actual frames, not the count the
+    // caller passed: the light meter sheet's copy of it can be stale, which
+    // numbered two frames saved in a row the same.
+    useEffect(() => {
+        if (mode !== 'new' || !framesLoaded) return;
+        const next = frames.reduce((max, f) => Math.max(max, f.frame_no), 0) + 1;
+        setFormData(prev => (prev.frame_no === next ? prev : { ...prev, frame_no: next }));
+        initialDataRef.current = { ...initialDataRef.current, frame_no: next };
+    }, [mode, framesLoaded, frames]);
+
     const [focusedField, setFocusedField] = useState<'lens' | null>(null);
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -272,8 +275,9 @@ export default function NewFrame() {
 
         try {
             // Decide the late fill from what is actually written, not from a
-            // fix that may land while the save awaits.
-            const savedLocation = location.fields();
+            // fix that may land while the save awaits. An edit that never
+            // touched the row leaves the stored location fields alone.
+            const savedLocation = mode === 'edit' && !location.touched ? null : location.fields();
             const dataToSave = { ...formData, ...savedLocation };
 
             // Copy a freshly picked image into app storage before touching the database.
@@ -286,10 +290,10 @@ export default function NewFrame() {
             try {
                 if (mode === 'edit' && frame) {
                     await updateFrame(dataToSave);
-                    location.fillWhenReady(frame.id, savedLocation);
+                    if (savedLocation) location.fillWhenReady(frame.id, savedLocation);
                 } else {
                     const created = await addFrame(dataToSave);
-                    location.fillWhenReady(created.id, savedLocation);
+                    location.fillWhenReady(created.id, savedLocation ?? location.fields());
                 }
             } catch (error) {
                 // The row was not written, so don't keep the orphaned copy.

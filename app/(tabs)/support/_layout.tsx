@@ -29,7 +29,7 @@ export default function HomeLayout() {
             title: "",
             contentStyle: { backgroundColor: isAndroid ? androidBackgroundColor : "transparent" },
 
-        }}> {/* Hide root header; show per-screen */}
+        }}>
             <Stack.Screen
                 name="index"
                 options={{

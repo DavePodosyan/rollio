@@ -44,7 +44,9 @@ export default function NewFilm() {
         addNewFilm,
     } = useFilms(false);
 
-    const [formData, setFormData] = useState<CreateFilmInput>({
+    // One object for both the form and its "unchanged" baseline, so the timestamp
+    // matches and an untouched form never counts as edited.
+    const [initialFilm] = useState<CreateFilmInput>(() => ({
         title: "",
         iso: 400,
         camera: null,
@@ -52,17 +54,9 @@ export default function NewFilm() {
         expected_shots: 36,
         push_pull: 0,
         created_at: new Date().toISOString(),
-    });
-
-    const initialDataRef = useRef<CreateFilmInput>({
-        title: "",
-        iso: 400,
-        camera: null,
-        status: FilmStatus.InCamera,
-        expected_shots: 36,
-        push_pull: 0,
-        created_at: new Date().toISOString(),
-    });
+    }));
+    const [formData, setFormData] = useState<CreateFilmInput>(initialFilm);
+    const initialDataRef = useRef<CreateFilmInput>(initialFilm);
 
     const hasUnsavedChanges = useCallback(() => {
         if (!initialDataRef.current) return false;
@@ -207,7 +201,7 @@ export default function NewFilm() {
 
         initialDataRef.current = formData;
         disablePrevention();
-        DeviceEventEmitter.emit('added_film');
+        DeviceEventEmitter.emit('added_film', { mode });
 
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         router.back();

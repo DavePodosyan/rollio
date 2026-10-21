@@ -307,8 +307,15 @@ export function LightMeterReadingSheet({
     const [isSheetExpanded, setIsSheetExpanded] = useState(false);
     const [showFullStopsOnly, setShowFullStopsOnly] = useState(true);
 
-    const { films } = useFilms();
+    const { films, fetchFilms } = useFilms();
     const isFocused = useIsFocused();
+
+    // Frames saved from here or from the Films tab change the counts; reload
+    // them each time this comes back into view so the next frame number is right.
+    useEffect(() => {
+        if (isFocused) fetchFilms();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isFocused]);
 
     // Selected film for saving frame (null = none selected, showing film list)
     const [selectedFilm, setSelectedFilm] = useState<Film | null>(null);

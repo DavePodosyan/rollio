@@ -180,6 +180,7 @@ export default memo(FilmListItemBase, (prev, next) => {
         prev.film.title === next.film.title &&
         prev.film.status === next.film.status &&
         prev.film.frame_count === next.film.frame_count &&
+        prev.film.expected_shots === next.film.expected_shots &&
         prev.film.camera === next.film.camera &&
         prev.film.created_at === next.film.created_at
     );

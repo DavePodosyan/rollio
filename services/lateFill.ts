@@ -21,13 +21,15 @@ export const cancelLateFill = (frameId: number): void => {
 /**
  * Waits for `fixPromise` (at most `timeoutMs`) and hands the fix to `write`.
  * Nothing is written if the fill was cancelled or replaced meanwhile, if the
- * request yielded no fix, or if the timeout won. A failing write (for
- * example the frame was deleted) is logged and swallowed.
+ * request yielded no fix, or if the timeout won. `write` gets a `stillWanted`
+ * check to call after its own awaits (a place lookup, say), since a cancel
+ * can land while it is running. A failing write (for example the frame was
+ * deleted) is logged and swallowed.
  */
 export const scheduleLateFill = (
     frameId: number,
     fixPromise: Promise<FrameFix | null>,
-    write: (fix: FrameFix) => Promise<void>,
+    write: (fix: FrameFix, stillWanted: () => boolean) => Promise<void>,
     timeoutMs: number = LATE_FILL_TIMEOUT_MS
 ): void => {
     cancelLateFill(frameId);
@@ -42,7 +44,7 @@ export const scheduleLateFill = (
     Promise.race([fixPromise, timeout])
         .then(async (fix) => {
             if (entry.cancelled || !fix) return;
-            await write(fix);
+            await write(fix, () => !entry.cancelled);
         })
         .catch((err) => console.warn('Could not attach the late location fix:', err))
         .finally(() => {

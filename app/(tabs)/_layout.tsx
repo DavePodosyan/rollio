@@ -1,6 +1,6 @@
 // import { useNavigation } from 'expo-router';
 import { isLiquidGlassAvailable } from 'expo-glass-effect';
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { NativeTabs } from 'expo-router/native-tabs';
 import { Platform, PlatformColor, useColorScheme } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useWhatsNew } from '@/hooks/useWhatsNew';

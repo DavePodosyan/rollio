@@ -20,8 +20,8 @@ const header = 'Film,Camera,ISO,Push/Pull,Status,Frame,Date,Aperture,Shutter,Len
 {
     const expected = '﻿' + header + '\r\n'
         + '"Portra 400, ""Trip""",Leica M6,400,1,archived,1,2026-10-12T08:30:00.000Z,Auto,Auto,50mm,,40.1872,44.5152\r\n'
-        + '"Portra 400, ""Trip""",Leica M6,400,1,archived,2,2026-10-12T09:00:00.000Z,2.8,1/500,,"line one\nline two",,\r\n'
-        + '"Portra 400, ""Trip""",Leica M6,400,1,archived,3,2026-10-12T10:00:00.000Z,4,1/125,35mm,"said ""hi""",,\r\n';
+        + '"Portra 400, ""Trip""",Leica M6,400,1,archived,2,2026-10-12T09:00:00.000Z,2.8,1/500s,,"line one\nline two",,\r\n'
+        + '"Portra 400, ""Trip""",Leica M6,400,1,archived,3,2026-10-12T10:00:00.000Z,4,1/125s,35mm,"said ""hi""",,\r\n';
     assert.equal(buildFilmCsv(film, frames), expected);
     assert.equal(CSV_BOM, '﻿');
 }

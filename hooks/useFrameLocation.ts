@@ -66,6 +66,10 @@ export const useFrameLocation = ({ mode, frame }: { mode: 'new' | 'edit'; frame:
     const [enabled, setEnabled] = useState(false);
     const [fix, setFix] = useState<FrameFix | null>(null);
     const [waiting, setWaiting] = useState(false);
+    // Whether the user changed the row in this form. An edit that never
+    // touched it leaves the stored location alone, including one written by a
+    // late fill after the form opened.
+    const [touched, setTouched] = useState(false);
 
     const enabledRef = useRef(false);
     const fixRef = useRef<FrameFix | null>(null);
@@ -198,6 +202,7 @@ export const useFrameLocation = ({ mode, frame }: { mode: 'new' | 'edit'; frame:
             setFix(null);
             setWaiting(false);
             setEnabled(false);
+            setTouched(true);
             rememberChoice(false);
             return;
         }
@@ -212,6 +217,7 @@ export const useFrameLocation = ({ mode, frame }: { mode: 'new' | 'edit'; frame:
             return;
         }
         setEnabled(true);
+        setTouched(true);
         rememberChoice(true);
         startCapture();
     }, [showPermissionAlert, startCapture, stopCapture]);
@@ -232,8 +238,10 @@ export const useFrameLocation = ({ mode, frame }: { mode: 'new' | 'edit'; frame:
         const capture = captureRef.current;
         if (!enabledRef.current || hasLocation(saved) || !capture) return;
         capture.claimed = true;
-        scheduleLateFill(frameId, capture.promise, async (late) => {
+        scheduleLateFill(frameId, capture.promise, async (late, stillWanted) => {
             const place = await lookUpPlace(late);
+            // The user may have re-saved the frame without a location meanwhile.
+            if (!stillWanted()) return;
             await updateFrame(db, frameId, fixToFields({ ...late, place }));
         });
     }, [db]);
@@ -258,5 +266,5 @@ export const useFrameLocation = ({ mode, frame }: { mode: 'new' | 'edit'; frame:
 
     const status: LocationStatus = !enabled ? 'off' : fix ? 'fixed' : waiting ? 'waiting' : 'finding';
 
-    return { ready, enabled, status, fix, toggle, fields, fillWhenReady, cancelFill, openInMaps };
+    return { ready, enabled, touched, status, fix, toggle, fields, fillWhenReady, cancelFill, openInMaps };
 };

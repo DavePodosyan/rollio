@@ -191,6 +191,7 @@ function FrameListItem({ frame, iso }: FrameListItemProps) {
 export default memo(FrameListItem, (prev, next) => {
     // re-render only if visible fields actually changed
     return (
+        prev.iso === next.iso &&
         prev.frame.id === next.frame.id &&
         prev.frame.frame_no === next.frame.frame_no &&
         prev.frame.lens === next.frame.lens &&
