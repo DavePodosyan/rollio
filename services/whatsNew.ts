@@ -31,6 +31,7 @@ export const WHATS_NEW: WhatsNewRelease[] = [
         version: '2.3.0',
         items: [
             { sf: 'mappin.and.ellipse', md: 'location-on', titleKey: 'whatsNew.releases.2_3_0.location.title', bodyKey: 'whatsNew.releases.2_3_0.location.body' },
+            { sf: 'sun.max', md: 'light-mode', titleKey: 'whatsNew.releases.2_3_0.launchTab.title', bodyKey: 'whatsNew.releases.2_3_0.launchTab.body' },
         ],
     },
     {

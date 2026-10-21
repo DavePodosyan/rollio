@@ -46,7 +46,10 @@ for (const release of WHATS_NEW) {
 
 console.log('ok');
 
-// 2.3.0: frame location
+// 2.3.0: frame location and the launch tab
 assert.ok(WHATS_NEW.some((r) => r.version === '2.3.0'), 'has a 2.3.0 entry');
 assert.equal(WHATS_NEW[0].version, '2.3.0', 'newest release first');
-assert.deepEqual(itemsSince('2.2.0', '2.3.0').map((i) => i.titleKey), ['whatsNew.releases.2_3_0.location.title']);
+assert.deepEqual(itemsSince('2.2.0', '2.3.0').map((i) => i.titleKey), [
+    'whatsNew.releases.2_3_0.location.title',
+    'whatsNew.releases.2_3_0.launchTab.title',
+]);
