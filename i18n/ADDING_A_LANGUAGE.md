@@ -92,9 +92,7 @@ shows a permission dialog.
      tab bar — same screens as the English regression pass, just reading the new
      language instead.
    - Specifically check line-wrapping in the light meter formsheet's two header
-     rows and the tab bar — those have the least slack for longer translated text
-     (see `LOCALIZATION_AUDIT.md` at the repo root for the full layout-risk
-     writeup if things look cramped).
+     rows and the tab bar — those have the least slack for longer translated text.
    - Trigger a camera and a photo-library permission prompt to confirm the native
      strings picked up too — this is the step people forget because everything
      else works without it.
