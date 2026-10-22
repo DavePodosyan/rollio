@@ -31,9 +31,11 @@ No logins. No cloud. Just you, your camera, and the notes that matter.
 
 ## 📸 Screenshots
 
-![Roll List](./assets/screenshots/home.png)
-![Add Roll](./assets/screenshots/film.png)
-![Log Frame](./assets/screenshots/add_frame.png)
+<p align="center">
+  <img src="./assets/screenshots/rolls.jpg" alt="Film rolls list" width="30%">
+  <img src="./assets/screenshots/frames.jpg" alt="Frames of a roll" width="30%">
+  <img src="./assets/screenshots/light-meter.jpg" alt="Built-in light meter" width="30%">
+</p>
 
 ---
 
