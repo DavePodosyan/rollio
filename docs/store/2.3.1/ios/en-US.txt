@@ -1,3 +1,0 @@
-New: Open on Launch. Use Rollio mostly to meter? In Settings, set Open on Launch to Light Meter and the app starts there. Films stays the default.
-
-Also includes bug fixes and stability improvements.
