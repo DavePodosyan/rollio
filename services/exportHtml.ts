@@ -2,8 +2,7 @@ import type { Film, Frame } from '@/types';
 
 // Pure HTML builder for the PDF contact sheet. Everything platform-specific
 // (fonts, thumbnails, translations, dates) is resolved by the caller so this
-// module runs unchanged under Node for tests. Layout per
-// docs/superpowers/specs/2026-10-20-film-export-design.md.
+// module runs unchanged under Node for tests.
 
 export type SheetFrame = Frame & { thumbnail: string | null };
 
