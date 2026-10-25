@@ -1,0 +1,50 @@
+Rollio 2.4.0 – release notes for the stores
+
+====================================================================
+App Store (What's New)
+====================================================================
+
+<en-US>
+New: Exposure Planner. No light to meter yet? Tap the sun in the top corner of the Light Meter, slide through scenes from snow in full sun to moonlight, and the aperture, shutter and ISO columns show what your film and lenses can do before you pack them. Save the plan to a frame if you like.
+</en-US>
+<ja>
+新機能：露出プランナー。まだ測る光がなくても大丈夫。露出計の右上にある太陽をタップし、雪の晴天から月明かりまでシーンをスライドして選ぶと、絞り・シャッター・ISO の列に、持っていくフィルムやレンズで何ができるかが事前に表示されます。計画はフレームとして保存することもできます。
+</ja>
+<ko>
+새 기능: 노출 플래너. 아직 측정할 빛이 없나요? 노출계 오른쪽 위의 해를 탭하고 눈 덮인 맑은 날부터 달빛까지 장면을 밀어 고르면, 조리개·셔터·ISO 열에서 챙길 필름과 렌즈로 무엇이 가능한지 미리 볼 수 있습니다. 원하면 계획을 프레임으로 저장할 수도 있습니다.
+</ko>
+
+====================================================================
+Google Play (paste as one file in the Play Console)
+====================================================================
+
+<en-US>
+New: Exposure Planner. No light to meter yet? Tap the sun in the top corner of the Light Meter, slide through scenes from snow in full sun to moonlight, and the aperture, shutter and ISO columns show what your film and lenses can do before you pack them. Save the plan to a frame if you like.
+</en-US>
+<da-DK>
+Nyt: Eksponeringsplanlægger. Intet lys at måle endnu? Tryk på solen øverst til højre i Lysmåler, glid gennem scener fra sne i fuld sol til måneskin, og kolonnerne for blænde, lukkertid og ISO viser, hvad din film og dine objektiver kan, før du pakker dem. Gem planen som et billede, hvis du vil.
+</da-DK>
+<de-DE>
+Neu: Belichtungsplaner. Noch kein Licht zum Messen? Tippe auf die Sonne oben rechts im Belichtungsmesser, wähle per Schieberegler eine Szene von Schnee in der prallen Sonne bis Mondlicht, und die Spalten für Blende, Verschlusszeit und ISO zeigen, was dein Film und deine Objektive leisten, bevor du sie einpackst. Den Plan kannst du auf Wunsch als Bild speichern.
+</de-DE>
+<fi-FI>
+Uutta: Valotussuunnittelija. Eikö mitattavaa valoa vielä ole? Napauta Valotusmittarin oikeassa yläkulmassa olevaa aurinkoa, selaa kohtauksia kirkkaan auringon lumesta kuunvaloon, niin aukko-, suljinaika- ja ISO-sarakkeet näyttävät, mihin filmisi ja objektiivisi pystyvät, ennen kuin pakkaat ne mukaan. Voit halutessasi tallentaa suunnitelman ruuduksi.
+</fi-FI>
+<fr-FR>
+Nouveau : Planificateur d'exposition. Pas encore de lumière à mesurer ? Touchez le soleil en haut à droite du Posemètre, faites défiler les scènes, de la neige en plein soleil au clair de lune, et les colonnes ouverture, vitesse et ISO montrent ce que votre film et vos objectifs peuvent faire avant de les emporter. Enregistrez le plan dans une vue si vous le souhaitez.
+</fr-FR>
+<ja-JP>
+新機能：露出プランナー。まだ測る光がなくても大丈夫。露出計の右上にある太陽をタップし、雪の晴天から月明かりまでシーンをスライドして選ぶと、絞り・シャッター・ISO の列に、持っていくフィルムやレンズで何ができるかが事前に表示されます。計画はフレームとして保存することもできます。
+</ja-JP>
+<ko-KR>
+새 기능: 노출 플래너. 아직 측정할 빛이 없나요? 노출계 오른쪽 위의 해를 탭하고 눈 덮인 맑은 날부터 달빛까지 장면을 밀어 고르면, 조리개·셔터·ISO 열에서 챙길 필름과 렌즈로 무엇이 가능한지 미리 볼 수 있습니다. 원하면 계획을 프레임으로 저장할 수도 있습니다.
+</ko-KR>
+<nl-NL>
+Nieuw: Belichtingsplanner. Nog geen licht om te meten? Tik op de zon rechtsboven in de Lichtmeter, schuif door scènes van sneeuw in de volle zon tot maanlicht, en de kolommen voor diafragma, sluitertijd en ISO laten zien wat je film en objectieven kunnen voordat je ze inpakt. Sla het plan desgewenst op als opname.
+</nl-NL>
+<no-NO>
+Nytt: Eksponeringsplanlegger. Ikke noe lys å måle ennå? Trykk på solen øverst til høyre i Lysmåler, dra gjennom scener fra snø i full sol til måneskinn, og kolonnene for blender, lukkertid og ISO viser hva filmen og objektivene dine kan før du pakker dem. Lagre planen som et bilde om du vil.
+</no-NO>
+<sv-SE>
+Nytt: Exponeringsplanerare. Inget ljus att mäta ännu? Tryck på solen uppe till höger i Ljusmätare, dra genom scener från snö i full sol till månsken, så visar kolumnerna för bländare, slutartid och ISO vad din film och dina objektiv klarar innan du packar dem. Spara planen som en bild om du vill.
+</sv-SE>
