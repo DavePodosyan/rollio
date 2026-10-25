@@ -834,9 +834,12 @@ export default function CameraBackgroundPage() {
                             })
                         },
                         {
+                            // The rotated element is now the planner button, gap and pill
+                            // (about 68 pt wider than the pill alone), so the side offsets
+                            // grow by half of that to keep the row centred in landscape.
                             translateX: buttonRotation.interpolate({
                                 inputRange: [0, 90, 180, 270],
-                                outputRange: [0, -40, 0, 40],
+                                outputRange: [0, -74, 0, 74],
                             })
                         }
                     ]

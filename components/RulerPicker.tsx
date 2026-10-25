@@ -107,6 +107,12 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
     }
   };
 
+  // A finger lifted exactly on a tick with no velocity never decelerates, so
+  // onMomentumScrollEnd never fires; settle from the drag end instead.
+  const handleDragEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if ((e.nativeEvent.velocity?.x ?? 0) === 0) handleMomentumEnd(e);
+  };
+
   const animatedOnScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { x: scrollX.current } } }],
     {
@@ -228,6 +234,7 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
         snapToInterval={tickWidth}
         decelerationRate="fast"
         onMomentumScrollEnd={handleMomentumEnd}
+        onScrollEndDrag={handleDragEnd}
         onScroll={animatedOnScroll}
         contentContainerStyle={{ paddingHorizontal: sidePadding }}
         scrollEventThrottle={16}

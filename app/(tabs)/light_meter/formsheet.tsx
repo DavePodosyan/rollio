@@ -25,7 +25,7 @@ import { MaterialIcons } from '@react-native-vector-icons/material-icons/static'
 import { ScrollView as GestureScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import { ExposureSceneCard, EXPOSURE_SCENE_CARD_HEIGHT } from "@/components/ExposureSceneCard";
-import { EV_PLANNER_DEFAULT, columnToMoveForEv } from "@/services/exposurePlanner";
+import { EV_PLANNER_DEFAULT, calculateAperture, calculateIso, calculateShutter, columnToMoveForEv } from "@/services/exposurePlanner";
 // ────────────────────────────────────────────────
 // Config
 // ────────────────────────────────────────────────
@@ -42,6 +42,7 @@ const NATIVE_FILM_LIST_DETENT = 0.85;
 // Scene mode (the exposure planner) carries the scene card above the columns.
 const BOTTOM_SHEET_SCENE_COMPACT_DETENT = 0.75;
 const NATIVE_SCENE_COMPACT_DETENT = 0.68;
+const SCENE_EXPANDED_DETENT = 0.95;
 const SCENE_CARD_GAP = 12;
 
 const platformColor = (iosName: string, androidName: string) => (
@@ -222,19 +223,7 @@ const normalizeIso = (rawValue: string | undefined): number => {
 // Exposure calculation helpers
 // ────────────────────────────────────────────────
 
-// Calculate shutter speed (in seconds) for given aperture, ISO, and target EV
-const calculateShutter = (aperture: number, iso: number, targetEV: number): number => {
-    // EV = log2(N²/t) - log2(ISO/100)
-    // Solving for t: t = N² / (2^(EV + log2(ISO/100)))
-    return (aperture ** 2) / Math.pow(2, targetEV + Math.log2(iso / 100));
-};
-
-// Calculate aperture for given shutter, ISO, and target EV
-const calculateAperture = (shutterSeconds: number, iso: number, targetEV: number): number => {
-    // EV = log2(N²/t) - log2(ISO/100)
-    // Solving for N: N = sqrt(t * 2^(EV + log2(ISO/100)))
-    return Math.sqrt(shutterSeconds * Math.pow(2, targetEV + Math.log2(iso / 100)));
-};
+// calculateShutter / calculateAperture / calculateIso come from services/exposurePlanner.
 
 // Picker identifiers
 type ActivePicker = 'aperture' | 'shutter' | 'iso' | null;
@@ -359,10 +348,9 @@ export function LightMeterReadingSheet({
     // While the ruler is moving the columns have not caught up yet, so the
     // over/under pill would flicker; it comes back once the ruler settles.
     const [isRulerMoving, setIsRulerMoving] = useState(false);
-    const onSceneTick = useCallback((nextEv: number) => {
-        setIsRulerMoving(true);
-        setSceneEv(nextEv);
-    }, []);
+    const onSceneMoveStart = useCallback(() => setIsRulerMoving(true), []);
+    // The card's real height (it grows with the text size); default until measured.
+    const [sceneCardHeight, setSceneCardHeight] = useState(EXPOSURE_SCENE_CARD_HEIGHT);
     const targetEV = isSceneMode ? sceneEv : (Number(ev) || 0);
 
     // Calculate current EV from selected settings and compare to target
@@ -583,13 +571,6 @@ export function LightMeterReadingSheet({
         }
     }, []);
 
-    // Calculate ISO needed for given aperture, shutter, and target EV
-    const calculateIso = useCallback((aperture: number, shutterSec: number, ev: number): number => {
-        // EV = log2(N²/t) - log2(ISO/100)
-        // Solving for ISO: ISO = 100 * 2^(log2(N²/t) - EV)
-        return 100 * Math.pow(2, Math.log2((aperture ** 2) / shutterSec) - ev);
-    }, []);
-
     // Toggle lock for a picker (tapping same lock unlocks, tapping different lock switches)
     // When in film mode, locks are disabled (ISO is auto-locked to film ISO)
     const toggleLock = useCallback((picker: 'aperture' | 'shutter' | 'iso') => {
@@ -647,7 +628,7 @@ export function LightMeterReadingSheet({
         // If both are locked, do nothing (can't maintain EV)
 
         activePickerRef.current = null;
-    }, [targetEV, scrollToValue, shutterOptions, minShutterSeconds, maxShutterSeconds, minIso, maxIso, calculateIso, lockedPicker]);
+    }, [targetEV, scrollToValue, shutterOptions, minShutterSeconds, maxShutterSeconds, minIso, maxIso, lockedPicker]);
 
     // Called when user FINISHES scrolling shutter
     // Priority: adjust aperture (if not locked), then ISO (if not locked)
@@ -697,7 +678,7 @@ export function LightMeterReadingSheet({
         // If both are locked, do nothing
 
         activePickerRef.current = null;
-    }, [targetEV, scrollToValue, apertureOptions, minAperture, maxAperture, minIso, maxIso, calculateIso, lockedPicker]);
+    }, [targetEV, scrollToValue, apertureOptions, minAperture, maxAperture, minIso, maxIso, lockedPicker]);
 
     // Called when user FINISHES scrolling ISO
     // Priority: adjust shutter (if not locked), then aperture (if not locked)
@@ -831,7 +812,9 @@ export function LightMeterReadingSheet({
 
         Haptics.selectionAsync().catch(() => { });
 
-        setSheetDetent(isBottomSheetPresentation ? BOTTOM_SHEET_FILM_LIST_DETENT : NATIVE_FILM_LIST_DETENT);
+        setSheetDetent(isSceneMode
+            ? SCENE_EXPANDED_DETENT
+            : isBottomSheetPresentation ? BOTTOM_SHEET_FILM_LIST_DETENT : NATIVE_FILM_LIST_DETENT);
     }
 
     const closeFilmSelector = useCallback(() => {
@@ -907,10 +890,12 @@ export function LightMeterReadingSheet({
 
         // Lock ISO (it's now fixed to film ISO)
         setLockedPicker('iso');
-        setSheetDetent(isBottomSheetPresentation ? BOTTOM_SHEET_SELECTED_FILM_DETENT : NATIVE_FILM_LIST_DETENT);
+        setSheetDetent(isSceneMode
+            ? SCENE_EXPANDED_DETENT
+            : isBottomSheetPresentation ? BOTTOM_SHEET_SELECTED_FILM_DETENT : NATIVE_FILM_LIST_DETENT);
     }, [selectedIso, selectedAperture, selectedShutter, targetEV, scrollToValue,
         minShutterSeconds, maxShutterSeconds, minAperture, maxAperture,
-        apertureOptions, isBottomSheetPresentation, setSheetDetent, shutterOptions]);
+        apertureOptions, isBottomSheetPresentation, setSheetDetent, shutterOptions, isSceneMode]);
 
     // Clear selected film and go back to film list
     const handleClearFilmSelection = useCallback(() => {
@@ -937,10 +922,11 @@ export function LightMeterReadingSheet({
                 frameCount: String(selectedFilm.frame_count),
                 aperture: selectedAperture,
                 shutterSpeed: selectedShutter,
-                image: image,
+                // A planned exposure has no photo; only a camera reading carries one.
+                ...(isSceneMode ? {} : { image }),
             }
         });
-    }, [selectedFilm, selectedAperture, selectedShutter, image, setSheetDetent]);
+    }, [selectedFilm, selectedAperture, selectedShutter, image, setSheetDetent, isSceneMode]);
 
     // Mark active picker on scroll start
     const onApertureScrollBegin = useCallback(() => { activePickerRef.current = 'aperture'; }, []);
@@ -1099,9 +1085,10 @@ export function LightMeterReadingSheet({
                 {isSceneMode && (
                     <View style={{ marginTop: sceneCardTop }}>
                         <ExposureSceneCard
-                            ev={sceneEv}
-                            onTick={onSceneTick}
+                            initialEv={sceneEv}
+                            onMoveStart={onSceneMoveStart}
                             onSettle={applySceneEv}
+                            onHeight={setSceneCardHeight}
                             labelColor={dynamicSheetColors.label}
                             secondaryLabelColor={dynamicSheetColors.secondaryLabel}
                             surfaceColor={wheelSurfaceBackgroundColor}
@@ -1114,7 +1101,7 @@ export function LightMeterReadingSheet({
                     flex: 1,
                     position: 'absolute',
                     top: isSceneMode
-                        ? sceneCardTop + EXPOSURE_SCENE_CARD_HEIGHT + SCENE_CARD_GAP
+                        ? sceneCardTop + sceneCardHeight + SCENE_CARD_GAP
                         : isBottomSheetPresentation ? -4 : headerHeight - 18,
                     left: 0,
                     right: 0,

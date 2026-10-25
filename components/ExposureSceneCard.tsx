@@ -6,20 +6,23 @@ import * as Haptics from 'expo-haptics';
 import { SymbolView } from 'expo-symbols';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, ColorValue, Platform, StyleSheet, Text, View } from 'react-native';
+import { Animated, ColorValue, LayoutChangeEvent, Platform, StyleSheet, Text, View } from 'react-native';
 
-/** Height of the card including its ruler; the sheet offsets the pill and columns by this. */
-export const EXPOSURE_SCENE_CARD_HEIGHT = 134;
+/** Expected height of the card at the default text size; the sheet measures the real one. */
+export const EXPOSURE_SCENE_CARD_HEIGHT = 142;
 
-const SCENE_ROW_HEIGHT = 66;
+const SCENE_ROW_MIN_HEIGHT = 74;
 const GLYPH_SIZE = 22;
 
 export type ExposureSceneCardProps = {
-    ev: number;
-    /** Every tick passed during the drag. */
-    onTick: (ev: number) => void;
+    /** The EV the card opens on. The card owns the live value from then on. */
+    initialEv: number;
+    /** The ruler started moving (first tick of a drag). */
+    onMoveStart: () => void;
     /** The ruler settled on a tick. */
     onSettle: (ev: number) => void;
+    /** Reports the card's laid-out height so the sheet can place what sits below it. */
+    onHeight?: (height: number) => void;
     labelColor: ColorValue;
     secondaryLabelColor: ColorValue;
     /** The sheet's wheel surface colour: transparent under glass, a fill otherwise. */
@@ -29,15 +32,21 @@ export type ExposureSceneCardProps = {
 };
 
 export function ExposureSceneCard({
-    ev,
-    onTick,
+    initialEv,
+    onMoveStart,
     onSettle,
+    onHeight,
     labelColor,
     secondaryLabelColor,
     surfaceColor,
     flat,
 }: ExposureSceneCardProps) {
     const { t } = useTranslation();
+    // The ruler's starting tick never changes after mount: feeding the live
+    // value back as `initial` would make the ruler re-scroll itself on every tick.
+    const [rulerInitial] = useState(initialEv);
+    const [ev, setEv] = useState(initialEv);
+    const isMoving = useRef(false);
     const scene = sceneForEv(ev);
     const lastSceneKey = useRef(scene.key);
     const [rowOpacity] = useState(() => new Animated.Value(1));
@@ -78,19 +87,30 @@ export function ExposureSceneCard({
                 label=""
                 valueKind="plain"
                 values={EV_PLANNER_VALUES}
-                initial={ev}
-                onTick={(value) => onTick(Number(value))}
-                onChange={(value) => onSettle(Number(value))}
+                initial={rulerInitial}
+                onTick={(value) => {
+                    if (!isMoving.current) {
+                        isMoving.current = true;
+                        onMoveStart();
+                    }
+                    setEv(Number(value));
+                }}
+                onChange={(value) => {
+                    isMoving.current = false;
+                    setEv(Number(value));
+                    onSettle(Number(value));
+                }}
             />
         </>
     );
 
     const style = [styles.card, { backgroundColor: surfaceColor }];
+    const onLayout = (e: LayoutChangeEvent) => onHeight?.(e.nativeEvent.layout.height);
     if (flat) {
-        return <View style={style}>{content}</View>;
+        return <View style={style} onLayout={onLayout}>{content}</View>;
     }
     return (
-        <GlassView style={style} glassEffectStyle="clear" isInteractive>
+        <GlassView style={style} glassEffectStyle="clear" isInteractive onLayout={onLayout}>
             {content}
         </GlassView>
     );
@@ -99,12 +119,12 @@ export function ExposureSceneCard({
 const styles = StyleSheet.create({
     card: {
         width: '100%',
-        height: EXPOSURE_SCENE_CARD_HEIGHT,
+        minHeight: EXPOSURE_SCENE_CARD_HEIGHT,
         borderRadius: 24,
         overflow: 'hidden',
     },
     sceneRow: {
-        height: SCENE_ROW_HEIGHT,
+        minHeight: SCENE_ROW_MIN_HEIGHT,
         flexDirection: 'row',
         alignItems: 'flex-start',
         paddingLeft: 16,
