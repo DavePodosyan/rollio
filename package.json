@@ -12,6 +12,7 @@
     "test:db": "for f in tests/db/test-*.mjs; do node --no-warnings \"$f\" || exit 1; done",
     "test:export": "for f in tests/export/test-*.mjs; do node --no-warnings \"$f\" || exit 1; done",
     "test:location": "for f in tests/location/test-*.mjs; do node --no-warnings \"$f\" || exit 1; done",
+    "test:light-meter": "for f in tests/light-meter/test-*.mjs; do node --no-warnings \"$f\" || exit 1; done",
     "test:unit": "for f in tests/*/test-*.mjs; do node --no-warnings \"$f\" || exit 1; done",
     "lint": "expo lint",
     "postinstall": "patch-package"
