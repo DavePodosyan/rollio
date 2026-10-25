@@ -336,6 +336,12 @@
     "version": "Version {{version}}",
     "continue": "Continue",
     "releases": {
+      "2_4_0": {
+        "planner": {
+          "title": "Plan an exposure",
+          "body": "No light to meter yet? Tap the sun next to Take a Reading, pick the scene you expect, and see what your film and lenses can do before you pack them."
+        }
+      },
       "2_3_1": {
         "launchTab": {
           "title": "Open on the light meter",
