@@ -24,6 +24,8 @@ import { useIsFocused, useHeaderHeight } from "expo-router/react-navigation";
 import { MaterialIcons } from '@react-native-vector-icons/material-icons/static';
 import { ScrollView as GestureScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
+import { ExposureSceneCard, EXPOSURE_SCENE_CARD_HEIGHT } from "@/components/ExposureSceneCard";
+import { EV_PLANNER_DEFAULT, columnToMoveForEv } from "@/services/exposurePlanner";
 // ────────────────────────────────────────────────
 // Config
 // ────────────────────────────────────────────────
@@ -37,6 +39,10 @@ const NATIVE_COMPACT_DETENT = 0.45;
 const BOTTOM_SHEET_FILM_LIST_DETENT = 0.55;
 const BOTTOM_SHEET_SELECTED_FILM_DETENT = 0.8;
 const NATIVE_FILM_LIST_DETENT = 0.85;
+// Scene mode (the exposure planner) carries the scene card above the columns.
+const BOTTOM_SHEET_SCENE_COMPACT_DETENT = 0.70;
+const NATIVE_SCENE_COMPACT_DETENT = 0.62;
+const SCENE_CARD_GAP = 12;
 
 const platformColor = (iosName: string, androidName: string) => (
     PlatformColor(Platform.OS === 'ios' ? iosName : androidName)
@@ -236,6 +242,8 @@ type ActivePicker = 'aperture' | 'shutter' | 'iso' | null;
 // ────────────────────────────────────────────────
 
 export type LightMeterReadingParams = {
+    /** 'reading' (default) after a camera reading; 'scene' is the exposure planner. */
+    mode?: 'reading' | 'scene';
     title?: string;
     ev?: string;
     aperture?: string;
@@ -257,6 +265,7 @@ const normalizeParam = (value: string | string[] | undefined): string | undefine
 };
 
 export function LightMeterReadingSheet({
+    mode = 'reading',
     title,
     ev,
     aperture: initialAperture,
@@ -274,10 +283,13 @@ export function LightMeterReadingSheet({
     const dynamicSheetColors = useMemo(() => getSheetColors(colorScheme), [colorScheme]);
     // Mirrors the previous `title = "Light Meter Reading"` default param, moved
     // here since a default param can't call the useTranslation() hook above it.
-    const resolvedTitle = title || t('lightMeterSheet.defaultTitle');
+    const resolvedTitle = mode === 'scene' ? t('lightMeter.planner.title') : (title || t('lightMeterSheet.defaultTitle'));
     const isGlassAvailable = isLiquidGlassAvailable();
     const isBottomSheetPresentation = presentation === 'bottom-sheet';
-    const compactSheetDetent = isBottomSheetPresentation ? BOTTOM_SHEET_COMPACT_DETENT : NATIVE_COMPACT_DETENT;
+    const isSceneMode = mode === 'scene';
+    const compactSheetDetent = isSceneMode
+        ? (isBottomSheetPresentation ? BOTTOM_SHEET_SCENE_COMPACT_DETENT : NATIVE_SCENE_COMPACT_DETENT)
+        : (isBottomSheetPresentation ? BOTTOM_SHEET_COMPACT_DETENT : NATIVE_COMPACT_DETENT);
     const closeSheet = onClose ?? (() => router.back());
     const setSheetDetent = useCallback((detent: number) => {
         if (presentation === 'native-sheet') {
@@ -296,9 +308,9 @@ export function LightMeterReadingSheet({
     // }, [title, ev, initialAperture, initialShutter, initialIsoStr, image]);
 
     // Normalize incoming raw values to closest available options
-    const initialApertureStr = normalizeAperture(initialAperture);
-    const initialShutterStr = normalizeShutter(initialShutter);
-    const initialIsoNum = normalizeIso(initialIsoStr);
+    const initialApertureStr = normalizeAperture(initialAperture ?? (isSceneMode ? '16' : undefined));
+    const initialShutterStr = normalizeShutter(initialShutter ?? (isSceneMode ? String(1 / 125) : undefined));
+    const initialIsoNum = normalizeIso(initialIsoStr ?? (isSceneMode ? '100' : undefined));
 
     const [selectedAperture, setSelectedAperture] = useState(initialApertureStr);
     const [selectedShutter, setSelectedShutter] = useState(initialShutterStr);
@@ -342,8 +354,9 @@ export function LightMeterReadingSheet({
     // When a film is selected, ISO is force-locked and other locks are disabled
     const isFilmMode = selectedFilm !== null;
 
-    // Target EV to maintain when adjusting values
-    const targetEV = Number(ev) || 0;
+    // Target EV to maintain when adjusting values. In scene mode the ruler owns it.
+    const [sceneEv, setSceneEv] = useState(EV_PLANNER_DEFAULT);
+    const targetEV = isSceneMode ? sceneEv : (Number(ev) || 0);
 
     // Calculate current EV from selected settings and compare to target
     // EV = log2(N²/t) - log2(ISO/100)
@@ -426,10 +439,10 @@ export function LightMeterReadingSheet({
     useEffect(() => {
         if (presentation === 'native-sheet') {
             navigation.setOptions({
-                title: title || t('lightMeterSheet.fallbackTitle'),
+                title: isSceneMode ? t('lightMeter.planner.title') : (title || t('lightMeterSheet.fallbackTitle')),
             });
         }
-    }, [navigation, presentation, title, t]);
+    }, [navigation, presentation, title, t, isSceneMode]);
 
     // Scroll to initial values
     // useEffect(() => {
@@ -732,6 +745,36 @@ export function LightMeterReadingSheet({
         activePickerRef.current = null;
     }, [targetEV, scrollToValue, apertureOptions, shutterOptions, minAperture, maxAperture, minShutterSeconds, maxShutterSeconds, lockedPicker]);
 
+    // Scene mode: the ruler settled on a new EV. Exactly one column gives way
+    // (shutter, or aperture when the shutter is locked); ISO never moves here.
+    const applySceneEv = useCallback((nextEv: number) => {
+        setSceneEv(nextEv);
+        const aperture = currentAperture.current;
+        const shutter = currentShutter.current;
+        const iso = currentIso.current;
+        const column = columnToMoveForEv(lockedPicker, isFilmMode);
+
+        if (column === 'shutter') {
+            const idealShutterSec = calculateShutter(Number(aperture), iso, nextEv);
+            const clampedShutterSec = Math.max(minShutterSeconds, Math.min(maxShutterSeconds, idealShutterSec));
+            const newShutter = findClosestShutter(clampedShutterSec, shutterOptions);
+            if (newShutter !== shutter) {
+                setSelectedShutter(newShutter);
+                scrollToValue(shutterRef, shutterOptions, newShutter, lastTickedShutterIdx);
+            }
+            return;
+        }
+
+        const shutterSec = shutterToSeconds(shutter);
+        const idealAperture = calculateAperture(shutterSec, iso, nextEv);
+        const clampedAperture = Math.max(minAperture, Math.min(maxAperture, idealAperture));
+        const newAperture = findClosestAperture(clampedAperture);
+        if (newAperture !== aperture) {
+            setSelectedAperture(newAperture);
+            scrollToValue(apertureRef, apertureOptions, newAperture, lastTickedApertureIdx);
+        }
+    }, [lockedPicker, isFilmMode, shutterOptions, apertureOptions, minShutterSeconds, maxShutterSeconds, minAperture, maxAperture, scrollToValue]);
+
     // ────────────────────────────────────────────────
     // Scroll Handlers (haptics + live value update)
     // ────────────────────────────────────────────────
@@ -931,6 +974,8 @@ export function LightMeterReadingSheet({
             ? 'rgba(255, 149, 0, 0.15)'
             : 'rgba(0, 122, 255, 0.15)';
     const exposureBadgeTextColor = isBottomSheetPresentation ? '#FFFFFF' : '#ffffff';
+    // Scene card sits just under the header (native) or the inline header (bottom sheet).
+    const sceneCardTop = isBottomSheetPresentation ? 4 : headerHeight + 2;
     const wheelSurfaceBackgroundColor = isBottomSheetPresentation
         ? colorScheme === 'dark' ? '#2c2c2e' : '#ececf2'
         : isGlassAvailable ? 'transparent' : dynamicSheetColors.tertiarySystemFill;
@@ -1043,11 +1088,26 @@ export function LightMeterReadingSheet({
             )}
 
             <View style={styles.container}>
+                {isSceneMode && (
+                    <View style={{ marginTop: sceneCardTop }}>
+                        <ExposureSceneCard
+                            ev={sceneEv}
+                            onTick={setSceneEv}
+                            onSettle={applySceneEv}
+                            labelColor={dynamicSheetColors.label}
+                            secondaryLabelColor={dynamicSheetColors.secondaryLabel}
+                            surfaceColor={wheelSurfaceBackgroundColor}
+                            flat={isBottomSheetPresentation}
+                        />
+                    </View>
+                )}
                 {/* Content area wrapper - indicator is absolutely positioned within */}
                 <View style={{
                     flex: 1,
                     position: 'absolute',
-                    top: isBottomSheetPresentation ? -4 : headerHeight - 18,
+                    top: isSceneMode
+                        ? sceneCardTop + EXPOSURE_SCENE_CARD_HEIGHT + SCENE_CARD_GAP
+                        : isBottomSheetPresentation ? -4 : headerHeight - 18,
                     left: 0,
                     right: 0,
                     zIndex: 10,
@@ -1094,6 +1154,7 @@ export function LightMeterReadingSheet({
                     style={[
                         styles.wheelsContainer,
                         presentation === 'bottom-sheet' && styles.wheelsContainerCompact,
+                        isSceneMode && styles.wheelsContainerScene,
                     ]}
                 >
                     {/* Aperture */}
@@ -1392,6 +1453,7 @@ export default function FormSheet() {
 
     return (
         <LightMeterReadingSheet
+            mode={normalizeParam(params.mode) === 'scene' ? 'scene' : 'reading'}
             title={normalizeParam(params.title)}
             ev={normalizeParam(params.ev)}
             aperture={normalizeParam(params.aperture)}
@@ -1445,6 +1507,10 @@ const styles = StyleSheet.create({
     },
     wheelsContainerCompact: {
         marginTop: 44,
+    },
+    wheelsContainerScene: {
+        // From the scene card's bottom: gap, the over/under pill's row, then the usual breathing room.
+        marginTop: SCENE_CARD_GAP + 22 + 36,
     },
     wheelColumn: {
         flex: 1,
