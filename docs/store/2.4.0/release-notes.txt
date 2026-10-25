@@ -1,22 +1,8 @@
-Rollio 2.4.0 – release notes for the stores
+Rollio 2.4.0 – What's New for the App Store and Google Play
 
-====================================================================
-App Store (What's New)
-====================================================================
-
-<en-US>
-New: Exposure Planner. No light to meter yet? Tap the sun in the top corner of the Light Meter, slide through scenes from snow in full sun to moonlight, and the aperture, shutter and ISO columns show what your film and lenses can do before you pack them. Save the plan to a frame if you like.
-</en-US>
-<ja>
-新機能：露出プランナー。まだ測る光がなくても大丈夫。露出計の右上にある太陽をタップし、雪の晴天から月明かりまでシーンをスライドして選ぶと、絞り・シャッター・ISO の列に、持っていくフィルムやレンズで何ができるかが事前に表示されます。計画はフレームとして保存することもできます。
-</ja>
-<ko>
-새 기능: 노출 플래너. 아직 측정할 빛이 없나요? 노출계 오른쪽 위의 해를 탭하고 눈 덮인 맑은 날부터 달빛까지 장면을 밀어 고르면, 조리개·셔터·ISO 열에서 챙길 필름과 렌즈로 무엇이 가능한지 미리 볼 수 있습니다. 원하면 계획을 프레임으로 저장할 수도 있습니다.
-</ko>
-
-====================================================================
-Google Play (paste as one file in the Play Console)
-====================================================================
+Both stores carry the same ten languages, and the text is the same on both,
+so paste from this one block. Google Play takes the whole file as is; in
+App Store Connect paste each language's paragraph into its own field.
 
 <en-US>
 New: Exposure Planner. No light to meter yet? Tap the sun in the top corner of the Light Meter, slide through scenes from snow in full sun to moonlight, and the aperture, shutter and ISO columns show what your film and lenses can do before you pack them. Save the plan to a frame if you like.
