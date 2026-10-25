@@ -111,7 +111,78 @@
     "takeReading": "Take a reading",
     "takePhotoErrorMessage": "Failed to take photo. Please try again.",
     "readCameraDataErrorMessage": "Failed to read camera data. Please try again.",
-    "captureErrorMessage": "Failed to capture image. Please try again."
+    "captureErrorMessage": "Failed to capture image. Please try again.",
+    "planner": {
+      "title": "Exposure Planner",
+      "open": "Plan an exposure",
+      "ev": "EV {{value}}",
+      "scenes": {
+        "snow": {
+          "name": "Snow or sand in sun",
+          "description": "Full sun on snow, sand or water"
+        },
+        "sun": {
+          "name": "Full sun",
+          "description": "Clear sky, hard shadows"
+        },
+        "hazySun": {
+          "name": "Hazy sun",
+          "description": "Thin haze, soft shadows"
+        },
+        "brightOvercast": {
+          "name": "Bright overcast",
+          "description": "Bright cloud, faint shadows"
+        },
+        "overcast": {
+          "name": "Overcast",
+          "description": "Grey sky, no shadows"
+        },
+        "heavyOvercast": {
+          "name": "Heavy overcast or shade",
+          "description": "Dark cloud, or open shade on a sunny day"
+        },
+        "sunset": {
+          "name": "Sunset",
+          "description": "Low sun, golden hour"
+        },
+        "afterSunset": {
+          "name": "Just after sunset",
+          "description": "Twilight, sky still bright"
+        },
+        "brightInterior": {
+          "name": "Bright interior",
+          "description": "Shop windows, bright rooms, stadiums"
+        },
+        "litStreet": {
+          "name": "Lit street at night",
+          "description": "Neon, shopfronts, bright streets"
+        },
+        "homeInterior": {
+          "name": "Home interior",
+          "description": "A normally lit room at night"
+        },
+        "dimInterior": {
+          "name": "Dim interior",
+          "description": "Restaurants, floodlit buildings"
+        },
+        "candlelight": {
+          "name": "Candlelight",
+          "description": "Candles, fireplaces, fairgrounds at night"
+        },
+        "distantLights": {
+          "name": "Distant lights",
+          "description": "Lit skyline from afar, dark streets"
+        },
+        "nightSkyline": {
+          "name": "Night skyline",
+          "description": "Lit buildings at night"
+        },
+        "moonlight": {
+          "name": "Moonlight",
+          "description": "Full moon landscapes and darker"
+        }
+      }
+    }
   },
   "lightMeterSheet": {
     "defaultTitle": "Light Meter Reading",

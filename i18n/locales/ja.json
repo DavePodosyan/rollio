@@ -111,7 +111,78 @@
     "takeReading": "露出を測る",
     "takePhotoErrorMessage": "写真の撮影に失敗しました。もう一度お試しください。",
     "readCameraDataErrorMessage": "カメラデータの読み取りに失敗しました。もう一度お試しください。",
-    "captureErrorMessage": "画像のキャプチャに失敗しました。もう一度お試しください。"
+    "captureErrorMessage": "画像のキャプチャに失敗しました。もう一度お試しください。",
+    "planner": {
+      "title": "露出プランナー",
+      "open": "露出を計画する",
+      "ev": "EV {{value}}",
+      "scenes": {
+        "snow": {
+          "name": "雪や砂浜の晴天",
+          "description": "雪・砂・水面に強い日差し"
+        },
+        "sun": {
+          "name": "快晴",
+          "description": "雲ひとつない空、濃い影"
+        },
+        "hazySun": {
+          "name": "薄曇りの日差し",
+          "description": "薄いもや、やわらかい影"
+        },
+        "brightOvercast": {
+          "name": "明るい曇り",
+          "description": "明るい雲、かすかな影"
+        },
+        "overcast": {
+          "name": "曇り",
+          "description": "灰色の空、影なし"
+        },
+        "heavyOvercast": {
+          "name": "厚い曇りや日陰",
+          "description": "暗い雲、または晴天時の日陰"
+        },
+        "sunset": {
+          "name": "夕日",
+          "description": "低い太陽、ゴールデンアワー"
+        },
+        "afterSunset": {
+          "name": "日没直後",
+          "description": "薄明、空はまだ明るい"
+        },
+        "brightInterior": {
+          "name": "明るい屋内",
+          "description": "ショーウィンドウ、明るい部屋、競技場"
+        },
+        "litStreet": {
+          "name": "夜の明るい街路",
+          "description": "ネオン、店先、明るい通り"
+        },
+        "homeInterior": {
+          "name": "家の中",
+          "description": "夜の普通の照明の部屋"
+        },
+        "dimInterior": {
+          "name": "薄暗い屋内",
+          "description": "レストラン、ライトアップされた建物"
+        },
+        "candlelight": {
+          "name": "ろうそくの灯り",
+          "description": "キャンドル、暖炉、夜の縁日"
+        },
+        "distantLights": {
+          "name": "遠くの灯り",
+          "description": "遠景の夜景、暗い通り"
+        },
+        "nightSkyline": {
+          "name": "夜のスカイライン",
+          "description": "夜にライトアップされた建物"
+        },
+        "moonlight": {
+          "name": "月明かり",
+          "description": "満月の風景、それより暗い場面"
+        }
+      }
+    }
   },
   "lightMeterSheet": {
     "defaultTitle": "露出計の測定値",

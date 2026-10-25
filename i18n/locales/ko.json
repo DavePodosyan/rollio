@@ -111,7 +111,78 @@
     "takeReading": "노출 측정하기",
     "takePhotoErrorMessage": "사진 촬영에 실패했습니다. 다시 시도해 주세요.",
     "readCameraDataErrorMessage": "카메라 데이터를 읽지 못했습니다. 다시 시도해 주세요.",
-    "captureErrorMessage": "이미지 캡처에 실패했습니다. 다시 시도해 주세요."
+    "captureErrorMessage": "이미지 캡처에 실패했습니다. 다시 시도해 주세요.",
+    "planner": {
+      "title": "노출 플래너",
+      "open": "노출 계획하기",
+      "ev": "EV {{value}}",
+      "scenes": {
+        "snow": {
+          "name": "맑은 날의 눈이나 모래",
+          "description": "눈, 모래, 물 위의 강한 햇빛"
+        },
+        "sun": {
+          "name": "맑음",
+          "description": "구름 없는 하늘, 진한 그림자"
+        },
+        "hazySun": {
+          "name": "옅은 안개 속 햇빛",
+          "description": "옅은 안개, 부드러운 그림자"
+        },
+        "brightOvercast": {
+          "name": "밝은 흐림",
+          "description": "밝은 구름, 희미한 그림자"
+        },
+        "overcast": {
+          "name": "흐림",
+          "description": "회색 하늘, 그림자 없음"
+        },
+        "heavyOvercast": {
+          "name": "짙은 흐림 또는 그늘",
+          "description": "어두운 구름, 또는 맑은 날의 그늘"
+        },
+        "sunset": {
+          "name": "일몰",
+          "description": "낮은 해, 골든아워"
+        },
+        "afterSunset": {
+          "name": "일몰 직후",
+          "description": "황혼, 하늘은 아직 밝음"
+        },
+        "brightInterior": {
+          "name": "밝은 실내",
+          "description": "쇼윈도, 밝은 방, 경기장"
+        },
+        "litStreet": {
+          "name": "밤의 밝은 거리",
+          "description": "네온, 상점가, 밝은 거리"
+        },
+        "homeInterior": {
+          "name": "집 안",
+          "description": "밤에 평범하게 조명된 방"
+        },
+        "dimInterior": {
+          "name": "어두운 실내",
+          "description": "레스토랑, 조명을 받은 건물"
+        },
+        "candlelight": {
+          "name": "촛불",
+          "description": "촛불, 벽난로, 밤의 축제장"
+        },
+        "distantLights": {
+          "name": "멀리 보이는 불빛",
+          "description": "멀리서 본 야경, 어두운 거리"
+        },
+        "nightSkyline": {
+          "name": "밤의 스카이라인",
+          "description": "밤에 불 켜진 건물들"
+        },
+        "moonlight": {
+          "name": "달빛",
+          "description": "보름달 아래 풍경과 그보다 어두운 장면"
+        }
+      }
+    }
   },
   "lightMeterSheet": {
     "defaultTitle": "노출계 측정값",
