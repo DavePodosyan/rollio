@@ -24,20 +24,24 @@ export default function HomeLayout() {
 
             <Stack.Screen
                 name="formsheet"
-                options={{
-                    headerShown: true,
-                    headerTransparent: true,
-                    headerTintColor: String(lightMeterLayoutColors.label),
-                    title: '',
-                    headerTitleStyle: { fontFamily: 'LufgaMedium', fontSize: 20 },
-                    presentation: "formSheet",
-                    gestureEnabled: false,
-                    sheetGrabberVisible: false,
-                    contentStyle: { backgroundColor: isGlassAvailable ? "transparent" : lightMeterLayoutColors.systemBackground },
-                    sheetAllowedDetents: [0.45],
-                    sheetExpandsWhenScrolledToEdge: false,
-                    sheetInitialDetentIndex: 0,
-                    sheetLargestUndimmedDetentIndex: 0,
+                options={({ route }) => {
+                    // The exposure planner opens taller: it carries the scene card above the columns.
+                    const isSceneMode = (route.params as { mode?: string } | undefined)?.mode === 'scene';
+                    return {
+                        headerShown: true,
+                        headerTransparent: true,
+                        headerTintColor: String(lightMeterLayoutColors.label),
+                        title: '',
+                        headerTitleStyle: { fontFamily: 'LufgaMedium', fontSize: 20 },
+                        presentation: "formSheet",
+                        gestureEnabled: false,
+                        sheetGrabberVisible: false,
+                        contentStyle: { backgroundColor: isGlassAvailable ? "transparent" : lightMeterLayoutColors.systemBackground },
+                        sheetAllowedDetents: [isSceneMode ? 0.62 : 0.45],
+                        sheetExpandsWhenScrolledToEdge: false,
+                        sheetInitialDetentIndex: 0,
+                        sheetLargestUndimmedDetentIndex: 0,
+                    };
                 }}
             />
         </Stack>
