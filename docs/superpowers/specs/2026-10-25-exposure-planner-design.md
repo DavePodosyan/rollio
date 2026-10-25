@@ -81,24 +81,31 @@ exists today. No photo is carried along, because there is none.
 
 ## The entry point (light meter screen)
 
-Today the bottom of the camera screen holds one glass pill, "Take a
-reading", that rotates with the device. Add a second control to its left:
+A round glass button in the **top-right corner** of the camera view, where
+the Films tab keeps its secondary action:
 
-- A round glass button, 56 pt (60 on Android), same glass style, shadow and
-  fallback colours as the pill, containing one glyph at 22 pt in the label
-  colour: SF `sun.haze.fill`, Material `wb-twilight`. No text. Accessibility
-  label: the planner title string.
-- Both controls sit in one row with a 12 pt gap, centred where the pill is
-  centred today, and the whole row rotates and translates with orientation
-  as the pill does now. The builder adjusts the translateX offsets so the
-  row stays centred in landscape.
+- 48 pt, same glass style, shadow and fallback colours as the shutter pill,
+  containing one glyph at 22 pt in the label colour: SF `sun.haze.fill`,
+  Material `wb-twilight`. No text. Accessibility label: the planner title
+  string. Placed at the top safe-area inset plus 8 pt, inset from the right
+  edge by 10 pt plus the side safe-area inset (iPhone Duo rail).
+- Only the glyph turns with the device, like the Camera app; the button
+  stays put. The shutter pill keeps its own rotation behaviour, alone at the
+  bottom.
 - Tap: light haptic, then open the sheet in scene mode (below). The `loading`
   guard that stops double taps on the pill applies here too.
 
+While the planner is up the camera is off duty: the preview pauses
+(`isActive` false), the gradient used on the permission and no-camera
+screens fades in over it in 250 ms, and the shutter pill and the round
+button fade out underneath. Closing the sheet reverses the fade and resumes
+the camera. (Decided in chat on 2026-10-26, replacing an earlier placement
+beside the shutter pill.)
+
 On the **no camera permission** and **no camera device** screens, the
 message stays and gains one glass pill beneath it, in the same neutral style
-as the pill above (not the blue permission button): glyph `sun.haze.fill`
-plus the planner title. It opens the same sheet. On the permission screen it
+as the shutter pill (not the blue permission button): glyph `sun.haze.fill`
+plus "Plan an exposure". It opens the same sheet. On the permission screen it
 sits below the existing Grant Permission / Open Settings button.
 
 ## Opening in scene mode
@@ -279,8 +286,8 @@ New keys, added to en, ja and ko:
   `nightSkyline`, `moonlight`.
 - `whatsNew.releases.2_4_0.planner.title`: "Plan an exposure"
 - `whatsNew.releases.2_4_0.planner.body`: "No light to meter yet? Tap the
-  sun next to Take a Reading, pick the scene you expect, and see what your
-  film and lenses can do before you pack them."
+  sun in the top corner of the light meter, pick the scene you expect, and
+  see what your film and lenses can do before you pack them."
 
 Japanese and Korean translations follow the tone of the existing
 `lightMeterSheet` strings. Scene names are kept short enough to sit on one

@@ -292,6 +292,11 @@ export default function CameraBackgroundPage() {
     const [loading, setLoading] = useState(false);
     const [permissionRequested, setPermissionRequested] = useState(false);
     const [reading, setReading] = useState<LightMeterReadingParams | null>(null);
+    // iOS presents the planner as a route, so this screen only knows it is up by
+    // losing focus to it; the flag clears when focus comes back. Android keeps the
+    // sheet inside this screen, so `reading` already says.
+    const [plannerRouteOpen, setPlannerRouteOpen] = useState(false);
+    const plannerLostFocus = useRef(false);
 
     // Android: the hardware Back button closes the reading sheet instead of
     // switching tabs and leaving the frozen preview behind.
@@ -304,6 +309,28 @@ export default function CameraBackgroundPage() {
         return () => subscription.remove();
     }, [reading]);
     const [androidSheetDetent, setAndroidSheetDetent] = useState(ANDROID_READING_SHEET_COLLAPSED_DETENT);
+    useEffect(() => {
+        if (!plannerRouteOpen) return;
+        if (!isFocused) {
+            plannerLostFocus.current = true;
+        } else if (plannerLostFocus.current) {
+            plannerLostFocus.current = false;
+            setPlannerRouteOpen(false);
+        }
+    }, [isFocused, plannerRouteOpen]);
+    const isPlannerShowing = isAndroid ? reading?.mode === 'scene' : plannerRouteOpen;
+
+    // While the planner is up the camera is off duty: the preview pauses and the
+    // gradient from the no-camera screens fades in over it, controls fade out.
+    const [plannerBackdrop] = useState(() => new Animated.Value(0));
+    useEffect(() => {
+        Animated.timing(plannerBackdrop, {
+            toValue: isPlannerShowing ? 1 : 0,
+            duration: 250,
+            useNativeDriver: true,
+        }).start();
+    }, [isPlannerShowing, plannerBackdrop]);
+    const controlsOpacity = plannerBackdrop.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
     const bottomSheetRef = useRef<BottomSheet>(null);
     const shouldFreezeCameraPreview = isAndroid && reading?.image;
     const androidSheetContainerLayout = useSharedValue({
@@ -342,7 +369,7 @@ export default function CameraBackgroundPage() {
         }
     }, []);
     useEffect(() => releasePreviousTempPhoto, [releasePreviousTempPhoto]);
-    const buttonRotation = useRef(new Animated.Value(0)).current;
+    const [buttonRotation] = useState(() => new Animated.Value(0));
     const androidSheetSnapPoints = useMemo(
         () => [`${Math.round(androidSheetDetent * 100)}%`],
         [androidSheetDetent]
@@ -384,8 +411,8 @@ export default function CameraBackgroundPage() {
 
     // Focus indicator state and animations
     const [focusPoint, setFocusPoint] = useState<Point | null>(null);
-    const focusScale = useRef(new Animated.Value(1.2)).current;
-    const focusOpacity = useRef(new Animated.Value(0)).current;
+    const [focusScale] = useState(() => new Animated.Value(1.2));
+    const [focusOpacity] = useState(() => new Animated.Value(0));
 
     const focusAndExpose = useCallback(async (point: Point) => {
         const c = cameraRef.current
@@ -595,6 +622,7 @@ export default function CameraBackgroundPage() {
             setAndroidSheetDetent(ANDROID_PLANNER_SHEET_DETENT);
             setReading({ mode: 'scene' });
         } else {
+            setPlannerRouteOpen(true);
             router.push({
                 pathname: '/(tabs)/light_meter/formsheet',
                 params: { mode: 'scene' },
@@ -616,24 +644,58 @@ export default function CameraBackgroundPage() {
     };
     const controlTextColor = isAndroid && !isGlassAvailable ? androidFallbackButtonTextColor : lightMeterColors.label;
     const controlRipple = { color: colorScheme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(16,5,40,0.08)', borderless: false };
-    const plannerButtonSize = isAndroid ? 60 : 56;
+    const plannerButtonSize = 48;
 
-    // Round glyph button beside the shutter pill.
+    // Round glyph button in the top-right corner, where the Films tab keeps its
+    // secondary action. Only the glyph turns with the device, like the Camera app.
     const plannerButton = (
-        <GlassView isInteractive={true} glassEffectStyle='regular' style={[controlGlassStyle, { borderRadius: plannerButtonSize / 2 }]}>
-            <Pressable
-                onPress={openPlanner}
-                accessibilityRole="button"
-                accessibilityLabel={t('lightMeter.planner.title')}
-                android_ripple={controlRipple}
-                style={({ pressed }) => [
-                    { transform: isGlassAvailable ? [] : [{ scale: pressed ? 0.97 : 1 }] },
-                    { width: plannerButtonSize, height: plannerButtonSize, alignItems: 'center', justifyContent: 'center' },
-                ]}
-            >
-                <PlannerGlyph color={controlTextColor} />
-            </Pressable>
-        </GlassView>
+        <Animated.View
+            pointerEvents={isPlannerShowing ? 'none' : 'auto'}
+            style={{
+                position: 'absolute',
+                top: insets.top + 8,
+                right: 10 + insets.right,
+                zIndex: 9,
+                opacity: controlsOpacity,
+            }}
+        >
+            <GlassView isInteractive={true} glassEffectStyle='regular' style={[controlGlassStyle, { borderRadius: plannerButtonSize / 2 }]}>
+                <Pressable
+                    onPress={openPlanner}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('lightMeter.planner.title')}
+                    android_ripple={controlRipple}
+                    style={({ pressed }) => [
+                        { transform: isGlassAvailable ? [] : [{ scale: pressed ? 0.97 : 1 }] },
+                        { width: plannerButtonSize, height: plannerButtonSize, alignItems: 'center', justifyContent: 'center' },
+                    ]}
+                >
+                    <Animated.View style={{
+                        transform: [{
+                            rotate: buttonRotation.interpolate({
+                                inputRange: [0, 90, 180, 270],
+                                outputRange: ['0deg', '90deg', '180deg', '270deg'],
+                            })
+                        }]
+                    }}>
+                        <PlannerGlyph color={controlTextColor} />
+                    </Animated.View>
+                </Pressable>
+            </GlassView>
+        </Animated.View>
+    );
+
+    // The gradient from the no-camera screens, faded over the paused preview while planning.
+    const plannerBackdropView = (
+        <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: plannerBackdrop, zIndex: 8 }]}>
+            <LinearGradient
+                colors={gradientColors}
+                locations={[0.1, 0.4, 0.9]}
+                style={StyleSheet.absoluteFill}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+            />
+        </Animated.View>
     );
 
     // Glyph-and-text pill for the screens that have no shutter button.
@@ -784,7 +846,7 @@ export default function CameraBackgroundPage() {
                     ref={cameraRef}
                     style={StyleSheet.absoluteFill}
                     device={device}
-                    isActive={isFocused && !shouldFreezeCameraPreview}
+                    isActive={isFocused && !shouldFreezeCameraPreview && !isPlannerShowing}
                     zoom={device.neutralZoom}
                     photo={true}
                     onInitialized={() => setIsCameraReady(true)}
@@ -834,18 +896,15 @@ export default function CameraBackgroundPage() {
                             })
                         },
                         {
-                            // The rotated element is now the planner button, gap and pill
-                            // (about 68 pt wider than the pill alone), so the side offsets
-                            // grow by half of that to keep the row centred in landscape.
                             translateX: buttonRotation.interpolate({
                                 inputRange: [0, 90, 180, 270],
-                                outputRange: [0, -74, 0, 74],
+                                outputRange: [0, -40, 0, 40],
                             })
                         }
-                    ]
+                    ],
+                    opacity: controlsOpacity,
+                    zIndex: 9,
                 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, zIndex: 9 }}>
-                    {plannerButton}
                     <GlassView isInteractive={true} glassEffectStyle='regular' style={[controlGlassStyle, { borderRadius: 22 }]}>
 
                         <Pressable style={({ pressed }) => [
@@ -875,9 +934,10 @@ export default function CameraBackgroundPage() {
 
                         </Pressable>
                     </GlassView>
-                  </View>
                 </Animated.View>
             )}
+            {plannerBackdropView}
+            {isCameraReady && plannerButton}
             {androidSheet}
         </View >
     );

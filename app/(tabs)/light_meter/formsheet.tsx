@@ -969,7 +969,7 @@ export function LightMeterReadingSheet({
             : 'rgba(0, 122, 255, 0.15)';
     const exposureBadgeTextColor = isBottomSheetPresentation ? '#FFFFFF' : '#ffffff';
     // Scene card sits just under the header (native) or the inline header (bottom sheet).
-    const sceneCardTop = isBottomSheetPresentation ? 4 : headerHeight + 2;
+    const sceneCardTop = isBottomSheetPresentation ? 12 : headerHeight + 14;
     const wheelSurfaceBackgroundColor = isBottomSheetPresentation
         ? colorScheme === 'dark' ? '#2c2c2e' : '#ececf2'
         : isGlassAvailable ? 'transparent' : dynamicSheetColors.tertiarySystemFill;
