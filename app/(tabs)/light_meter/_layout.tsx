@@ -1,7 +1,7 @@
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { router, Stack } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { View, Pressable, Platform, PlatformColor } from "react-native";
+import { View, Pressable, Platform, PlatformColor, useColorScheme } from "react-native";
 
 const platformColor = (iosName: string, androidName: string) => (
     PlatformColor(Platform.OS === 'ios' ? iosName : androidName)
@@ -14,13 +14,25 @@ const lightMeterLayoutColors = {
 
 export default function HomeLayout() {
     const isGlassAvailable = isLiquidGlassAvailable();
+    const colorScheme = useColorScheme();
+    const isAndroid = Platform.OS === 'android';
     return (
         <Stack screenOptions={{
             headerShown: false,
             contentStyle: { backgroundColor: "transparent" },
 
         }}>
-            <Stack.Screen name="index" />
+            <Stack.Screen
+                name="index"
+                options={{
+                    // iOS carries the planner's sun in a transparent header, the way the
+                    // Films tab carries its "+". Android draws its own button on the screen.
+                    headerShown: !isAndroid,
+                    headerTransparent: true,
+                    title: '',
+                    headerTintColor: colorScheme === 'dark' ? '#fff' : '#100528',
+                }}
+            />
 
             <Stack.Screen
                 name="formsheet"

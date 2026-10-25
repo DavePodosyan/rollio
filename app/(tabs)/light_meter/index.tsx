@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, Platform, PlatformColor, ActivityInd
 import { Camera, Point, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 import { useIsFocused } from "expo-router/react-navigation";
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { calculateEV100 } from '@/utils/calculations';
 import * as Haptics from 'expo-haptics';
 import { GestureDetector, useTapGesture } from 'react-native-gesture-handler'
@@ -646,8 +646,21 @@ export default function CameraBackgroundPage() {
     const controlRipple = { color: colorScheme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(16,5,40,0.08)', borderless: false };
     const plannerButtonSize = 48;
 
-    // Round glyph button in the top-right corner, where the Films tab keeps its
-    // secondary action. Only the glyph turns with the device, like the Camera app.
+    // iOS: the same native header button the Films tab uses for its "+", so the two
+    // corners match. It is withdrawn while the planner is open so a second tap
+    // cannot stack sheets. Header buttons stay upright; only the shutter pill turns.
+    const plannerToolbar = (
+        <Stack.Toolbar placement="right">
+            <Stack.Toolbar.Button
+                icon="sun.haze.fill"
+                accessibilityLabel={t('lightMeter.planner.title')}
+                onPress={openPlanner}
+            />
+        </Stack.Toolbar>
+    );
+
+    // Android has no native header on this screen, so it draws its own round glyph
+    // button in the same corner.
     const plannerButton = (
         <Animated.View
             pointerEvents={isPlannerShowing ? 'none' : 'auto'}
@@ -670,16 +683,7 @@ export default function CameraBackgroundPage() {
                         { width: plannerButtonSize, height: plannerButtonSize, alignItems: 'center', justifyContent: 'center' },
                     ]}
                 >
-                    <Animated.View style={{
-                        transform: [{
-                            rotate: buttonRotation.interpolate({
-                                inputRange: [0, 90, 180, 270],
-                                outputRange: ['0deg', '90deg', '180deg', '270deg'],
-                            })
-                        }]
-                    }}>
-                        <PlannerGlyph color={controlTextColor} />
-                    </Animated.View>
+                    <PlannerGlyph color={controlTextColor} />
                 </Pressable>
             </GlassView>
         </Animated.View>
@@ -937,7 +941,7 @@ export default function CameraBackgroundPage() {
                 </Animated.View>
             )}
             {plannerBackdropView}
-            {isCameraReady && plannerButton}
+            {isCameraReady && (isAndroid ? plannerButton : !isPlannerShowing && plannerToolbar)}
             {androidSheet}
         </View >
     );

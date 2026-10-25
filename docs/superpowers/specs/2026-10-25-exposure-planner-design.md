@@ -81,17 +81,21 @@ exists today. No photo is carried along, because there is none.
 
 ## The entry point (light meter screen)
 
-A round glass button in the **top-right corner** of the camera view, where
-the Films tab keeps its secondary action:
+A button in the **top-right corner** of the camera view, matching the Films
+tab's "+" exactly:
 
-- 48 pt, same glass style, shadow and fallback colours as the shutter pill,
-  containing one glyph at 22 pt in the label colour: SF `sun.haze.fill`,
-  Material `wb-twilight`. No text. Accessibility label: the planner title
-  string. Placed at the top safe-area inset plus 8 pt, inset from the right
-  edge by 10 pt plus the side safe-area inset (iPhone Duo rail).
-- Only the glyph turns with the device, like the Camera app; the button
-  stays put. The shutter pill keeps its own rotation behaviour, alone at the
-  bottom.
+- iOS: the screen gets a transparent native header (empty title, the Films
+  tint colours) and the button is a `Stack.Toolbar` button with the SF glyph
+  `sun.haze.fill`, the same component the Films list uses for "+". So size,
+  glass and placement are the system's, identical across the two tabs. The
+  button is withdrawn while the planner is open so a second tap cannot stack
+  sheets.
+- Android: no native header on this screen, so a 48 pt round glass button of
+  its own at the top safe-area inset plus 8 pt, inset from the right edge by
+  10 pt plus the side inset, with the Material glyph `wb-twilight` at 22 pt.
+- Accessibility label: the planner title string. No text.
+- Header buttons do not rotate with the device. Only the shutter pill turns,
+  alone at the bottom.
 - Tap: light haptic, then open the sheet in scene mode (below). The `loading`
   guard that stops double taps on the pill applies here too.
 
