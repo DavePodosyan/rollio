@@ -17,7 +17,16 @@ export type RulerPickerProps = {
   valueKind: RulerPickerValueKind;
   values: Array<number | string>;
   initial: number | string;
+  /** Fires once the ruler settles on a tick (momentum end). */
   onChange?: (value: number | string) => void;
+  /** Fires on every tick passed during the drag, with the tick's value. */
+  onTick?: (value: number | string) => void;
+  /**
+   * 'card' (default) is the glass card with the label pill and the value above
+   * the ticks, as in the film and frame forms. 'bare' is only the tick strip,
+   * for callers that draw their own value, like the exposure planner.
+   */
+  variant?: 'card' | 'bare';
 };
 
 const TICK_THIN = 13;   // small tick height
@@ -30,7 +39,9 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
   valueKind,
   initial,
   values,
-  onChange
+  onChange,
+  onTick,
+  variant = 'card',
 }) => {
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
@@ -106,7 +117,7 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
         const safe = clampIndex(index);
         if (safe !== selectedIndex) {
           setSelectedIndex(safe);
-          // notifyChange(safe);
+          onTick?.(values[safe]);
           maybeHapticForIndex(safe);
         }
       },
@@ -160,10 +171,11 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
     const tickColor = isSelected && isAuto ? '#4CAF50' : tickSchemaColor;
 
     return (
-      <View style={[styles.tickCell, { width: tickWidth }]}>
+      <View style={[styles.tickCell, variant === 'bare' && styles.tickCellBare, { width: tickWidth }]}>
         <Animated.View
           style={[
             styles.tick,
+            variant === 'bare' && styles.tickBare,
             {
               height: TICK_THICK, // Fixed height
               opacity: animatedOpacity,
@@ -174,7 +186,7 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
         />
       </View>
     );
-  }, [tickWidth, selectedIndex, colorScheme]);
+  }, [tickWidth, selectedIndex, colorScheme, variant]);
 
   const getItemLayout = useCallback(
     (data: ArrayLike<number | string> | null | undefined, index: number) => ({
@@ -202,6 +214,36 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
 
     return isGlassAvailable ? 'transparent' : colorScheme === 'dark' ? '#09090b5d' : '#ffffff90';
   }, [isAndroid, colorScheme, isGlassAvailable]);
+
+  const ruler = (
+    <View style={[styles.container, { height }]} onLayout={onRulerLayout}>
+      <Animated.FlatList
+        ref={flatListRef}
+        initialScrollIndex={startIndex}
+        data={values}
+        renderItem={renderTick}
+        keyExtractor={keyExtractor}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={tickWidth}
+        decelerationRate="fast"
+        onMomentumScrollEnd={handleMomentumEnd}
+        onScroll={animatedOnScroll}
+        contentContainerStyle={{ paddingHorizontal: sidePadding }}
+        scrollEventThrottle={16}
+        bounces
+        overScrollMode="always"
+        getItemLayout={getItemLayout}
+        initialNumToRender={20} // Enough for initial load
+        maxToRenderPerBatch={10}
+        windowSize={11} // ~5 items on each side; tune if needed (lower = better perf, higher = smoother pre-rendering)
+      />
+    </View>
+  );
+
+  if (variant === 'bare') {
+    return ruler;
+  }
 
   return (
     <GlassView
@@ -251,29 +293,7 @@ const RulerPicker: React.FC<RulerPickerProps> = ({
         })()}
       </Text>
 
-      <View style={[styles.container, { height }]} onLayout={onRulerLayout}>
-        <Animated.FlatList
-          ref={flatListRef}
-          initialScrollIndex={startIndex}
-          data={values}
-          renderItem={renderTick}
-          keyExtractor={keyExtractor}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          snapToInterval={tickWidth}
-          decelerationRate="fast"
-          onMomentumScrollEnd={handleMomentumEnd}
-          onScroll={animatedOnScroll}
-          contentContainerStyle={{ paddingHorizontal: sidePadding }}
-          scrollEventThrottle={16}
-          bounces
-          overScrollMode="always"
-          getItemLayout={getItemLayout}
-          initialNumToRender={20} // Enough for initial load
-          maxToRenderPerBatch={10}
-          windowSize={11} // ~5 items on each side; tune if needed (lower = better perf, higher = smoother pre-rendering)
-        />
-      </View>
+      {ruler}
     </GlassView>
   );
 };
@@ -291,9 +311,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
+  tickCellBare: {
+    justifyContent: 'center',
+  },
   tick: {
     width: 2,
     borderRadius: 1,
     marginBottom: 8
+  },
+  tickBare: {
+    marginBottom: 0,
   },
 });
