@@ -18,6 +18,23 @@ export const EV_PLANNER_VALUES: number[] = Array.from(
     (_, i) => toThird(EV_PLANNER_MIN + i * THIRD),
 );
 
+/** Every ruler tick when the sheet shows full stops only: whole EVs, one per scene band. */
+export const EV_PLANNER_WHOLE_VALUES: number[] = Array.from(
+    { length: EV_PLANNER_MAX - EV_PLANNER_MIN + 1 },
+    (_, i) => EV_PLANNER_MIN + i,
+);
+
+/** The ruler's ticks for the sheet's stop setting. */
+export function plannerEvValues(fullStopsOnly: boolean): number[] {
+    return fullStopsOnly ? EV_PLANNER_WHOLE_VALUES : EV_PLANNER_VALUES;
+}
+
+/** The nearest tick for the stop setting, inside the ruler's range. */
+export function snapEvToStops(ev: number, fullStopsOnly: boolean): number {
+    const clamped = Math.max(EV_PLANNER_MIN, Math.min(EV_PLANNER_MAX, ev));
+    return fullStopsOnly ? Math.round(clamped) : toThird(clamped);
+}
+
 export type SceneKey =
     | 'snow' | 'sun' | 'hazySun' | 'brightOvercast' | 'overcast' | 'heavyOvercast'
     | 'sunset' | 'afterSunset' | 'brightInterior' | 'litStreet' | 'homeInterior'

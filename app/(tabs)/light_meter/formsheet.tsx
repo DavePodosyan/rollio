@@ -25,7 +25,7 @@ import { MaterialIcons } from '@react-native-vector-icons/material-icons/static'
 import { ScrollView as GestureScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import { ExposureSceneCard, EXPOSURE_SCENE_CARD_HEIGHT } from "@/components/ExposureSceneCard";
-import { EV_PLANNER_DEFAULT, calculateAperture, calculateIso, calculateShutter, columnToMoveForEv } from "@/services/exposurePlanner";
+import { EV_PLANNER_DEFAULT, calculateAperture, calculateIso, calculateShutter, columnToMoveForEv, snapEvToStops } from '@/services/exposurePlanner';
 // ────────────────────────────────────────────────
 // Config
 // ────────────────────────────────────────────────
@@ -505,6 +505,11 @@ export function LightMeterReadingSheet({
     // When full stops toggle changes, snap current shutter to nearest available option
     useEffect(() => {
         if (prevShowFullStopsOnly.current !== showFullStopsOnly) {
+            if (isSceneMode) {
+                // The planner snaps its EV instead (effect below applySceneEv).
+                prevShowFullStopsOnly.current = showFullStopsOnly;
+                return;
+            }
             // IMMEDIATELY block scroll handler from updating selection
             isProgrammaticScroll.current = true;
 
@@ -550,7 +555,7 @@ export function LightMeterReadingSheet({
                 }, 50);
             }
         }
-    }, [showFullStopsOnly, shutterOptions]);
+    }, [showFullStopsOnly, shutterOptions, isSceneMode]);
 
     // Scroll a FlatList to a specific value
     const scrollToValue = useCallback((
@@ -763,6 +768,16 @@ export function LightMeterReadingSheet({
             scrollToValue(apertureRef, apertureOptions, newAperture, lastTickedApertureIdx);
         }
     }, [lockedPicker, isFilmMode, shutterOptions, apertureOptions, minShutterSeconds, maxShutterSeconds, minAperture, maxAperture, scrollToValue]);
+
+    // Scene mode: the gear toggle changed the ruler's tick spacing (the card
+    // remounts on it). The EV defines the shutter here, so snap the EV to the
+    // new ruler and let the column follow from there.
+    const prevSceneStops = useRef(showFullStopsOnly);
+    useEffect(() => {
+        if (!isSceneMode || prevSceneStops.current === showFullStopsOnly) return;
+        prevSceneStops.current = showFullStopsOnly;
+        applySceneEv(snapEvToStops(sceneEv, showFullStopsOnly));
+    }, [isSceneMode, showFullStopsOnly, sceneEv, applySceneEv]);
 
     // ────────────────────────────────────────────────
     // Scroll Handlers (haptics + live value update)
@@ -1085,7 +1100,9 @@ export function LightMeterReadingSheet({
                 {isSceneMode && (
                     <View style={{ marginTop: sceneCardTop }}>
                         <ExposureSceneCard
-                            initialEv={sceneEv}
+                            key={showFullStopsOnly ? 'whole' : 'thirds'}
+                            initialEv={snapEvToStops(sceneEv, showFullStopsOnly)}
+                            fullStopsOnly={showFullStopsOnly}
                             onMoveStart={onSceneMoveStart}
                             onSettle={applySceneEv}
                             onHeight={setSceneCardHeight}

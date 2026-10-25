@@ -65,3 +65,23 @@ assert.ok(Math.abs(calculateAperture(1 / 125, 100, 15) - 16) / 16 < 0.03);
 assert.ok(Math.abs(calculateIso(16, 1 / 125, 15) - 100) / 100 < 0.03);
 
 console.log('ALL PASSED');
+
+// full stops only: the ruler ticks in whole EVs, one per scene, and a third
+// lands on its nearest whole stop; with thirds showing nothing changes
+{
+    const { EV_PLANNER_WHOLE_VALUES, plannerEvValues, snapEvToStops } = await import('@/services/exposurePlanner');
+    assert.equal(EV_PLANNER_WHOLE_VALUES.length, 21);
+    assert.equal(EV_PLANNER_WHOLE_VALUES[0], -3);
+    assert.equal(EV_PLANNER_WHOLE_VALUES.at(-1), 17);
+    assert.ok(EV_PLANNER_WHOLE_VALUES.every((v) => Number.isInteger(v)));
+    assert.ok(EV_PLANNER_WHOLE_VALUES.includes(EV_PLANNER_DEFAULT));
+    assert.equal(plannerEvValues(true), EV_PLANNER_WHOLE_VALUES);
+    assert.equal(plannerEvValues(false), EV_PLANNER_VALUES);
+    assert.equal(snapEvToStops(9 + 1 / 3, true), 9);
+    assert.equal(snapEvToStops(9 + 2 / 3, true), 10);
+    assert.equal(snapEvToStops(-2 / 3, true), -1);
+    assert.equal(snapEvToStops(9, true), 9);
+    assert.equal(snapEvToStops(9 + 1 / 3, false), 9 + 1 / 3);
+    assert.equal(snapEvToStops(17.2, true), 17);
+    assert.equal(snapEvToStops(-3.4, false), -3);
+}

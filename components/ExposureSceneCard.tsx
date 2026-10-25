@@ -1,4 +1,4 @@
-import { EV_PLANNER_VALUES, formatEv, sceneForEv } from '@/services/exposurePlanner';
+import { formatEv, plannerEvValues, sceneForEv } from '@/services/exposurePlanner';
 import RulerPicker from '@/components/RulerPicker';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons/static';
 import { GlassView } from 'expo-glass-effect';
@@ -15,8 +15,14 @@ const SCENE_ROW_MIN_HEIGHT = 74;
 const GLYPH_SIZE = 22;
 
 export type ExposureSceneCardProps = {
-    /** The EV the card opens on. The card owns the live value from then on. */
+    /**
+     * The EV the card opens on. The card owns the live value from then on, so
+     * a caller that changes the tick spacing remounts the card (by key) with a
+     * snapped `initialEv`.
+     */
     initialEv: number;
+    /** Whole-stop ticks, matching the sheet's "full stops only" setting; thirds otherwise. */
+    fullStopsOnly: boolean;
     /** The ruler started moving (first tick of a drag). */
     onMoveStart: () => void;
     /** The ruler settled on a tick. */
@@ -33,6 +39,7 @@ export type ExposureSceneCardProps = {
 
 export function ExposureSceneCard({
     initialEv,
+    fullStopsOnly,
     onMoveStart,
     onSettle,
     onHeight,
@@ -86,7 +93,7 @@ export function ExposureSceneCard({
                 variant="bare"
                 label=""
                 valueKind="plain"
-                values={EV_PLANNER_VALUES}
+                values={plannerEvValues(fullStopsOnly)}
                 initial={rulerInitial}
                 onTick={(value) => {
                     if (!isMoving.current) {

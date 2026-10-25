@@ -28,7 +28,9 @@ exists today. No photo is carried along, because there is none.
   sun, overcast, sunset, lit street, candlelight, moonlight…), with a short
   description so a user who does not think in EV still lands on the right
   light.
-- Fine control in third stops, so the ruler is both presets and tuning.
+- Fine control in third stops, so the ruler is both presets and tuning. With
+  the sheet's "full stops only" setting on (the default) the ruler ticks in
+  whole EVs instead, one per scene, so every tick lands on a full shutter stop.
 - Live: the scene name and EV value follow the ruler tick by tick; the
   unlocked column recalculates the moment the ruler settles, so the user can
   slide from overcast to sunset and watch the shutter fall.
@@ -146,7 +148,10 @@ Top to bottom:
      whether this is a `RulerPicker` option (e.g. `variant: 'bare'`) or the
      ruler extracted into a shared piece; the film and frame forms must look
      identical afterwards.
-   - Values: EV −3 to 17 in third stops (61 ticks). Starts on **EV 15**.
+   - Values: EV −3 to 17 in third stops (61 ticks), or whole stops (21 ticks)
+     while the gear toggle shows full stops only. Starts on **EV 15**. Toggling
+     remounts the card on the EV snapped to the new spacing and the shutter
+     follows from that EV.
    - Two update rates. The scene row (glyph, name, description, EV value)
      updates on every tick during the drag; `RulerPicker` currently reports
      only on momentum end, so the planner ruler needs a per-tick callback
@@ -264,6 +269,9 @@ of the ruler's own per-tick selection haptic.
 - `EV_PLANNER_MIN = -3`, `EV_PLANNER_MAX = 17`, `EV_PLANNER_DEFAULT = 15`.
 - `EV_PLANNER_VALUES: number[]`: thirds from min to max, stored as
   rounded thirds (−3, −2.667, −2.333, …, 17) so equality checks work.
+- `EV_PLANNER_WHOLE_VALUES`, `plannerEvValues(fullStopsOnly)`,
+  `snapEvToStops(ev, fullStopsOnly)`: the whole-stop list, the pick between
+  the two, and the nearest tick for a setting (clamped to the range).
 - `EV_SCENES`: the table above, ordered from brightest to darkest.
 - `sceneForEv(ev: number)`: the band for an EV using the ±½ rule and open
   ends.
