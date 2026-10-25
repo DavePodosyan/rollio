@@ -17,6 +17,8 @@ import { File, FileMode } from 'expo-file-system';
 import { deleteTempFile } from '@/utils/ImageService';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SymbolView } from 'expo-symbols';
+import { MaterialIcons } from '@react-native-vector-icons/material-icons/static';
 
 const platformColor = (iosName: string, androidName: string) => (
     PlatformColor(Platform.OS === 'ios' ? iosName : androidName)
@@ -252,6 +254,17 @@ const readPhotoExposureSettings = async (path: string, metadata?: Record<string,
 };
 
 const ANDROID_READING_SHEET_COLLAPSED_DETENT = 0.52;
+// The exposure planner carries the scene card above the columns, so it opens taller.
+const ANDROID_PLANNER_SHEET_DETENT = 0.70;
+const PLANNER_GLYPH_SIZE = 22;
+
+/** The planner's glyph: a hazy sun on iOS, twilight on Android. */
+function PlannerGlyph({ color }: { color: string | ReturnType<typeof PlatformColor> }) {
+    if (Platform.OS === 'android') {
+        return <MaterialIcons name="wb-twilight" size={PLANNER_GLYPH_SIZE} color={color} />;
+    }
+    return <SymbolView name="sun.haze.fill" style={{ width: PLANNER_GLYPH_SIZE, height: PLANNER_GLYPH_SIZE }} tintColor={color} />;
+}
 
 export default function CameraBackgroundPage() {
     const { t } = useTranslation();
@@ -573,6 +586,117 @@ export default function CameraBackgroundPage() {
         }
     };
 
+    // Open the reading sheet as the exposure planner: no reading, no photo, the
+    // scene ruler sets the EV. Works on every state of this screen.
+    const openPlanner = () => {
+        if (loading) return;
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
+        if (isAndroid) {
+            setAndroidSheetDetent(ANDROID_PLANNER_SHEET_DETENT);
+            setReading({ mode: 'scene' });
+        } else {
+            router.push({
+                pathname: '/(tabs)/light_meter/formsheet',
+                params: { mode: 'scene' },
+            });
+        }
+    };
+
+    // Chrome shared by the shutter pill, the round planner button and the planner pill.
+    const controlGlassStyle = {
+        backgroundColor: isGlassAvailable ? 'transparent' : isAndroid ? androidFallbackButtonBackground : lightMeterColors.tertiarySystemFill,
+        borderWidth: isAndroid && !isGlassAvailable ? 1 : 0,
+        borderColor: isAndroid && !isGlassAvailable ? androidFallbackButtonBorder : 'transparent',
+        shadowColor: '#000',
+        shadowOpacity: isAndroid ? 0.28 : 0.2,
+        shadowRadius: 14,
+        shadowOffset: { width: 0, height: 8 },
+        elevation: isAndroid ? 8 : 0,
+        overflow: 'hidden' as const,
+    };
+    const controlTextColor = isAndroid && !isGlassAvailable ? androidFallbackButtonTextColor : lightMeterColors.label;
+    const controlRipple = { color: colorScheme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(16,5,40,0.08)', borderless: false };
+    const plannerButtonSize = isAndroid ? 60 : 56;
+
+    // Round glyph button beside the shutter pill.
+    const plannerButton = (
+        <GlassView isInteractive={true} glassEffectStyle='regular' style={[controlGlassStyle, { borderRadius: plannerButtonSize / 2 }]}>
+            <Pressable
+                onPress={openPlanner}
+                accessibilityRole="button"
+                accessibilityLabel={t('lightMeter.planner.title')}
+                android_ripple={controlRipple}
+                style={({ pressed }) => [
+                    { transform: isGlassAvailable ? [] : [{ scale: pressed ? 0.97 : 1 }] },
+                    { width: plannerButtonSize, height: plannerButtonSize, alignItems: 'center', justifyContent: 'center' },
+                ]}
+            >
+                <PlannerGlyph color={controlTextColor} />
+            </Pressable>
+        </GlassView>
+    );
+
+    // Glyph-and-text pill for the screens that have no shutter button.
+    const plannerPill = (
+        <Pressable
+            onPress={openPlanner}
+            accessibilityRole="button"
+            style={({ pressed }) => [{ marginTop: 20, transform: isGlassAvailable ? [] : [{ scale: pressed ? 0.97 : 1 }] }]}
+        >
+            <GlassView isInteractive={true} glassEffectStyle='regular' style={[controlGlassStyle, { borderRadius: 22 }]}>
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 10,
+                    minHeight: isAndroid ? 60 : 56,
+                    paddingHorizontal: isAndroid ? 26 : 22,
+                    paddingVertical: isAndroid ? 16 : 14,
+                }}>
+                    <PlannerGlyph color={controlTextColor} />
+                    <Text style={{
+                        color: controlTextColor,
+                        fontFamily: 'LufgaMedium',
+                        fontSize: isAndroid ? 16 : 14,
+                        lineHeight: isAndroid ? 21 : 18,
+                        includeFontPadding: false,
+                        textAlignVertical: 'center',
+                        letterSpacing: 0.25,
+                    }}>{t('lightMeter.planner.open')}</Text>
+                </View>
+            </GlassView>
+        </Pressable>
+    );
+
+    // Android presents the sheet inline; every state of this screen can open it.
+    const androidSheet = isAndroid && reading ? (
+        <BottomSheet
+            ref={bottomSheetRef}
+            index={0}
+            snapPoints={androidSheetSnapPoints}
+            containerLayoutState={androidSheetContainerLayout}
+            enableDynamicSizing={false}
+            enableContentPanningGesture={false}
+            enableHandlePanningGesture={false}
+            enableOverDrag={false}
+            enablePanDownToClose={false}
+            backdropComponent={renderSheetBackdrop}
+            backgroundStyle={{ backgroundColor: androidSheetBackground }}
+            handleComponent={null}
+            handleStyle={styles.sheetHandle}
+            handleIndicatorStyle={{ backgroundColor: androidSheetHandleColor }}
+            onClose={() => setReading(null)}
+        >
+            <BottomSheetView style={styles.sheetContent}>
+                <LightMeterReadingSheet
+                    {...reading}
+                    presentation="bottom-sheet"
+                    onClose={() => bottomSheetRef.current?.close()}
+                    onSheetDetentChange={setAndroidSheetDetent}
+                />
+            </BottomSheetView>
+        </BottomSheet>
+    ) : null;
+
     if (!hasPermission) {
         // Camera permissions are not granted
         return (
@@ -624,6 +748,8 @@ export default function CameraBackgroundPage() {
                         </GlassView>
                     </Pressable>
                 )}
+                {plannerPill}
+                {androidSheet}
             </View>
         );
     }
@@ -641,10 +767,8 @@ export default function CameraBackgroundPage() {
                     end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
                 />
                 <Text style={{ textAlign: 'center', fontFamily: 'LufgaRegular', color: lightMeterColors.label }}>{t('lightMeter.noDeviceMessage')}</Text>
-
-                {/* <Pressable onPress={() => handleFormSheetOpen(true)}><Text style={{ color: PlatformColor('label'), marginTop: 50 }}>Debug</Text></Pressable> */}
-
-
+                {plannerPill}
+                {androidSheet}
             </View>
         );
     }
@@ -717,19 +841,9 @@ export default function CameraBackgroundPage() {
                         }
                     ]
                 }}>
-                    <GlassView isInteractive={true} glassEffectStyle='regular' style={{
-                        borderRadius: 22,
-                        zIndex: 9,
-                        backgroundColor: isGlassAvailable ? 'transparent' : isAndroid ? androidFallbackButtonBackground : lightMeterColors.tertiarySystemFill,
-                        borderWidth: isAndroid && !isGlassAvailable ? 1 : 0,
-                        borderColor: isAndroid && !isGlassAvailable ? androidFallbackButtonBorder : 'transparent',
-                        shadowColor: '#000',
-                        shadowOpacity: isAndroid ? 0.28 : 0.2,
-                        shadowRadius: 14,
-                        shadowOffset: { width: 0, height: 8 },
-                        elevation: isAndroid ? 8 : 0,
-                        overflow: 'hidden',
-                    }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, zIndex: 9 }}>
+                    {plannerButton}
+                    <GlassView isInteractive={true} glassEffectStyle='regular' style={[controlGlassStyle, { borderRadius: 22 }]}>
 
                         <Pressable style={({ pressed }) => [
                             {
@@ -758,36 +872,10 @@ export default function CameraBackgroundPage() {
 
                         </Pressable>
                     </GlassView>
+                  </View>
                 </Animated.View>
             )}
-            {isAndroid && reading && (
-                <BottomSheet
-                    ref={bottomSheetRef}
-                    index={0}
-                    snapPoints={androidSheetSnapPoints}
-                    containerLayoutState={androidSheetContainerLayout}
-                    enableDynamicSizing={false}
-                    enableContentPanningGesture={false}
-                    enableHandlePanningGesture={false}
-                    enableOverDrag={false}
-                    enablePanDownToClose={false}
-                    backdropComponent={renderSheetBackdrop}
-                    backgroundStyle={{ backgroundColor: isAndroid ? androidSheetBackground : lightMeterColors.systemBackground }}
-                    handleComponent={null}
-                    handleStyle={styles.sheetHandle}
-                    handleIndicatorStyle={{ backgroundColor: isAndroid ? androidSheetHandleColor : lightMeterColors.tertiaryLabel }}
-                    onClose={() => setReading(null)}
-                >
-                    <BottomSheetView style={styles.sheetContent}>
-                        <LightMeterReadingSheet
-                            {...reading}
-                            presentation="bottom-sheet"
-                            onClose={() => bottomSheetRef.current?.close()}
-                            onSheetDetentChange={setAndroidSheetDetent}
-                        />
-                    </BottomSheetView>
-                </BottomSheet>
-            )}
+            {androidSheet}
         </View >
     );
 }
