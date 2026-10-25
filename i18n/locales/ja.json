@@ -118,7 +118,7 @@
       "ev": "EV {{value}}",
       "scenes": {
         "snow": {
-          "name": "雪や砂浜の晴天",
+          "name": "雪や砂浜",
           "description": "雪・砂・水面に強い日差し"
         },
         "sun": {
@@ -138,7 +138,7 @@
           "description": "灰色の空、影なし"
         },
         "heavyOvercast": {
-          "name": "厚い曇りや日陰",
+          "name": "厚い曇り",
           "description": "暗い雲、または晴天時の日陰"
         },
         "sunset": {

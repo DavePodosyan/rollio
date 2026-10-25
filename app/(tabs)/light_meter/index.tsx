@@ -255,7 +255,7 @@ const readPhotoExposureSettings = async (path: string, metadata?: Record<string,
 
 const ANDROID_READING_SHEET_COLLAPSED_DETENT = 0.52;
 // The exposure planner carries the scene card above the columns, so it opens taller.
-const ANDROID_PLANNER_SHEET_DETENT = 0.70;
+const ANDROID_PLANNER_SHEET_DETENT = 0.75;
 const PLANNER_GLYPH_SIZE = 22;
 
 /** The planner's glyph: a hazy sun on iOS, twilight on Android. */

@@ -203,10 +203,10 @@ not written into the frame.
 
 The scene card adds roughly 130 pt. Builder measures and sets:
 
-- iOS native sheet, compact: **0.62** (reading mode stays 0.45). Film list
+- iOS native sheet, compact: **0.68** (reading mode stays 0.45). Film list
   and selected-film states keep their current larger detents (0.85), raised
   only if the card pushes the Save button under the home indicator.
-- Android bottom sheet, compact: **0.70** (reading mode stays 0.52).
+- Android bottom sheet, compact: **0.75** (reading mode stays 0.52).
   Selected film: 0.88 if 0.8 clips the Save button.
 
 The sheet must fit on the smallest supported phone and on iPhone Duo in
@@ -220,12 +220,12 @@ the ends open.
 
 | EV | Name | Description | SF Symbol | Material |
 |---|---|---|---|---|
-| ≥ 15.5 | Snow or sand in sun | Full sun on snow, sand or water | `snowflake` | `ac-unit` |
+| ≥ 15.5 | Snow or sand | Full sun on snow, sand or water | `snowflake` | `ac-unit` |
 | 15 | Full sun | Clear sky, hard shadows | `sun.max.fill` | `wb-sunny` |
 | 14 | Hazy sun | Thin haze, soft shadows | `sun.haze.fill` | `brightness-5` |
 | 13 | Bright overcast | Bright cloud, faint shadows | `cloud.sun.fill` | `wb-cloudy` |
 | 12 | Overcast | Grey sky, no shadows | `cloud.fill` | `cloud` |
-| 11 | Heavy overcast or shade | Dark cloud, or open shade on a sunny day | `smoke.fill` | `filter-drama` |
+| 11 | Heavy overcast | Dark cloud, or open shade on a sunny day | `smoke.fill` | `filter-drama` |
 | 10 | Sunset | Low sun, golden hour | `sunset.fill` | `wb-twilight` |
 | 9 | Just after sunset | Twilight, sky still bright | `sun.horizon.fill` | `brightness-4` |
 | 8 | Bright interior | Shop windows, bright rooms, stadiums | `lightbulb.fill` | `lightbulb` |

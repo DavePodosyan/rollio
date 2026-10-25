@@ -40,8 +40,8 @@ const BOTTOM_SHEET_FILM_LIST_DETENT = 0.55;
 const BOTTOM_SHEET_SELECTED_FILM_DETENT = 0.8;
 const NATIVE_FILM_LIST_DETENT = 0.85;
 // Scene mode (the exposure planner) carries the scene card above the columns.
-const BOTTOM_SHEET_SCENE_COMPACT_DETENT = 0.70;
-const NATIVE_SCENE_COMPACT_DETENT = 0.62;
+const BOTTOM_SHEET_SCENE_COMPACT_DETENT = 0.75;
+const NATIVE_SCENE_COMPACT_DETENT = 0.68;
 const SCENE_CARD_GAP = 12;
 
 const platformColor = (iosName: string, androidName: string) => (
@@ -356,6 +356,13 @@ export function LightMeterReadingSheet({
 
     // Target EV to maintain when adjusting values. In scene mode the ruler owns it.
     const [sceneEv, setSceneEv] = useState(EV_PLANNER_DEFAULT);
+    // While the ruler is moving the columns have not caught up yet, so the
+    // over/under pill would flicker; it comes back once the ruler settles.
+    const [isRulerMoving, setIsRulerMoving] = useState(false);
+    const onSceneTick = useCallback((nextEv: number) => {
+        setIsRulerMoving(true);
+        setSceneEv(nextEv);
+    }, []);
     const targetEV = isSceneMode ? sceneEv : (Number(ev) || 0);
 
     // Calculate current EV from selected settings and compare to target
@@ -749,6 +756,7 @@ export function LightMeterReadingSheet({
     // (shutter, or aperture when the shutter is locked); ISO never moves here.
     const applySceneEv = useCallback((nextEv: number) => {
         setSceneEv(nextEv);
+        setIsRulerMoving(false);
         const aperture = currentAperture.current;
         const shutter = currentShutter.current;
         const iso = currentIso.current;
@@ -1092,7 +1100,7 @@ export function LightMeterReadingSheet({
                     <View style={{ marginTop: sceneCardTop }}>
                         <ExposureSceneCard
                             ev={sceneEv}
-                            onTick={setSceneEv}
+                            onTick={onSceneTick}
                             onSettle={applySceneEv}
                             labelColor={dynamicSheetColors.label}
                             secondaryLabelColor={dynamicSheetColors.secondaryLabel}
@@ -1113,7 +1121,7 @@ export function LightMeterReadingSheet({
                     zIndex: 10,
                 }}>
                     {/* Exposure indicator - absolutely positioned to avoid layout shifts */}
-                    {Math.abs(exposureDiff) >= 0.1 && (
+                    {Math.abs(exposureDiff) >= 0.1 && !isRulerMoving && (
                         <View style={{
                             // position: 'absolute',
                             alignItems: 'center'
@@ -1509,8 +1517,8 @@ const styles = StyleSheet.create({
         marginTop: 44,
     },
     wheelsContainerScene: {
-        // From the scene card's bottom: gap, the over/under pill's row, then the usual breathing room.
-        marginTop: SCENE_CARD_GAP + 22 + 36,
+        // From the scene card's bottom: gap, the over/under pill's row, a little air.
+        marginTop: SCENE_CARD_GAP + 22 + 14,
     },
     wheelColumn: {
         flex: 1,

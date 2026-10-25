@@ -37,7 +37,7 @@ export default function HomeLayout() {
                         gestureEnabled: false,
                         sheetGrabberVisible: false,
                         contentStyle: { backgroundColor: isGlassAvailable ? "transparent" : lightMeterLayoutColors.systemBackground },
-                        sheetAllowedDetents: [isSceneMode ? 0.62 : 0.45],
+                        sheetAllowedDetents: [isSceneMode ? 0.68 : 0.45],
                         sheetExpandsWhenScrolledToEdge: false,
                         sheetInitialDetentIndex: 0,
                         sheetLargestUndimmedDetentIndex: 0,

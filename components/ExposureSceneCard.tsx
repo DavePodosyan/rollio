@@ -9,9 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { Animated, ColorValue, Platform, StyleSheet, Text, View } from 'react-native';
 
 /** Height of the card including its ruler; the sheet offsets the pill and columns by this. */
-export const EXPOSURE_SCENE_CARD_HEIGHT = 132;
+export const EXPOSURE_SCENE_CARD_HEIGHT = 134;
 
-const SCENE_ROW_HEIGHT = 64;
+const SCENE_ROW_HEIGHT = 66;
 const GLYPH_SIZE = 22;
 
 export type ExposureSceneCardProps = {
@@ -60,16 +60,18 @@ export function ExposureSceneCard({
             <Animated.View style={[styles.sceneRow, { opacity: rowOpacity }]}>
                 <View style={styles.glyphWell}>{glyph}</View>
                 <View style={styles.sceneText}>
-                    <Text style={[styles.sceneName, { color: labelColor }]}>
-                        {t(`lightMeter.planner.scenes.${scene.key}.name`)}
-                    </Text>
+                    <View style={styles.nameLine}>
+                        <Text style={[styles.sceneName, { color: labelColor }]}>
+                            {t(`lightMeter.planner.scenes.${scene.key}.name`)}
+                        </Text>
+                        <Text style={[styles.evValue, { color: labelColor }]}>
+                            {t('lightMeter.planner.ev', { value: formatEv(ev) })}
+                        </Text>
+                    </View>
                     <Text style={[styles.sceneDescription, { color: secondaryLabelColor }]}>
                         {t(`lightMeter.planner.scenes.${scene.key}.description`)}
                     </Text>
                 </View>
-                <Text style={[styles.evValue, { color: labelColor }]}>
-                    {t('lightMeter.planner.ev', { value: formatEv(ev) })}
-                </Text>
             </Animated.View>
             <RulerPicker
                 variant="bare"
@@ -104,15 +106,16 @@ const styles = StyleSheet.create({
     sceneRow: {
         height: SCENE_ROW_HEIGHT,
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         paddingLeft: 16,
         paddingRight: 18,
-        paddingTop: 6,
+        paddingTop: 14,
     },
     glyphWell: {
         width: 28,
         alignItems: 'center',
         marginRight: 12,
+        marginTop: 2,
     },
     glyph: {
         width: GLYPH_SIZE,
@@ -120,25 +123,30 @@ const styles = StyleSheet.create({
     },
     sceneText: {
         flex: 1,
-        justifyContent: 'center',
+    },
+    nameLine: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        justifyContent: 'space-between',
     },
     sceneName: {
+        flexShrink: 1,
         fontFamily: 'LufgaMedium',
         fontSize: 17,
-        lineHeight: 21,
+        lineHeight: 22,
         includeFontPadding: false,
     },
     sceneDescription: {
         fontFamily: 'LufgaRegular',
         fontSize: 13,
-        lineHeight: 16,
+        lineHeight: 17,
         marginTop: 2,
         includeFontPadding: false,
     },
     evValue: {
         fontFamily: 'LufgaMedium',
-        fontSize: 24,
-        lineHeight: 28,
+        fontSize: 22,
+        lineHeight: 22,
         includeFontPadding: false,
         marginLeft: 12,
         fontVariant: ['tabular-nums'],

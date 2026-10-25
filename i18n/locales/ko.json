@@ -118,7 +118,7 @@
       "ev": "EV {{value}}",
       "scenes": {
         "snow": {
-          "name": "맑은 날의 눈이나 모래",
+          "name": "눈이나 모래",
           "description": "눈, 모래, 물 위의 강한 햇빛"
         },
         "sun": {
@@ -138,7 +138,7 @@
           "description": "회색 하늘, 그림자 없음"
         },
         "heavyOvercast": {
-          "name": "짙은 흐림 또는 그늘",
+          "name": "짙은 흐림",
           "description": "어두운 구름, 또는 맑은 날의 그늘"
         },
         "sunset": {
