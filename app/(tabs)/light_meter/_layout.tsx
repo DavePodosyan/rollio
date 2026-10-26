@@ -16,6 +16,7 @@ export default function HomeLayout() {
     const isGlassAvailable = isLiquidGlassAvailable();
     const colorScheme = useColorScheme();
     const isAndroid = Platform.OS === 'android';
+    const headerTint = colorScheme === 'dark' ? '#fff' : '#100528';
     return (
         <Stack screenOptions={{
             headerShown: false,
@@ -30,7 +31,7 @@ export default function HomeLayout() {
                     headerShown: !isAndroid,
                     headerTransparent: true,
                     title: '',
-                    headerTintColor: colorScheme === 'dark' ? '#fff' : '#100528',
+                    headerTintColor: headerTint,
                 }}
             />
 
@@ -42,7 +43,9 @@ export default function HomeLayout() {
                     return {
                         headerShown: true,
                         headerTransparent: true,
-                        headerTintColor: String(lightMeterLayoutColors.label),
+                        // A resolved colour, as on the Films stack: String(PlatformColor) is
+                        // "[object Object]", which the header ignored and drew white in light mode.
+                        headerTintColor: headerTint,
                         title: '',
                         headerTitleStyle: { fontFamily: 'LufgaMedium', fontSize: 20 },
                         presentation: "formSheet",
