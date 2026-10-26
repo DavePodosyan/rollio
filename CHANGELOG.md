@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 ### ✨ New Feature
 - **Exposure Planner**: open the light meter's calculator without taking a reading. Slide through scenes from snow in full sun to moonlight to set the EV, then work the aperture, shutter and ISO columns as usual. The ruler follows the sheet's full-stops setting: whole EVs by default, thirds when half/third stops are on. Handy for deciding which film and lenses to bring.
 
+### 🐞 Bug Fixes
+- Android: the planner sheet was drawn underneath the gradient that covers the paused camera, so tapping the sun showed only the gradient.
+
 ---
 
 ## [2.3.1] – 2026-10-21

@@ -740,6 +740,9 @@ export default function CameraBackgroundPage() {
             index={0}
             snapPoints={androidSheetSnapPoints}
             containerLayoutState={androidSheetContainerLayout}
+            // Above the planner gradient (zIndex 8): on Android a sibling with a
+            // zIndex draws over siblings without one, which hid the whole sheet.
+            containerStyle={styles.sheetContainer}
             enableDynamicSizing={false}
             enableContentPanningGesture={false}
             enableHandlePanningGesture={false}
@@ -948,6 +951,9 @@ export default function CameraBackgroundPage() {
 }
 
 const styles = StyleSheet.create({
+    sheetContainer: {
+        zIndex: 10,
+    },
     container: {
         // backgroundColor: 'red',
         flex: 1,
