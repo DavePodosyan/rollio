@@ -344,7 +344,7 @@
       "2_4_1": {
         "contactSheet": {
           "title": "Colour contact sheets",
-          "body": "The PDF export now asks whether the photos should be black & white, the classic contact sheet, or colour as shot. Handy when the sheet lives in the folder with the negatives and colour rolls should read as colour."
+          "body": "The PDF export now asks whether the photos should be black & white or colour."
         }
       },
       "2_4_0": {

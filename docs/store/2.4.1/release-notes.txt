@@ -2,8 +2,7 @@ Rollio 2.4.1 – What's New for the App Store and Google Play
 
 Both stores carry the same ten languages, and the text is the same on both,
 so paste from this one block. Google Play takes the whole file as is; in
-App Store Connect paste each language's paragraph into its own field. The
-in-app What's New card uses the same paragraph (without the closing line).
+App Store Connect paste each language's paragraph into its own field.
 
 <en-US>
 New: Colour contact sheets. The PDF export now asks whether the photos should be black & white, the classic contact sheet, or colour as shot. Handy when the sheet lives in the folder with the negatives and colour rolls should read as colour.
