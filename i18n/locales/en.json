@@ -135,7 +135,7 @@
         },
         "overcast": {
           "name": "Overcast",
-          "description": "Grey sky, no shadows"
+          "description": "Gray sky, no shadows"
         },
         "heavyOvercast": {
           "name": "Heavy overcast",
@@ -271,7 +271,7 @@
     "photos": {
       "question": "How should the photos look?",
       "blackAndWhite": "Black & White",
-      "color": "Colour"
+      "color": "Color"
     },
     "preparingPdf": "Preparing PDF…",
     "preparingCsv": "Preparing CSV…",
@@ -343,8 +343,8 @@
     "releases": {
       "2_4_1": {
         "contactSheet": {
-          "title": "Colour contact sheets",
-          "body": "The PDF export now asks whether the photos should be black & white or colour."
+          "title": "Color contact sheets",
+          "body": "The PDF export now asks whether the photos should be black & white or color."
         }
       },
       "2_4_0": {

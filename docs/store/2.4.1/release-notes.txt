@@ -5,7 +5,7 @@ so paste from this one block. Google Play takes the whole file as is; in
 App Store Connect paste each language's paragraph into its own field.
 
 <en-US>
-New: Colour contact sheets. The PDF export now asks whether the photos should be black & white, the classic contact sheet, or colour as shot. Handy when the sheet lives in the folder with the negatives and colour rolls should read as colour.
+New: Color contact sheets. The PDF export now asks whether the photos should be black & white, the classic contact sheet, or color as shot. Handy when the sheet lives in the folder with the negatives and color rolls should read as color.
 
 Also includes bug fixes and stability improvements.
 </en-US>
