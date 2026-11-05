@@ -5,52 +5,52 @@ so paste from this one block. Google Play takes the whole file as is; in
 App Store Connect paste each language's paragraph into its own field.
 
 <en-US>
-New: Color contact sheets. The PDF export now asks whether the photos should be black & white, the classic contact sheet, or color as shot. Handy when the sheet lives in the folder with the negatives and color rolls should read as color.
+New: Color contact sheets. The PDF export now asks whether the photos should be black & white or color.
 
 Also includes bug fixes and stability improvements.
 </en-US>
 <da-DK>
-Nyt: Kontaktark i farver. Når du eksporterer til PDF, spørger Rollio nu, om billederne skal være sort-hvide som et klassisk kontaktark eller i farver, som de er taget. Praktisk når arket ligger i mappen med negativerne, og farveruller skal kunne kendes med det samme.
+Nyt: Kontaktark i farver. PDF-eksporten spørger nu, om billederne skal være sort-hvide eller i farver.
 
 Indeholder også fejlrettelser og forbedret stabilitet.
 </da-DK>
 <de-DE>
-Neu: Kontaktabzüge in Farbe. Beim PDF-Export fragt Rollio jetzt, ob die Fotos schwarzweiß wie ein klassischer Kontaktabzug oder in Farbe wie aufgenommen erscheinen sollen. Praktisch, wenn der Bogen beim Negativ im Ordner liegt und Farbfilme auf einen Blick erkennbar sein sollen.
+Neu: Kontaktabzüge in Farbe. Der PDF-Export fragt jetzt, ob die Fotos schwarzweiß oder in Farbe sein sollen.
 
 Außerdem Fehlerbehebungen und Verbesserungen der Stabilität.
 </de-DE>
 <fi-FI>
-Uutta: Värilliset kontaktivedokset. PDF-viennissä Rollio kysyy nyt, näytetäänkö kuvat mustavalkoisina kuten perinteisessä kontaktivedoksessa vai värillisinä sellaisina kuin ne on kuvattu. Kätevää, kun arkki säilytetään negatiivien kanssa samassa kansiossa ja värifilmit halutaan tunnistaa yhdellä silmäyksellä.
+Uutta: Värilliset kontaktivedokset. PDF-vienti kysyy nyt, näytetäänkö kuvat mustavalkoisina vai värillisinä.
 
 Lisäksi virheenkorjauksia ja vakauden parannuksia.
 </fi-FI>
 <fr-FR>
-Nouveau : Planches-contacts en couleur. À l'export PDF, Rollio demande désormais si les photos doivent être en noir et blanc, comme une planche-contact classique, ou en couleur, telles qu'elles ont été prises. Pratique quand la planche est rangée avec les négatifs et que les films couleur doivent se repérer d'un coup d'œil.
+Nouveau : Planches-contacts en couleur. L'export PDF demande désormais si les photos doivent être en noir et blanc ou en couleur.
 
 Comprend aussi des corrections de bugs et des améliorations de stabilité.
 </fr-FR>
 <ja-JP>
-新機能：カラーのコンタクトシート。PDF書き出しで、写真をモノクロ（従来のコンタクトシート）にするか、撮影したままのカラーにするかを選べるようになりました。ネガと一緒にシートを保管していて、カラーのロールをひと目で見分けたいときに便利です。
+新機能：カラーのコンタクトシート。PDF書き出しで、写真をモノクロにするかカラーにするかを選べるようになりました。
 
 そのほか、不具合の修正と安定性の向上を行いました。
 </ja-JP>
 <ko-KR>
-새 기능: 컬러 컨택트 시트. PDF 내보내기에서 사진을 흑백(클래식 컨택트 시트)으로 할지, 촬영한 그대로의 컬러로 할지 고를 수 있습니다. 네거티브와 함께 시트를 보관하면서 컬러 롤을 한눈에 구분하고 싶을 때 유용합니다.
+새 기능: 컬러 컨택트 시트. PDF 내보내기에서 사진을 흑백으로 할지 컬러로 할지 고를 수 있습니다.
 
 그 밖에 버그 수정과 안정성 개선이 포함되어 있습니다.
 </ko-KR>
 <nl-NL>
-Nieuw: Contactafdrukken in kleur. Bij het exporteren naar PDF vraagt Rollio nu of de foto's zwart-wit moeten zijn, zoals een klassieke contactafdruk, of in kleur zoals ze zijn gemaakt. Handig als het vel bij de negatieven in de map zit en kleurenrolletjes meteen herkenbaar moeten zijn.
+Nieuw: Contactafdrukken in kleur. De PDF-export vraagt nu of de foto's zwart-wit of in kleur moeten zijn.
 
 Bevat ook bugfixes en stabiliteitsverbeteringen.
 </nl-NL>
 <no-NO>
-Nytt: Kontaktkopier i farger. Ved PDF-eksport spør Rollio nå om bildene skal være svart-hvitt som en klassisk kontaktkopi, eller i farger slik de ble tatt. Praktisk når arket ligger i mappen sammen med negativene og fargefilmer skal kjennes igjen med én gang.
+Nytt: Kontaktkopier i farger. PDF-eksporten spør nå om bildene skal være svart-hvitt eller i farger.
 
 Inneholder også feilrettinger og bedre stabilitet.
 </no-NO>
 <sv-SE>
-Nytt: Kontaktkartor i färg. Vid PDF-export frågar Rollio nu om bilderna ska vara svartvita som en klassisk kontaktkarta eller i färg som de togs. Praktiskt när arket ligger i mappen med negativen och färgrullar ska gå att känna igen direkt.
+Nytt: Kontaktkartor i färg. PDF-exporten frågar nu om bilderna ska vara svartvita eller i färg.
 
 Innehåller även buggfixar och stabilitetsförbättringar.
 </sv-SE>
