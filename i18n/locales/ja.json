@@ -266,6 +266,11 @@
     "menu": "書き出し",
     "pdf": "PDFコンタクトシート",
     "csv": "CSVスプレッドシート",
+    "photos": {
+      "question": "写真の仕上がりを選んでください",
+      "blackAndWhite": "モノクロ",
+      "color": "カラー"
+    },
     "preparingPdf": "PDFを準備中…",
     "preparingCsv": "CSVを準備中…",
     "errorMessage": "このフィルムを書き出せませんでした。",

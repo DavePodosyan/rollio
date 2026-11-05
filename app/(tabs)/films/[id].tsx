@@ -92,11 +92,17 @@ export default function FilmDetailPage() {
         navigation.goBack();
     }
 
-    // Android alerts show at most three buttons, so export lives one level down.
+    // Android alerts show at most three buttons, so export lives one level down,
+    // and the contact sheet's photo look one level below that.
     const handleAndroidExportPress = useCallback(() => {
         if (!film) return;
+        const askPhotos = () => Alert.alert(t('export.pdf'), t('export.photos.question'), [
+            { text: t('export.photos.blackAndWhite'), onPress: () => exportPdf(film, frames, 'blackAndWhite') },
+            { text: t('export.photos.color'), onPress: () => exportPdf(film, frames, 'color') },
+            { text: t('shared.cancel'), style: 'cancel' },
+        ], { cancelable: true });
         Alert.alert(t('export.menu'), undefined, [
-            { text: t('export.pdf'), onPress: () => exportPdf(film, frames) },
+            { text: t('export.pdf'), onPress: askPhotos },
             { text: t('export.csv'), onPress: () => exportCsv(film, frames) },
             { text: t('shared.cancel'), style: 'cancel' },
         ], { cancelable: true });
@@ -318,7 +324,11 @@ export default function FilmDetailPage() {
                         <Stack.Toolbar.MenuAction icon="pencil" onPress={() => handleContextMenuSelect('edit')}>{t('shared.edit')}</Stack.Toolbar.MenuAction>
                         <Stack.Toolbar.Menu icon="square.and.arrow.up">
                             <Stack.Toolbar.Label>{t('export.menu')}</Stack.Toolbar.Label>
-                            <Stack.Toolbar.MenuAction icon="doc.richtext" onPress={() => exportPdf(film, frames)}>{t('export.pdf')}</Stack.Toolbar.MenuAction>
+                            <Stack.Toolbar.Menu icon="doc.richtext">
+                                <Stack.Toolbar.Label>{t('export.pdf')}</Stack.Toolbar.Label>
+                                <Stack.Toolbar.MenuAction icon="circle.lefthalf.filled" onPress={() => exportPdf(film, frames, 'blackAndWhite')}>{t('export.photos.blackAndWhite')}</Stack.Toolbar.MenuAction>
+                                <Stack.Toolbar.MenuAction icon="paintpalette" onPress={() => exportPdf(film, frames, 'color')}>{t('export.photos.color')}</Stack.Toolbar.MenuAction>
+                            </Stack.Toolbar.Menu>
                             <Stack.Toolbar.MenuAction icon="tablecells" onPress={() => exportCsv(film, frames)}>{t('export.csv')}</Stack.Toolbar.MenuAction>
                         </Stack.Toolbar.Menu>
 

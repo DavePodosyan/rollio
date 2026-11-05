@@ -11,7 +11,7 @@ import { getAutoValueLabel } from '@/utils/cameraSettingsLabels';
 import { getFilmStatusLabel } from '@/utils/filmStatusLabels';
 import { EXPORT_PREFIX, cleanupStaleExports } from '@/services/backup';
 import { CSV_BOM, buildFilmCsv, exportFileName } from '@/services/exportCsv';
-import { buildContactSheetHtml, formatShotDates, type SheetFrame, type SheetLabels } from '@/services/exportHtml';
+import { buildContactSheetHtml, formatShotDates, type SheetFrame, type SheetLabels, type ContactSheetPhotos } from '@/services/exportHtml';
 
 // Native glue for the film export: resolves fonts, thumbnails, labels and
 // dates, renders the contact sheet with expo-print, writes the files into a
@@ -133,7 +133,11 @@ const createOutputDir = (): Directory => {
 // ---------------------------------------------------------------------------
 
 /** Renders the contact sheet and returns the PDF file in a fresh export folder. */
-export const renderContactSheet = async (film: Film, frames: Frame[]): Promise<File> => {
+export const renderContactSheet = async (
+    film: Film,
+    frames: Frame[],
+    photos: ContactSheetPhotos = 'blackAndWhite'
+): Promise<File> => {
     const fonts = await loadFonts();
     const sheetFrames: SheetFrame[] = [];
     for (const frame of frames) {
@@ -146,6 +150,7 @@ export const renderContactSheet = async (film: Film, frames: Frame[]): Promise<F
         shotDates: formatShotDates(frames, film, i18n.language),
         fonts,
         platform: Platform.OS === 'android' ? 'android' : 'ios',
+        photos,
     });
 
     const printed = await Print.printToFileAsync({

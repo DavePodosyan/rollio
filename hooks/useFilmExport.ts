@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { Film, Frame } from '@/types';
 import { renderContactSheet, shareExportedFile, writeFilmCsv, type ExportKind } from '@/services/exportFilm';
+import type { ContactSheetPhotos } from '@/services/exportHtml';
 import type { File } from 'expo-file-system';
 
 export type ExportBusy = 'idle' | ExportKind;
@@ -46,7 +47,7 @@ export const useFilmExport = () => {
     }, [t]);
 
     const exportPdf = useCallback(
-        (film: Film, frames: Frame[]) => run('pdf', () => renderContactSheet(film, frames)),
+        (film: Film, frames: Frame[], photos: ContactSheetPhotos) => run('pdf', () => renderContactSheet(film, frames, photos)),
         [run]
     );
     const exportCsv = useCallback(

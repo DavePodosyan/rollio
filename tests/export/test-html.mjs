@@ -171,3 +171,14 @@ assert.ok(buildContactSheetHtml(makeInput(range(1), { platform: 'android' })).in
 }
 
 console.log('ok');
+
+// photos: black and white by default (the classic contact sheet), colour on request
+{
+    const bw = buildContactSheetHtml(makeInput(range(1)));
+    const bwExplicit = buildContactSheetHtml({ ...makeInput(range(1)), photos: 'blackAndWhite' });
+    const color = buildContactSheetHtml({ ...makeInput(range(1)), photos: 'color' });
+    assert.ok(/\.photo \{[^}]*grayscale\(1\)/.test(bw), 'default sheet desaturates photos');
+    assert.ok(/\.photo \{[^}]*grayscale\(1\)/.test(bwExplicit));
+    assert.ok(!/grayscale/.test(color), 'colour sheet has no grayscale filter');
+    assert.ok(!/contrast\(/.test(color), 'colour sheet has no contrast tweak');
+}

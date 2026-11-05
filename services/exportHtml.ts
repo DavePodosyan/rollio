@@ -19,6 +19,9 @@ export type SheetLabels = {
     exportedOn: string;
 };
 
+/** The thumbnails' look: the classic desaturated contact sheet, or as shot. */
+export type ContactSheetPhotos = 'blackAndWhite' | 'color';
+
 export type ContactSheetInput = {
     film: Film;
     frames: SheetFrame[];
@@ -26,6 +29,8 @@ export type ContactSheetInput = {
     shotDates: string;
     fonts: { regular: string; medium: string };
     platform: 'ios' | 'android';
+    /** @default 'blackAndWhite' */
+    photos?: ContactSheetPhotos;
 };
 
 export const FRAMES_PER_STRIP = 4;
@@ -66,7 +71,7 @@ export const formatShotDates = (
     return `${startText} – ${endText}`;
 };
 
-const css = (fonts: ContactSheetInput['fonts'], platform: ContactSheetInput['platform']) => `
+const css = (fonts: ContactSheetInput['fonts'], platform: ContactSheetInput['platform'], photos: ContactSheetPhotos) => `
 @font-face { font-family: 'Lufga'; font-weight: 400; src: url(data:font/truetype;base64,${fonts.regular}) format('truetype'); }
 @font-face { font-family: 'Lufga'; font-weight: 500; src: url(data:font/truetype;base64,${fonts.medium}) format('truetype'); }
 ${platform === 'android' ? '@page { margin: 36pt }' : ''}
@@ -92,7 +97,8 @@ body {
 .cell { display: flex; flex-direction: column; min-width: 0; }
 .edge { height: 11pt; line-height: 11pt; font-family: Menlo, "SF Mono", "Roboto Mono", monospace; font-variant-numeric: tabular-nums; font-size: 7.5pt; letter-spacing: 0.12em; color: #100528; display: flex; align-items: center; }
 .edge::before { content: ''; width: 0; height: 0; border-left: 4pt solid #C8901F; border-top: 3pt solid transparent; border-bottom: 3pt solid transparent; margin-right: 4pt; }
-.photo { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 1pt; filter: grayscale(1) contrast(1.06); }
+.photo { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 1pt; }
+${photos === 'color' ? '' : '.photo { filter: grayscale(1) contrast(1.06); }'}
 .tile { width: 100%; aspect-ratio: 3 / 2; display: flex; align-items: center; justify-content: center; font-size: 9pt; color: #B9B6C6; background: #FAFAFC; border: 1pt dashed #D9D7E2; border-radius: 1pt; }
 .cap { font-family: Menlo, "SF Mono", "Roboto Mono", monospace; font-variant-numeric: tabular-nums; font-size: 7.5pt; color: #6B6877; margin-top: 4pt; letter-spacing: 0.02em; }
 .notes { margin-top: 10pt; }
@@ -132,7 +138,7 @@ const renderUnit = (strip: SheetFrame[], labels: SheetLabels): string => {
 };
 
 export const buildContactSheetHtml = (input: ContactSheetInput): string => {
-    const { film, labels, fonts, platform, shotDates } = input;
+    const { film, labels, fonts, platform, shotDates, photos = 'blackAndWhite' } = input;
     const frames = [...input.frames].sort((a, b) => a.frame_no - b.frame_no);
 
     const sub = [film.camera, labels.iso, labels.pushPull, labels.exposures, shotDates]
@@ -149,7 +155,7 @@ export const buildContactSheetHtml = (input: ContactSheetInput): string => {
         : `<div class="no-frames">${escapeHtml(labels.noFrames)}</div>`;
 
     return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>${escapeHtml(film.title)}</title><style>${css(fonts, platform)}</style></head>
+<html><head><meta charset="utf-8"><title>${escapeHtml(film.title)}</title><style>${css(fonts, platform, photos)}</style></head>
 <body>
 <header class="head"><div><h1 class="title">${escapeHtml(film.title)}</h1><div class="sub">${sub}</div></div><span class="chip">${escapeHtml(labels.status.toUpperCase())}</span></header>
 ${body}
