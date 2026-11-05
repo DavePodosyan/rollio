@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [2.4.1] – 2026-11-05
 
 ### ✨ New Feature
 - **Colour contact sheets**: the PDF export now asks whether the photos should be black & white, the classic look, or colour as shot. Handy for telling colour rolls from black & white ones in a folder of negatives.

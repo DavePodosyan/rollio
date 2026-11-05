@@ -28,6 +28,12 @@ export const FIRST_TRACKED_VERSION = '0.0.0';
 /** Newest release first. Add an entry per release worth announcing. */
 export const WHATS_NEW: WhatsNewRelease[] = [
     {
+        version: '2.4.1',
+        items: [
+            { sf: 'paintpalette', md: 'palette', titleKey: 'whatsNew.releases.2_4_1.contactSheet.title', bodyKey: 'whatsNew.releases.2_4_1.contactSheet.body' },
+        ],
+    },
+    {
         version: '2.4.0',
         items: [
             { sf: 'sun.haze.fill', md: 'wb-twilight', titleKey: 'whatsNew.releases.2_4_0.planner.title', bodyKey: 'whatsNew.releases.2_4_0.planner.body' },
