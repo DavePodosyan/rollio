@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.5.0] – 2026-11-09
+
+### ✨ New Features
+- **Skip a frame**: touch and hold + on a roll and choose Skip a Frame to log a blank frame, an accidental exposure or a shot not worth recording. The frame keeps its number, so the count stays in step with the camera. Skipped frames show as a slim dimmed row, can carry a note, and can be logged after all by opening them and turning Skipped Frame off. They keep their place in the PDF contact sheet and the CSV, with no exposure settings.
+- **What's New in Settings**: every release's notes on one page, so the sheet shown after an update can be read again.
+
+### 🔧 Changes
+- A new frame copies its settings from the last logged frame, not from a skipped one.
+- iOS: on a roll, + and … now sit in separate glass circles.
+- Database schema 5 adds the skipped flag to frames. Backups made by this version cannot be restored by older versions.
+
+---
+
 ## [2.4.1] – 2026-11-05
 
 ### ✨ New Feature
