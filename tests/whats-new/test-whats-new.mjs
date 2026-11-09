@@ -46,9 +46,10 @@ for (const release of WHATS_NEW) {
 
 console.log('ok');
 
-// 2.3.0: frame location; 2.3.1: the launch tab; 2.4.0: the exposure planner; 2.4.1: colour contact sheets
+// 2.3.0: frame location; 2.3.1: the launch tab; 2.4.0: the exposure planner; 2.4.1: color contact sheets;
+// 2.5.0: skipping a frame and the What's New history
 assert.ok(WHATS_NEW.some((r) => r.version === '2.3.0'), 'has a 2.3.0 entry');
-assert.equal(WHATS_NEW[0].version, '2.4.1', 'newest release first');
+assert.equal(WHATS_NEW[0].version, '2.5.0', 'newest release first');
 assert.deepEqual(itemsSince('2.4.0', '2.4.1').map((i) => i.titleKey), ['whatsNew.releases.2_4_1.contactSheet.title']);
 assert.deepEqual(itemsSince('2.3.1', '2.4.0').map((i) => i.titleKey), ['whatsNew.releases.2_4_0.planner.title']);
 assert.deepEqual(itemsSince('2.3.0', '2.3.1').map((i) => i.titleKey), ['whatsNew.releases.2_3_1.launchTab.title']);
@@ -56,3 +57,34 @@ assert.deepEqual(itemsSince('2.2.0', '2.3.1').map((i) => i.titleKey), [
     'whatsNew.releases.2_3_1.launchTab.title',
     'whatsNew.releases.2_3_0.location.title',
 ]);
+assert.deepEqual(itemsSince('2.4.1', '2.5.0').map((i) => i.titleKey), [
+    'whatsNew.releases.2_5_0.skipFrame.title',
+    'whatsNew.releases.2_5_0.history.title',
+]);
+
+// The history page in Settings: every release up to the running app, newest
+// first, grouped by version. Unlike the sheet it needs no "last seen".
+{
+    const { releasesUpTo } = await import('@/services/whatsNew');
+    const shuffled = [releases[0], { version: '2.10.0', items: [item('future')] }, releases[1]];
+    assert.deepEqual(releasesUpTo('2.3.0', shuffled).map((r) => r.version), ['2.3.0', '2.2.0']);
+    assert.deepEqual(releasesUpTo('2.2.5', shuffled).map((r) => r.version), ['2.2.0']);
+    assert.deepEqual(releasesUpTo('2.10.0', shuffled).map((r) => r.version), ['2.10.0', '2.3.0', '2.2.0']);
+    assert.deepEqual(releasesUpTo('2.0.0', shuffled), []);
+    // an unknown version (a build without one) hides nothing
+    assert.deepEqual(releasesUpTo('', shuffled).map((r) => r.version), ['2.10.0', '2.3.0', '2.2.0']);
+    // items come through untouched
+    assert.deepEqual(releasesUpTo('2.2.0', shuffled)[0].items.map((i) => i.sf), ['backup', 'export']);
+    // every string of the real list exists in every language
+    const fs = await import('node:fs');
+    for (const lang of ['en', 'ja', 'ko']) {
+        const strings = JSON.parse(fs.readFileSync(new URL(`../../i18n/locales/${lang}.json`, import.meta.url), 'utf8'));
+        const lookup = (key) => key.split('.').reduce((node, part) => node?.[part], strings);
+        for (const release of WHATS_NEW) {
+            for (const i of release.items) {
+                assert.equal(typeof lookup(i.titleKey), 'string', `${lang} has ${i.titleKey}`);
+                assert.equal(typeof lookup(i.bodyKey), 'string', `${lang} has ${i.bodyKey}`);
+            }
+        }
+    }
+}

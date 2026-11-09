@@ -28,6 +28,13 @@ export const FIRST_TRACKED_VERSION = '0.0.0';
 /** Newest release first. Add an entry per release worth announcing. */
 export const WHATS_NEW: WhatsNewRelease[] = [
     {
+        version: '2.5.0',
+        items: [
+            { sf: 'forward.frame', md: 'skip-next', titleKey: 'whatsNew.releases.2_5_0.skipFrame.title', bodyKey: 'whatsNew.releases.2_5_0.skipFrame.body' },
+            { sf: 'sparkles', md: 'auto-awesome', titleKey: 'whatsNew.releases.2_5_0.history.title', bodyKey: 'whatsNew.releases.2_5_0.history.body' },
+        ],
+    },
+    {
         version: '2.4.1',
         items: [
             { sf: 'paintpalette', md: 'palette', titleKey: 'whatsNew.releases.2_4_1.contactSheet.title', bodyKey: 'whatsNew.releases.2_4_1.contactSheet.body' },
@@ -89,3 +96,12 @@ export const itemsSince = (
         .sort((a, b) => compareVersions(b.version, a.version))
         .flatMap((r) => r.items);
 };
+
+/**
+ * The history shown in Settings: every release up to the running app, newest
+ * first. An unknown `current` (a build without a version) hides nothing.
+ */
+export const releasesUpTo = (current: string, releases: WhatsNewRelease[] = WHATS_NEW): WhatsNewRelease[] =>
+    [...releases]
+        .filter((r) => !current || compareVersions(r.version, current) <= 0)
+        .sort((a, b) => compareVersions(b.version, a.version));
