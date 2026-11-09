@@ -37,15 +37,20 @@ function FrameListItem({ frame, iso }: FrameListItemProps) {
                 onPress={openFrame}
                 accessibilityRole="button"
                 accessibilityLabel={`${frame.frame_no}, ${t('rollDetail.skipFrame.skipped')}`}
-                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
-                <View
+                style={({ pressed }) => [
+                    {
+                        transform: isGlassAvailable ? [] : [{ scale: pressed ? 0.97 : 1 }],
+                    },
+                ]}>
+                {/* The same glass card as a logged frame, only slimmer and with muted text. */}
+                <GlassView
+                    isInteractive={true}
+                    glassEffectStyle={colorScheme === 'dark' ? 'clear' : 'regular'}
                     style={{
-                        paddingVertical: 10,
+                        paddingVertical: 12,
                         paddingHorizontal: 20,
                         borderRadius: 24,
-                        borderWidth: 1,
-                        borderColor: colorScheme === 'dark' ? '#ffffff1f' : '#1005281a',
-                        backgroundColor: colorScheme === 'dark' ? '#a583ef0d' : '#ffffff59',
+                        backgroundColor: isGlassAvailable ? 'transparent' : (colorScheme === 'dark' ? '#a583ef1f' : '#ffffffcc'),
                     }}>
                     <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
                         <View
@@ -72,7 +77,7 @@ function FrameListItem({ frame, iso }: FrameListItemProps) {
                             )}
                         </View>
                     </View>
-                </View>
+                </GlassView>
             </Pressable>
         );
     }
