@@ -55,6 +55,25 @@ export default function FilmDetailPage() {
 
 
     const listRef = useRef<FlatList<Frame>>(null);
+    const listMetrics = useRef({ content: 0, layout: 0 });
+    const revealEndUntil = useRef(0);
+
+    // FlatList's own scrollToEnd stops with the last row's bottom edge at the
+    // bottom of the list, which on iOS is underneath the tab bar. Aim for the
+    // real end instead: all the content, bottom padding included, above the bar.
+    const scrollToListEnd = useCallback(() => {
+        const { content, layout } = listMetrics.current;
+        if (!content || !layout) return;
+        const tabBar = Platform.OS === 'ios' ? insets.bottom : 0;
+        listRef.current?.scrollToOffset({ offset: Math.max(0, content - layout + tabBar), animated: true });
+    }, [insets.bottom]);
+
+    // Rows far below the fold are only estimated until they render, so keep
+    // re-aiming for a moment while the list measures them on the way down.
+    const revealLastFrame = useCallback(() => {
+        revealEndUntil.current = Date.now() + 1500;
+        scrollToListEnd();
+    }, [scrollToListEnd]);
     // Android: the hold menu under the header "+".
     const [skipMenuOpen, setSkipMenuOpen] = useState(false);
 
@@ -68,12 +87,12 @@ export default function FilmDetailPage() {
             await skipNextFrame();
             await refreshFilm();
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 300);
+            revealLastFrame();
         } catch (err) {
             console.error('Failed to skip frame', err);
             Alert.alert(t('shared.error'), t('rollDetail.skipFrame.errorMessage'));
         }
-    }, [skipNextFrame, refreshFilm, t]);
+    }, [skipNextFrame, refreshFilm, revealLastFrame, t]);
 
     function handleContextMenuSelect(action: string) {
         switch (action) {
@@ -440,6 +459,14 @@ export default function FilmDetailPage() {
                             </View>
                         )}
                         contentInsetAdjustmentBehavior="automatic"
+                        // iOS clamps scroll commands short of the tab bar inset without this.
+                        scrollToOverflowEnabled
+                        onLayout={(e) => { listMetrics.current.layout = e.nativeEvent.layout.height; }}
+                        onContentSizeChange={(_, height) => {
+                            listMetrics.current.content = height;
+                            if (Date.now() < revealEndUntil.current) scrollToListEnd();
+                        }}
+                        onScrollBeginDrag={() => { revealEndUntil.current = 0; }}
                         scrollEventThrottle={16}
                         contentContainerStyle={{ paddingTop: Platform.OS === 'android' ? 24 : 20, paddingLeft: 18 + insets.left, paddingRight: 18 + insets.right, paddingBottom: 50 }}
                         refreshing={false}
