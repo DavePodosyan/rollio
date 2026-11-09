@@ -1,6 +1,6 @@
 import { openDb, database, fsStub, check, done } from './harness.mjs';
 
-const { initDatabase, createFilm, createFrame, updateFrame, deleteFrame, deleteFilm, getFilmById, getFramesByFilmId } = database;
+const { initDatabase, createFilm, createFrame, updateFrame, deleteFrame, deleteFilm, getFilmById, getFramesByFilmId, getFrameById, skipFrame } = database;
 
 async function fresh() {
     const db = openDb();
@@ -89,6 +89,42 @@ console.log('\nlocation: rounded, both-or-neither, clearable');
     let threw = false;
     try { await updateFrame(db, 99999, { latitude: null, longitude: null, location_accuracy: null, place: null }); } catch { threw = true; }
     check(threw, 'updateFrame on a missing id throws');
+}
+
+console.log('\nskipFrame: logs the next frame as skipped');
+{
+    const { db, film } = await fresh();
+    const first = await skipFrame(db, film.id, '2025-03-01T10:00:00.000Z');
+    check(first.frame_no === 1 && first.skipped === 1, 'an empty roll skips frame 1');
+    check(first.aperture === 'Auto' && first.shutter_speed === 'Auto' && first.lens === null && first.image === null, 'a skipped frame carries no exposure data');
+    check(first.created_at === '2025-03-01T10:00:00.000Z', 'keeps the given time');
+    check((await getFilmById(db, film.id)).frame_count === 1, 'frame_count counts the skipped frame');
+
+    const logged = await createFrame(db, frameInput(film.id, 2));
+    check(logged.skipped === 0, 'a normal frame is not skipped');
+    await createFrame(db, frameInput(film.id, 7));
+    const next = await skipFrame(db, film.id, '2025-03-02T10:00:00.000Z');
+    check(next.frame_no === 8, 'skips the number after the highest one, across gaps');
+    check((await getFilmById(db, film.id)).frame_count === 4, 'frame_count is 4 after two logged and two skipped');
+
+    const { db: other } = await fresh();
+    let threw = false;
+    try { await skipFrame(other, 9999, '2025-03-01T10:00:00.000Z'); } catch { threw = true; }
+    check(threw, 'skipFrame on a missing film throws');
+    check(other.raw.prepare('SELECT COUNT(*) AS n FROM frames').get().n === 0, 'and leaves no orphan frame');
+}
+
+console.log('\nupdateFrame: a skipped frame can be logged after all, and keeps its note meanwhile');
+{
+    const { db, film } = await fresh();
+    const skipped = await skipFrame(db, film.id, '2025-03-01T10:00:00.000Z');
+    const noted = await updateFrame(db, skipped.id, { note: 'Lens cap on' });
+    check(noted.skipped === 1 && noted.note === 'Lens cap on', 'a note does not un-skip the frame');
+    await updateFrame(db, skipped.id, { skipped: 0, aperture: '2.8', shutter_speed: '1/60', lens: '50mm' });
+    const stored = await getFrameById(db, skipped.id);
+    check(stored.skipped === 0 && stored.aperture === '2.8' && stored.shutter_speed === '1/60' && stored.lens === '50mm', 'the frame is stored as a normal frame');
+    check(stored.frame_no === skipped.frame_no && stored.note === 'Lens cap on', 'number and note are kept');
+    check((await getFilmById(db, film.id)).frame_count === 1, 'frame_count unchanged');
 }
 
 done();

@@ -44,6 +44,8 @@ export interface Frame {
     location_accuracy: number | null;
     /** Short reverse-geocoded label; null when none. */
     place: string | null;
+    /** 1 when the frame was skipped (nothing logged for it), otherwise 0. */
+    skipped: number;
 }
 
 export interface CreateFrameInput {
@@ -59,4 +61,5 @@ export interface CreateFrameInput {
     longitude?: number | null;
     location_accuracy?: number | null;
     place?: string | null;
+    skipped?: boolean;
 }

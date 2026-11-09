@@ -16,7 +16,7 @@ const frameInput = (film_id, n, image = null) => ({ film_id, aperture: 'f/2', sh
 
 try {
     console.log('TARGET_VERSION is exported');
-    check(TARGET_VERSION === 4, 'TARGET_VERSION === 4');
+    check(TARGET_VERSION === 5, 'TARGET_VERSION === 5');
 
     console.log('\nsnapshotDatabase: VACUUM INTO writes a consistent copy');
     {
@@ -30,7 +30,7 @@ try {
         const copy = new DatabaseSync(dest);
         check(copy.prepare('SELECT COUNT(*) AS n FROM films').get().n === 1, 'snapshot has the film');
         check(copy.prepare('SELECT COUNT(*) AS n FROM frames').get().n === 1, 'snapshot has the frame');
-        check(copy.prepare('PRAGMA user_version').get().user_version === 4, 'snapshot keeps user_version 4');
+        check(copy.prepare('PRAGMA user_version').get().user_version === 5, 'snapshot keeps user_version 5');
         copy.close();
         // live connection still works
         await createFilm(db, filmInput('Gold'));
@@ -60,7 +60,7 @@ try {
         const real = openDb();
         await initDatabase(real);
         const info = await inspectImportedDatabase(real);
-        check(info.schemaVersion === 4, 'returns schemaVersion 4 for a current db');
+        check(info.schemaVersion === 5, 'returns schemaVersion 5 for a current db');
     }
 
     console.log('\nreplaceAllData: replaces rows and continues ids');
@@ -170,7 +170,7 @@ try {
 
         const imported = openDb(importedPath);
         await initDatabase(imported);            // same migration path as app startup
-        check(userVersion(imported) === 4, 'imported db migrated to 4');
+        check(userVersion(imported) === 5, 'imported db migrated to 5');
         check(columns(imported, 'frames').includes('lens'), 'imported frames gained lens column');
         imported.raw.close();
 
@@ -179,6 +179,7 @@ try {
         check(film.title === 'Old' && film.expected_shots === 36, 'old film copied with defaulted new columns');
         const [oldFrame] = await getFramesByFilmId(live, film.id);
         check(oldFrame.latitude === null && oldFrame.longitude === null && oldFrame.place === null, 'pre-2.3 backup restores with NULL location');
+        check(oldFrame.skipped === 0, 'pre-2.5 backup restores with no skipped frames');
     }
 
     console.log('\nreplaceAllData: image paths outside frames/ are dropped');

@@ -3,7 +3,7 @@ import { type SQLiteDatabase } from 'expo-sqlite';
 import { deleteFrameImage } from '@/utils/ImageService';
 
 /** Schema version the app expects; bump together with a new migrateToVN. */
-export const TARGET_VERSION = 4;
+export const TARGET_VERSION = 5;
 
 export const initDatabase = async (db: SQLiteDatabase) => {
     await db.execAsync(`
@@ -35,6 +35,7 @@ export const initDatabase = async (db: SQLiteDatabase) => {
         longitude REAL DEFAULT NULL,
         location_accuracy REAL DEFAULT NULL,
         place TEXT DEFAULT NULL,
+        skipped INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE CASCADE
     );
     `);
@@ -54,6 +55,10 @@ export const initDatabase = async (db: SQLiteDatabase) => {
 
         if (currentVersion < 4) {
             await migrateToV4(db);
+        }
+
+        if (currentVersion < 5) {
+            await migrateToV5(db);
         }
 
         await db.execAsync(`PRAGMA user_version = ${TARGET_VERSION}`);
@@ -97,6 +102,15 @@ const migrateToV4 = async (db: SQLiteDatabase) => {
     console.log('Migration to version 4 completed.');
 }
 
+/** Adds the skipped-frame flag (2.5.0). Idempotent. */
+const migrateToV5 = async (db: SQLiteDatabase) => {
+    console.log('Applying migration to version 5...');
+
+    await addMissingColumns(db, SKIPPED_COLUMNS);
+
+    console.log('Migration to version 5 completed.');
+}
+
 type ColumnSpec = { table: string; column: string; definition: string };
 
 const V3_COLUMNS: ColumnSpec[] = [
@@ -111,6 +125,10 @@ const LOCATION_COLUMNS: ColumnSpec[] = [
     { table: 'frames', column: 'longitude', definition: 'REAL DEFAULT NULL' },
     { table: 'frames', column: 'location_accuracy', definition: 'REAL DEFAULT NULL' },
     { table: 'frames', column: 'place', definition: 'TEXT DEFAULT NULL' },
+];
+
+const SKIPPED_COLUMNS: ColumnSpec[] = [
+    { table: 'frames', column: 'skipped', definition: 'INTEGER NOT NULL DEFAULT 0' },
 ];
 
 const addMissingColumns = async (db: SQLiteDatabase, columnsToAdd: ColumnSpec[] = V3_COLUMNS) => {
@@ -344,8 +362,9 @@ export const createFrame = async (db: SQLiteDatabase, input: CreateFrameInput): 
                     latitude,
                     longitude,
                     location_accuracy,
-                    place)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    place,
+                    skipped)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
             [
                 input.film_id,
@@ -360,6 +379,7 @@ export const createFrame = async (db: SQLiteDatabase, input: CreateFrameInput): 
                 location.longitude,
                 location.location_accuracy,
                 location.place,
+                input.skipped ? 1 : 0,
             ]
         );
 
@@ -378,13 +398,44 @@ export const createFrame = async (db: SQLiteDatabase, input: CreateFrameInput): 
     });
 };
 
-export const updateFrame = async (db: SQLiteDatabase, id: number, input: Partial<Omit<Frame, 'id'>>): Promise<Frame> => {
+/**
+ * Logs the roll's next frame as skipped: a blank frame, an accidental
+ * exposure, a shot not worth recording. It is a real row, so the count and
+ * the next frame number stay in step with the camera's counter.
+ */
+export const skipFrame = async (db: SQLiteDatabase, filmId: number, createdAt: string): Promise<Frame> => {
+    if (!db) throw new Error('Database not provided');
+
+    const film = await getFilmById(db, filmId);
+    if (!film) throw new Error('Film with id ' + filmId + ' not found');
+
+    const row = await db.getFirstAsync<{ last: number | null }>(
+        `SELECT MAX(frame_no) AS last FROM frames WHERE film_id = ?`,
+        [filmId]
+    );
+
+    return createFrame(db, {
+        film_id: filmId,
+        aperture: 'Auto',
+        shutter_speed: 'Auto',
+        frame_no: (row?.last ?? 0) + 1,
+        created_at: createdAt,
+        image: null,
+        skipped: true,
+    });
+};
+
+/** A frame update; `skipped` takes the form's boolean or the stored 0/1. */
+export type FrameUpdate = Partial<Omit<Frame, 'id' | 'skipped'>> & { skipped?: boolean | number };
+
+export const updateFrame = async (db: SQLiteDatabase, id: number, input: FrameUpdate): Promise<Frame> => {
     if (!db) throw new Error('Database not provided');
 
     const existing = await getFrameById(db, id);
     if (!existing) throw new Error('Frame with id ' + id + ' not found');
 
-    const updated = { ...existing, ...input, ...normalizeLocation({ ...existing, ...input }) } as Frame;
+    const merged = { ...existing, ...input };
+    const updated = { ...merged, ...normalizeLocation(merged), skipped: merged.skipped ? 1 : 0 } as Frame;
 
     await db.runAsync(
         `
@@ -400,7 +451,8 @@ export const updateFrame = async (db: SQLiteDatabase, id: number, input: Partial
                 latitude = ?,
                 longitude = ?,
                 location_accuracy = ?,
-                place = ?
+                place = ?,
+                skipped = ?
             WHERE id = ?
         `,
         [
@@ -416,6 +468,7 @@ export const updateFrame = async (db: SQLiteDatabase, id: number, input: Partial
             updated.longitude,
             updated.location_accuracy,
             updated.place,
+            updated.skipped ? 1 : 0,
             id,
         ]
     );

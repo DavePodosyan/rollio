@@ -5,7 +5,8 @@ import {
     createFrame as dbCreateFrame,
     updateFrame as dbUpdateFrame,
     deleteFrame as dbDeleteFrame,
-    updateFilm // You'll likely need this to update frame_count later
+    updateFilm, // You'll likely need this to update frame_count later
+    type FrameUpdate,
 } from "@/services/database";
 import { useSQLiteContext } from 'expo-sqlite';
 import { CreateFrameInput, Frame } from "@/types";
@@ -53,7 +54,7 @@ export const useFrames = (filmId: number) => {
     };
 
     // 3. UPDATE
-    const editFrame = async (id: number, input: Partial<Omit<Frame, 'id'>>) => {
+    const editFrame = async (id: number, input: FrameUpdate) => {
         if (!db) return;
         try {
             await dbUpdateFrame(db, id, input);
