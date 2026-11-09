@@ -30,6 +30,7 @@ export default function SettingsLayout() {
             contentStyle: { backgroundColor: isAndroid ? androidBackgroundColor : "transparent" },
         }}>
             <Stack.Screen name="index" options={{ title: t('settings.title') }} />
+            <Stack.Screen name="whats-new" options={{ title: t('settings.whatsNew'), headerLargeTitle: false }} />
         </Stack>
     );
 }

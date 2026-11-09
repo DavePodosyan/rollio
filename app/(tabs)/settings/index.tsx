@@ -18,6 +18,8 @@ import { Host, Picker, Text as SwiftText } from '@expo/ui/swift-ui';
 import { font, pickerStyle, tag, tint } from '@expo/ui/swift-ui/modifiers';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as HapticFeedback from 'expo-haptics';
+import * as Application from 'expo-application';
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBackup } from '@/hooks/useBackup';
@@ -53,6 +55,7 @@ export default function Settings() {
     };
     const currentLanguage = (i18n.resolvedLanguage ?? i18n.language ?? 'en').split('-')[0];
     const currentLanguageName = LANGUAGE_NAMES[currentLanguage] ?? currentLanguage;
+    const appVersion = Application.nativeApplicationVersion ?? '';
 
     // Android has no pull-down menu picker; a plain chooser alert stands in.
     const chooseLaunchTab = () => {
@@ -263,6 +266,44 @@ export default function Settings() {
                         <Text style={[styles.footnote, { color: textColor }]}>
                             {t('settings.languageFootnote')}
                         </Text>
+                    </View>
+
+                    <View style={{ marginBottom: 36 }}>
+                        <GlassView
+                            isInteractive={true}
+                            glassEffectStyle="regular"
+                            style={{
+                                borderRadius: 24,
+                                overflow: 'hidden',
+                                backgroundColor: isGlassAvailable ? 'transparent' : (isDark ? '#a583ef1f' : '#ffffffcc'),
+                            }}
+                        >
+                            <Pressable
+                                onPress={() => {
+                                    HapticFeedback.selectionAsync();
+                                    router.push('/(tabs)/settings/whats-new');
+                                }}
+                                accessibilityRole="button"
+                                accessibilityLabel={t('settings.whatsNew')}
+                                accessibilityValue={{ text: appVersion }}
+                                style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}
+                            >
+                                <Text style={[styles.rowLabel, { color: textColor }]}>
+                                    {t('settings.whatsNew')}
+                                </Text>
+
+                                <Text style={[styles.rowValue, { color: textColor }]} numberOfLines={1}>
+                                    {appVersion}
+                                </Text>
+
+                                <SymbolView
+                                    name={{ ios: 'chevron.right', android: 'chevron_right' }}
+                                    size={14}
+                                    weight="semibold"
+                                    tintColor={isDark ? '#ffffff66' : '#10052866'}
+                                />
+                            </Pressable>
+                        </GlassView>
                     </View>
                 </ScrollView>
             </LinearGradient>
