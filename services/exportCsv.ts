@@ -1,4 +1,5 @@
 import type { Film, Frame } from '@/types';
+import { isSkipped } from '@/services/skippedFrames';
 
 /** Byte-order mark so spreadsheet apps read the file as UTF-8. */
 export const CSV_BOM = '﻿';
@@ -23,10 +24,17 @@ const shutterCell = (value: string): string => (value === 'Auto' ? value : `${va
  */
 export const buildFilmCsv = (film: Film, frames: Frame[]): string => {
     const sorted = [...frames].sort((a, b) => a.frame_no - b.frame_no);
-    const rows = sorted.map((frame) => [
-        film.title, film.camera, film.iso, film.push_pull, film.status,
-        frame.frame_no, frame.created_at, frame.aperture, shutterCell(frame.shutter_speed), frame.lens, frame.note, frame.latitude, frame.longitude,
-    ].map(field).join(','));
+    const rows = sorted.map((frame) => {
+        // A skipped frame keeps its row so the numbers match the negatives,
+        // but has no settings: blank, unlike a logged frame on "Auto".
+        const skipped = isSkipped(frame);
+        return [
+            film.title, film.camera, film.iso, film.push_pull, film.status,
+            frame.frame_no, frame.created_at,
+            skipped ? null : frame.aperture, skipped ? null : shutterCell(frame.shutter_speed), skipped ? null : frame.lens,
+            frame.note, frame.latitude, frame.longitude,
+        ].map(field).join(',');
+    });
     return CSV_BOM + [COLUMNS.join(','), ...rows].map((line) => line + '\r\n').join('');
 };
 

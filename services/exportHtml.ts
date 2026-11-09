@@ -1,4 +1,5 @@
 import type { Film, Frame } from '@/types';
+import { isSkipped } from '@/services/skippedFrames';
 
 // Pure HTML builder for the PDF contact sheet. Everything platform-specific
 // (fonts, thumbnails, translations, dates) is resolved by the caller so this
@@ -14,6 +15,7 @@ export type SheetLabels = {
     aperture: (value: string) => string;
     shutter: (value: string) => string;
     noPhoto: string;
+    skipped: string;
     noFrames: string;
     framesCount: string;
     exportedOn: string;
@@ -100,6 +102,7 @@ body {
 .photo { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 1pt; }
 ${photos === 'color' ? '' : '.photo { filter: grayscale(1) contrast(1.06); }'}
 .tile { width: 100%; aspect-ratio: 3 / 2; display: flex; align-items: center; justify-content: center; font-size: 9pt; color: #B9B6C6; background: #FAFAFC; border: 1pt dashed #D9D7E2; border-radius: 1pt; }
+.tile.skipped { background: transparent; }
 .cap { font-family: Menlo, "SF Mono", "Roboto Mono", monospace; font-variant-numeric: tabular-nums; font-size: 7.5pt; color: #6B6877; margin-top: 4pt; letter-spacing: 0.02em; }
 .notes { margin-top: 10pt; }
 .note { display: block; padding-left: 24pt; margin-top: 2pt; }
@@ -117,6 +120,11 @@ const SPROCKETS_PER_ROW = 28;
 const sprockets = `<div class="sprockets">${'<i></i>'.repeat(SPROCKETS_PER_ROW)}</div>`;
 
 const renderCell = (frame: SheetFrame, labels: SheetLabels): string => {
+    // A skipped frame keeps its place on the strip so the numbers line up
+    // with the negatives, but has nothing to show.
+    if (isSkipped(frame)) {
+        return `<div class="cell"><div class="edge">${padNumber(frame.frame_no)}</div><div class="tile skipped">${escapeHtml(labels.skipped)}</div><div class="cap"></div></div>`;
+    }
     const caption = [labels.aperture(frame.aperture), labels.shutter(frame.shutter_speed), frame.lens]
         .filter((part): part is string => !!part)
         .map(escapeHtml)

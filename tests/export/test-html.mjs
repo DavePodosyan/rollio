@@ -20,7 +20,7 @@ const makeInput = (frames, overrides = {}) => ({
         iso: 'ISO 400', exposures: '36 exp', pushPull: 'Push +1', status: 'Archived',
         aperture: (v) => (v === 'Auto' ? 'Auto' : 'f/' + v),
         shutter: (v) => (v === 'Auto' ? 'Auto' : v + 's'),
-        noPhoto: '—', noFrames: 'No frames logged yet',
+        noPhoto: '—', skipped: 'Skipped', noFrames: 'No frames logged yet',
         framesCount: frames.length + ' frames', exportedOn: 'Exported 20 Oct 2026',
         ...(overrides.labels ?? {}),
     },
@@ -181,4 +181,20 @@ console.log('ok');
     assert.ok(/\.photo \{[^}]*grayscale\(1\)/.test(bwExplicit));
     assert.ok(!/grayscale/.test(color), 'colour sheet has no grayscale filter');
     assert.ok(!/contrast\(/.test(color), 'colour sheet has no contrast tweak');
+}
+
+// a skipped frame keeps its numbered cell, says so, and shows no settings
+{
+    const html = buildContactSheetHtml(makeInput([frame(1), frame(2, { skipped: 1, aperture: 'Auto', shutter_speed: 'Auto', lens: null, note: 'Lens cap on' }), frame(3)]));
+    const cell = html.match(/<div class="cell"><div class="edge">02<\/div>.*?<div class="cap">.*?<\/div><\/div>/)[0];
+    assert.ok(cell.includes('<div class="tile skipped">Skipped</div>'), 'the tile is labeled as skipped');
+    assert.ok(cell.endsWith('<div class="cap"></div></div>'), 'no exposure caption');
+    assert.ok(!cell.includes('Auto'), 'no Auto placeholders');
+    assert.ok(html.includes('<span class="n">02</span><span class="text">Lens cap on</span>'), 'its note is still listed');
+    // logged frames around it are untouched
+    assert.equal(count(html, /class="tile">—</g), 2);
+    assert.equal(count(html, /f\/2 · 1\/250s · 50mm/g), 2);
+    // a skipped frame never shows a photo, even if a stale thumbnail is passed
+    const stale = buildContactSheetHtml(makeInput([frame(1, { skipped: 1, thumbnail: 'data:image/jpeg;base64,AAAA' })]));
+    assert.equal(count(stale, /<img class="photo"/g), 0);
 }

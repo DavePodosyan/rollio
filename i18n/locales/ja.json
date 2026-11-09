@@ -53,6 +53,11 @@
     "pushPull": {
       "push": "増感 +{{stops}}",
       "pull": "減感 {{stops}}"
+    },
+    "skipFrame": {
+      "action": "フレームをスキップ",
+      "skipped": "スキップ",
+      "errorMessage": "フレームをスキップできませんでした。"
     }
   },
   "newFilm": {
@@ -101,6 +106,11 @@
         "wait": "待つ",
         "save": "このまま保存"
       }
+    },
+    "skipped": {
+      "title": "スキップしたフレーム",
+      "on": "オフにするとこのフレームを記録できます",
+      "off": "通常のフレームとして保存されます"
     }
   },
   "lightMeter": {
@@ -260,7 +270,8 @@
       "successMessage": "{{rolls}}と{{frames}}を復元しました。",
       "rollsCount_other": "フィルム{{count}}本",
       "framesCount_other": "フレーム{{count}}枚"
-    }
+    },
+    "whatsNew": "新機能"
   },
   "export": {
     "menu": "書き出し",
@@ -278,6 +289,7 @@
       "iso": "ISO {{iso}}",
       "exposures": "{{count}}枚撮り",
       "noPhoto": "—",
+      "skipped": "スキップ",
       "noFrames": "まだコマが記録されていません",
       "framesCount_other": "{{count}}コマ",
       "exportedOn": "書き出し日 {{date}}"
@@ -338,6 +350,16 @@
     "version": "バージョン {{version}}",
     "continue": "続ける",
     "releases": {
+      "2_5_0": {
+        "skipFrame": {
+          "title": "フレームをスキップ",
+          "body": "ロールの「+」を長押しすると、フレームをスキップとして記録でき、カメラのカウンターと番号がずれません。"
+        },
+        "history": {
+          "title": "新機能をいつでも確認",
+          "body": "これまでのアップデート内容は、設定の「新機能」からいつでも見返せます。"
+        }
+      },
       "2_4_1": {
         "contactSheet": {
           "title": "カラーのコンタクトシート",

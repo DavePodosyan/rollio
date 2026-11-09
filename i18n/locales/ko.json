@@ -53,6 +53,11 @@
     "pushPull": {
       "push": "푸시 +{{stops}}",
       "pull": "풀 {{stops}}"
+    },
+    "skipFrame": {
+      "action": "프레임 건너뛰기",
+      "skipped": "건너뜀",
+      "errorMessage": "프레임을 건너뛸 수 없습니다."
     }
   },
   "newFilm": {
@@ -101,6 +106,11 @@
         "wait": "계속 기다리기",
         "save": "그냥 저장"
       }
+    },
+    "skipped": {
+      "title": "건너뛴 프레임",
+      "on": "끄면 이 프레임을 기록할 수 있습니다",
+      "off": "일반 프레임으로 저장됩니다"
     }
   },
   "lightMeter": {
@@ -260,7 +270,8 @@
       "successMessage": "{{rolls}}과 {{frames}}을 복원했습니다.",
       "rollsCount_other": "필름 {{count}}롤",
       "framesCount_other": "프레임 {{count}}개"
-    }
+    },
+    "whatsNew": "새로운 기능"
   },
   "export": {
     "menu": "내보내기",
@@ -278,6 +289,7 @@
       "iso": "ISO {{iso}}",
       "exposures": "{{count}}장",
       "noPhoto": "—",
+      "skipped": "건너뜀",
       "noFrames": "아직 기록된 프레임이 없습니다",
       "framesCount_other": "프레임 {{count}}개",
       "exportedOn": "내보낸 날짜 {{date}}"
@@ -338,6 +350,16 @@
     "version": "버전 {{version}}",
     "continue": "계속",
     "releases": {
+      "2_5_0": {
+        "skipFrame": {
+          "title": "프레임 건너뛰기",
+          "body": "롤에서 + 버튼을 길게 누르면 프레임을 건너뛴 것으로 기록해, 카메라 카운터와 번호를 맞출 수 있습니다."
+        },
+        "history": {
+          "title": "새로운 기능 다시 보기",
+          "body": "지난 업데이트 내용은 설정의 '새로운 기능'에서 언제든 다시 볼 수 있습니다."
+        }
+      },
       "2_4_1": {
         "contactSheet": {
           "title": "컬러 컨택트 시트",

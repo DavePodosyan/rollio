@@ -53,6 +53,11 @@
     "pushPull": {
       "push": "Push +{{stops}}",
       "pull": "Pull {{stops}}"
+    },
+    "skipFrame": {
+      "action": "Skip a Frame",
+      "skipped": "Skipped",
+      "errorMessage": "Could not skip the frame."
     }
   },
   "newFilm": {
@@ -101,6 +106,11 @@
         "wait": "Keep Waiting",
         "save": "Save Anyway"
       }
+    },
+    "skipped": {
+      "title": "Skipped Frame",
+      "on": "Turn off to log this frame",
+      "off": "Will be saved as a normal frame"
     }
   },
   "lightMeter": {
@@ -262,7 +272,8 @@
       "rollsCount_other": "{{count}} rolls",
       "framesCount_one": "{{count}} frame",
       "framesCount_other": "{{count}} frames"
-    }
+    },
+    "whatsNew": "What's New"
   },
   "export": {
     "menu": "Export",
@@ -280,6 +291,7 @@
       "iso": "ISO {{iso}}",
       "exposures": "{{count}} exp",
       "noPhoto": "—",
+      "skipped": "Skipped",
       "noFrames": "No frames logged yet",
       "framesCount_one": "{{count}} frame",
       "framesCount_other": "{{count}} frames",
@@ -341,6 +353,16 @@
     "version": "Version {{version}}",
     "continue": "Continue",
     "releases": {
+      "2_5_0": {
+        "skipFrame": {
+          "title": "Skip a frame",
+          "body": "Touch and hold + on a roll to log a frame as skipped and keep the count in step with your camera."
+        },
+        "history": {
+          "title": "What's New, any time",
+          "body": "Find every update again under What's New in Settings."
+        }
+      },
       "2_4_1": {
         "contactSheet": {
           "title": "Color contact sheets",

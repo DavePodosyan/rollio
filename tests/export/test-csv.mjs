@@ -54,3 +54,12 @@ assert.equal(exportFileName('Tab\there', null, 'csv'), 'Tab here.csv');
 }
 
 console.log('ok');
+
+// a skipped frame keeps its row and number, with no exposure settings
+{
+    const skipped = { id: 14, film_id: 1, frame_no: 4, aperture: 'Auto', shutter_speed: 'Auto', lens: null, note: 'Lens cap on', image: null, created_at: '2026-10-12T11:00:00.000Z', latitude: null, longitude: null, skipped: 1 };
+    const rows = buildFilmCsv({ ...film, title: 'Plain' }, [...frames, skipped]).split('\r\n');
+    assert.equal(rows[4], 'Plain,Leica M6,400,1,archived,4,2026-10-12T11:00:00.000Z,,,,Lens cap on,,');
+    // a logged frame on Auto still says so
+    assert.ok(rows[1].includes(',Auto,Auto,'));
+}

@@ -109,6 +109,7 @@ const buildLabels = (film: Film, frameCount: number): SheetLabels => {
         aperture: (value) => (value === 'Auto' ? auto : i18n.t('cameraSettings.apertureFormat', { value })),
         shutter: (value) => (value === 'Auto' ? auto : i18n.t('cameraSettings.shutterSpeedFormat', { value })),
         noPhoto: i18n.t('export.sheet.noPhoto'),
+        skipped: i18n.t('export.sheet.skipped'),
         noFrames: i18n.t('export.sheet.noFrames'),
         framesCount: i18n.t('export.sheet.framesCount', { count: frameCount }),
         exportedOn: i18n.t('export.sheet.exportedOn', { date: dateFormatter().format(new Date()) }),
