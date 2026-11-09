@@ -125,7 +125,90 @@
         }
       ],
       "expo-status-bar",
-      "expo-widgets"
+      [
+        "expo-widgets",
+        {
+          "widgets": [
+            {
+              "name": "RollWidget",
+              "displayName": "Current Roll",
+              "description": "The roll in your camera and its frame count.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "accessoryCircular",
+                  "accessoryRectangular",
+                  "accessoryInline"
+                ],
+                "initialLayout": "widgets/RollWidget.tsx",
+                "configuration": {
+                  "title": "Current Roll",
+                  "description": "Choose which roll this widget shows.",
+                  "parameters": {
+                    "roll": {
+                      "title": "Roll",
+                      "type": "enum",
+                      "dynamic": true,
+                      "values": [
+                        {
+                          "name": "Latest roll",
+                          "value": "latest"
+                        }
+                      ],
+                      "default": "latest"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "LightMeterWidget",
+              "displayName": "Light Meter",
+              "description": "Open the light meter.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "accessoryCircular"
+                ],
+                "initialLayout": "widgets/LightMeterWidget.tsx"
+              }
+            }
+          ]
+        }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "RollWidget",
+              "label": "Current Roll",
+              "description": "The roll in your camera, with buttons to log a frame and open the light meter.",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "previewImage": "./assets/widget-preview/roll.png",
+              "widgetFeatures": "reconfigurable|configuration_optional"
+            },
+            {
+              "name": "RollWidgetWide",
+              "label": "Current Roll (wide)",
+              "description": "The roll in your camera, with Log Frame and Light Meter buttons.",
+              "minWidth": "250dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "previewImage": "./assets/widget-preview/roll-wide.png",
+              "widgetFeatures": "reconfigurable|configuration_optional"
+            }
+          ]
+        }
+      ],
+      "./plugins/withDeepLinkAfterProcessDeath"
     ],
     "experiments": {
       "typedRoutes": true

@@ -399,5 +399,16 @@
         }
       }
     }
+  },
+  "widgets": {
+    "noRollTitle": "カメラ内にフィルムがありません",
+    "noRollBody": "フィルムを追加して記録を始めましょう。",
+    "startRoll": "フィルムを追加",
+    "logFrame": "フレームを記録",
+    "lightMeter": "露出計",
+    "framesOf": "{{total}}枚中{{done}}枚",
+    "latestRoll": "最新のフィルム",
+    "latestRollHint": "最後に記録したフィルムを表示します",
+    "chooseRoll": "このウィジェットのフィルム"
   }
 }

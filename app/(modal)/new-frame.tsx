@@ -11,6 +11,7 @@ import { SymbolView } from "expo-symbols";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useFrame } from "@/hooks/useFrame";
+import { rollHref } from "@/services/widgetRoll";
 import { useFrames } from "@/hooks/useFrames";
 import ImageUploader from "@/components/ImageUploader";
 import { saveFrameImage, deleteFrameImage } from "@/utils/ImageService";
@@ -36,7 +37,7 @@ export default function NewFrame() {
     const suggestionPillTextColor = colorScheme === 'dark' ? '#fff' : '#100528';
     const glassSuggestionFallbackColor = colorScheme === 'dark' ? '#2C2C2E' : '#F2F2F7';
     const navigation = useNavigation();
-    const { mode = 'new', filmId, iso, frameCount, frameId, aperture: initialAperture, shutterSpeed: initialShutter, image } = useLocalSearchParams<{
+    const { mode = 'new', filmId, iso, frameCount, frameId, aperture: initialAperture, shutterSpeed: initialShutter, image, showRoll } = useLocalSearchParams<{
         mode?: 'edit',
         filmId: string,
         iso: string,
@@ -45,6 +46,8 @@ export default function NewFrame() {
         aperture?: string,
         shutterSpeed?: string,
         image?: string,
+        /** '1' when opened from a widget: saving then opens the roll, to show where the frame went. */
+        showRoll?: string,
     }>();
     const isReady = useRef(mode !== 'edit');
 
@@ -342,6 +345,7 @@ export default function NewFrame() {
 
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             router.back();
+            if (showRoll === '1') router.navigate(rollHref(filmId));
 
         } catch (error) {
             console.error("Failed to save frame", error);

@@ -399,5 +399,16 @@
         }
       }
     }
+  },
+  "widgets": {
+    "noRollTitle": "카메라에 필름이 없습니다",
+    "noRollBody": "필름을 추가해 기록을 시작하세요.",
+    "startRoll": "필름 추가",
+    "logFrame": "프레임 기록",
+    "lightMeter": "노출계",
+    "framesOf": "{{total}}장 중 {{done}}장",
+    "latestRoll": "최근 필름",
+    "latestRollHint": "마지막으로 기록한 필름을 표시합니다",
+    "chooseRoll": "이 위젯의 필름"
   }
 }

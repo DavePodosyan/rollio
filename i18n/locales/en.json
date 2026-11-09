@@ -402,5 +402,16 @@
         }
       }
     }
+  },
+  "widgets": {
+    "noRollTitle": "No roll in camera",
+    "noRollBody": "Load a film to start logging.",
+    "startRoll": "Start a roll",
+    "logFrame": "Log Frame",
+    "lightMeter": "Light Meter",
+    "framesOf": "{{done}} of {{total}} frames",
+    "latestRoll": "Latest roll",
+    "latestRollHint": "Follows the roll you logged to last",
+    "chooseRoll": "Roll for this widget"
   }
 }

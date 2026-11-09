@@ -31,6 +31,11 @@ export default function ModalLayout() {
                 title: t('newFrame.addTitle')
             }} />
 
+            {/* Hands over to new-frame at once (see log-frame.tsx); same title so nothing flickers. */}
+            <Stack.Screen name="log-frame" options={{
+                title: t('newFrame.addTitle')
+            }} />
+
             <Stack.Screen name="whats-new" options={{
                 headerShown: false,
             }} />

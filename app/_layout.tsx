@@ -7,13 +7,24 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider, DarkTheme, DefaultTheme } from "expo-router/react-navigation";
 import { I18nextProvider } from 'react-i18next';
 import i18n from '@/i18n';
+import WidgetSync from '@/components/WidgetSync';
+
+// A link straight into a modal (for example the widget's Log Frame) still gets the
+// tabs underneath, so closing or saving has somewhere to go back to.
+export const unstable_settings = { anchor: '(tabs)' };
 
 SplashScreen.preventAutoHideAsync();
+
+// The iOS widgets register themselves on import; Android's are registered in index.ts.
+if (Platform.OS === 'ios') {
+    require('@/widgets/RollWidget');
+    require('@/widgets/LightMeterWidget');
+}
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();
@@ -44,6 +55,7 @@ export default function RootLayout() {
         <I18nextProvider i18n={i18n}>
             <SafeAreaProvider>
                 <SQLiteProvider databaseName="rollio.db" onInit={initDatabase}>
+                    <WidgetSync />
                     <GestureHandlerRootView style={{ flex: 1 }}>
                         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                             <StatusBar
