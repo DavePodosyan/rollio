@@ -14,10 +14,6 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from '@/i18n';
 import WidgetSync from '@/components/WidgetSync';
 
-// A link straight into a modal (for example the widget's Log Frame) still gets the
-// tabs underneath, so closing or saving has somewhere to go back to.
-export const unstable_settings = { anchor: '(tabs)' };
-
 SplashScreen.preventAutoHideAsync();
 
 // The iOS widgets register themselves on import; Android's are registered in index.ts.

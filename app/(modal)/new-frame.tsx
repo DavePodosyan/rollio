@@ -12,6 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useFrame } from "@/hooks/useFrame";
 import { rollHref } from "@/services/widgetRoll";
+import { closeModal } from "@/services/closeModal";
 import { useFrames } from "@/hooks/useFrames";
 import ImageUploader from "@/components/ImageUploader";
 import { saveFrameImage, deleteFrameImage } from "@/utils/ImageService";
@@ -344,8 +345,7 @@ export default function NewFrame() {
             disablePrevention();
 
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.back();
-            if (showRoll === '1') router.navigate(rollHref(filmId));
+            closeModal(router, showRoll === '1' ? rollHref(filmId) : undefined);
 
         } catch (error) {
             console.error("Failed to save frame", error);
@@ -381,7 +381,7 @@ export default function NewFrame() {
             title: mode === 'new' ? t('newFrame.addTitle') : t('newFrame.editTitle'),
             headerLeft: isAndroid ? () => (
                 <Pressable
-                    onPress={() => router.back()}
+                    onPress={() => closeModal(router)}
                     style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}
                 >
                     <MaterialIcons
@@ -431,7 +431,7 @@ export default function NewFrame() {
                             initialDataRef.current = formData;
                             disablePrevention();
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            router.back();
+                            closeModal(router);
                         } catch (error) {
                             console.error('Failed to delete frame', error);
                             Alert.alert(t('shared.error'), t('newFrame.deleteErrorMessage'));
@@ -459,7 +459,7 @@ export default function NewFrame() {
             {!isAndroid && (
                 <>
                     <Stack.Toolbar placement="left">
-                        <Stack.Toolbar.Button icon="xmark" onPress={() => router.back()} />
+                        <Stack.Toolbar.Button icon="xmark" onPress={() => closeModal(router)} />
                     </Stack.Toolbar>
 
                     <Stack.Toolbar placement="right">

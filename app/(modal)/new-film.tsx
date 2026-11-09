@@ -1,6 +1,7 @@
 import { useFilms } from "@/hooks/useFilms";
 import { CreateFilmInput, FilmStatus } from "@/types";
 import { router, useNavigation, useLocalSearchParams, Stack } from "expo-router";
+import { closeModal } from "@/services/closeModal";
 import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme, DeviceEventEmitter, Platform, PlatformColor, type ViewInstance, type TextInputInstance } from "react-native";
 import RulerPicker from '@/components/RulerPicker';
 import AdaptiveDatePicker from '@/components/AdaptiveDatePicker';
@@ -204,7 +205,7 @@ export default function NewFilm() {
         DeviceEventEmitter.emit('added_film', { mode });
 
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        router.back();
+        closeModal(router);
 
     }, [formData, mode, film, updateFilm, addNewFilm, disablePrevention, t]);
 
@@ -218,7 +219,7 @@ export default function NewFilm() {
             title: mode === 'new' ? t('newFilm.addTitle') : t('newFilm.editTitle'),
             headerLeft: isAndroid ? () => (
                 <Pressable
-                    onPress={() => router.back()}
+                    onPress={() => closeModal(router)}
                     style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}
                 >
                     <MaterialIcons
@@ -275,7 +276,7 @@ export default function NewFilm() {
             {!isAndroid && (
                 <>
                     <Stack.Toolbar placement="left">
-                        <Stack.Toolbar.Button icon="xmark" onPress={() => router.back()} />
+                        <Stack.Toolbar.Button icon="xmark" onPress={() => closeModal(router)} />
                     </Stack.Toolbar>
                     <Stack.Toolbar placement="right">
                         <Stack.Toolbar.Button variant="prominent" tintColor={PlatformColor('systemBlue')} icon="checkmark" onPress={handleSaveFilm} />
