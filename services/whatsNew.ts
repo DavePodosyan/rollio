@@ -28,6 +28,13 @@ export const FIRST_TRACKED_VERSION = '0.0.0';
 /** Newest release first. Add an entry per release worth announcing. */
 export const WHATS_NEW: WhatsNewRelease[] = [
     {
+        version: '2.6.0',
+        items: [
+            { sf: 'square.grid.2x2', md: 'widgets', titleKey: 'whatsNew.releases.2_6_0.widgets.title', bodyKey: 'whatsNew.releases.2_6_0.widgets.body' },
+            { sf: 'film', md: 'camera-roll', titleKey: 'whatsNew.releases.2_6_0.widgetRoll.title', bodyKey: 'whatsNew.releases.2_6_0.widgetRoll.body' },
+        ],
+    },
+    {
         version: '2.5.0',
         items: [
             { sf: 'forward.frame', md: 'skip-next', titleKey: 'whatsNew.releases.2_5_0.skipFrame.title', bodyKey: 'whatsNew.releases.2_5_0.skipFrame.body' },

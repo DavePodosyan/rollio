@@ -47,9 +47,9 @@ for (const release of WHATS_NEW) {
 console.log('ok');
 
 // 2.3.0: frame location; 2.3.1: the launch tab; 2.4.0: the exposure planner; 2.4.1: color contact sheets;
-// 2.5.0: skipping a frame and the What's New history
+// 2.5.0: skipping a frame and the What's New history; 2.6.0: home screen widgets
 assert.ok(WHATS_NEW.some((r) => r.version === '2.3.0'), 'has a 2.3.0 entry');
-assert.equal(WHATS_NEW[0].version, '2.5.0', 'newest release first');
+assert.equal(WHATS_NEW[0].version, '2.6.0', 'newest release first');
 assert.deepEqual(itemsSince('2.4.0', '2.4.1').map((i) => i.titleKey), ['whatsNew.releases.2_4_1.contactSheet.title']);
 assert.deepEqual(itemsSince('2.3.1', '2.4.0').map((i) => i.titleKey), ['whatsNew.releases.2_4_0.planner.title']);
 assert.deepEqual(itemsSince('2.3.0', '2.3.1').map((i) => i.titleKey), ['whatsNew.releases.2_3_1.launchTab.title']);
@@ -61,6 +61,22 @@ assert.deepEqual(itemsSince('2.4.1', '2.5.0').map((i) => i.titleKey), [
     'whatsNew.releases.2_5_0.skipFrame.title',
     'whatsNew.releases.2_5_0.history.title',
 ]);
+assert.deepEqual(itemsSince('2.5.0', '2.6.0').map((i) => i.titleKey), [
+    'whatsNew.releases.2_6_0.widgets.title',
+    'whatsNew.releases.2_6_0.widgetRoll.title',
+]);
+// every announced item has its text in all three languages
+{
+    const fs = await import('node:fs');
+    const at = (obj, key) => key.split('.').reduce((o, k) => o?.[k], obj);
+    for (const lang of ['en', 'ja', 'ko']) {
+        const strings = JSON.parse(fs.readFileSync(new URL(`../../i18n/locales/${lang}.json`, import.meta.url), 'utf8'));
+        for (const release of WHATS_NEW) for (const i of release.items) {
+            assert.equal(typeof at(strings, i.titleKey), 'string', `${lang} is missing ${i.titleKey}`);
+            assert.equal(typeof at(strings, i.bodyKey), 'string', `${lang} is missing ${i.bodyKey}`);
+        }
+    }
+}
 
 // The history page in Settings: every release up to the running app, newest
 // first, grouped by version. Unlike the sheet it needs no "last seen".

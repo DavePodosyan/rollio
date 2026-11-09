@@ -353,6 +353,16 @@
     "version": "Version {{version}}",
     "continue": "Continue",
     "releases": {
+      "2_6_0": {
+        "widgets": {
+          "title": "Widgets",
+          "body": "See your roll's frame count, log a frame or open the light meter right from your home screen."
+        },
+        "widgetRoll": {
+          "title": "A roll for each widget",
+          "body": "A widget can follow your latest roll or stay on one you choose in its settings."
+        }
+      },
       "2_5_0": {
         "skipFrame": {
           "title": "Skip a frame",

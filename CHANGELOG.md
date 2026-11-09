@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.6.0] – 2026-11-09
+
+### ✨ New Features
+- **Widgets**: see the roll in your camera and its frame count without opening the app, log a frame for it, or open the light meter.
+  - iOS (17 and later for the roll widget): a small and a medium Current Roll widget for the Home Screen, three Lock Screen sizes, and a Light Meter widget. Built with expo-widgets.
+  - Android: a 2×2 and a 4×2 Current Roll widget, each with Log Frame and Light Meter buttons. Built with react-native-android-widget until expo-widgets can open the app from an Android widget; the code under `widgets/android` can go then.
+- **A roll for each widget**: a widget follows the roll you logged to most recently, or stays on one roll chosen in its settings (Edit Widget on iOS, the widget's settings button on Android). A chosen roll that leaves the camera hands over to the latest roll.
+
+### 🔧 Changes
+- Saving a frame opened from a widget lands on that roll's page, to show where the frame went.
+- Links into the app (`rollio:///log-frame`, `/films/<id>`, `/light_meter`, `/new-film`) now open with the tabs underneath, so closing a form opened from a closed app has somewhere to go.
+- Android: a link that arrives after the system ended the app in the background opens the linked screen instead of the start screen.
+
+---
+
 ## [2.5.0] – 2026-11-09
 
 ### ✨ New Features

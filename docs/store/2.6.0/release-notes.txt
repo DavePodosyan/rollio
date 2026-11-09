@@ -1,0 +1,76 @@
+Rollio 2.6.0 – What's New for the App Store and Google Play
+
+Both stores carry the same ten languages, and the text is the same on both,
+so paste from this one block. Google Play takes the whole file as is; in
+App Store Connect paste each language's paragraph into its own field.
+
+<en-US>
+New: Widgets. See the roll in your camera and its frame count on your home screen, then log a frame or open the light meter with one tap. On iPhone the widgets fit the Lock Screen too.
+
+New: A roll for each widget. A widget can follow your latest roll or stay on one you choose in its settings.
+
+Also includes bug fixes and stability improvements.
+</en-US>
+<da-DK>
+Nyt: Widgets. Se filmen i dit kamera og dens billedtæller på hjemmeskærmen, og registrer et billede eller åbn lysmåleren med ét tryk. På iPhone passer widgets også til låseskærmen.
+
+Nyt: En film til hver widget. En widget kan følge din seneste film eller blive på en, du vælger i dens indstillinger.
+
+Indeholder også fejlrettelser og forbedret stabilitet.
+</da-DK>
+<de-DE>
+Neu: Widgets. Sieh den Film in deiner Kamera und seinen Bildzähler auf dem Home-Bildschirm und trage mit einem Tipp ein Bild ein oder öffne den Belichtungsmesser. Auf dem iPhone passen die Widgets auch auf den Sperrbildschirm.
+
+Neu: Ein Film pro Widget. Ein Widget kann deinem neuesten Film folgen oder bei einem Film bleiben, den du in seinen Einstellungen auswählst.
+
+Außerdem Fehlerbehebungen und Verbesserungen der Stabilität.
+</de-DE>
+<fi-FI>
+Uutta: Widgetit. Näe kamerassa oleva filmi ja sen ruutulaskuri Koti-valikossa ja kirjaa ruutu tai avaa valotusmittari yhdellä napautuksella. iPhonessa widgetit sopivat myös lukittuun näyttöön.
+
+Uutta: Oma filmi jokaiselle widgetille. Widget voi seurata viimeisintä filmiäsi tai pysyä filmissä, jonka valitset sen asetuksista.
+
+Lisäksi virheenkorjauksia ja vakauden parannuksia.
+</fi-FI>
+<fr-FR>
+Nouveau : Widgets. Voyez la pellicule dans votre appareil et son compteur de vues sur l'écran d'accueil, puis notez une vue ou ouvrez le posemètre d'un seul geste. Sur iPhone, les widgets vont aussi sur l'écran verrouillé.
+
+Nouveau : Une pellicule par widget. Un widget peut suivre votre dernière pellicule ou rester sur celle que vous choisissez dans ses réglages.
+
+Comprend aussi des corrections de bugs et des améliorations de stabilité.
+</fr-FR>
+<ja-JP>
+新機能：ウィジェット。カメラに入っているフィルムとフレーム数をホーム画面で確認し、ワンタップでフレームの記録や露出計の起動ができます。iPhoneではロック画面にも置けます。
+
+新機能：ウィジェットごとにフィルムを選択。ウィジェットの設定で、最新のフィルムを表示するか、選んだフィルムに固定するかを選べます。
+
+そのほか、不具合の修正と安定性の向上を行いました。
+</ja-JP>
+<ko-KR>
+새 기능: 위젯. 카메라에 든 필름과 프레임 수를 홈 화면에서 확인하고, 한 번의 탭으로 프레임을 기록하거나 노출계를 열 수 있습니다. iPhone에서는 잠금 화면에도 추가할 수 있습니다.
+
+새 기능: 위젯마다 필름 선택. 위젯 설정에서 최근 필름을 따라가거나, 선택한 필름으로 고정할 수 있습니다.
+
+그 밖에 버그 수정과 안정성 개선이 포함되어 있습니다.
+</ko-KR>
+<nl-NL>
+Nieuw: Widgets. Zie de film in je camera en de opnameteller op je beginscherm, en noteer een opname of open de lichtmeter met één tik. Op de iPhone passen de widgets ook op het toegangsscherm.
+
+Nieuw: Een film per widget. Een widget kan je nieuwste film volgen of bij een film blijven die je in de instellingen van de widget kiest.
+
+Bevat ook bugfixes en stabiliteitsverbeteringen.
+</nl-NL>
+<no-NO>
+Nytt: Widgeter. Se filmen i kameraet og bildetelleren på Hjem-skjermen, og registrer et bilde eller åpne lysmåleren med ett trykk. På iPhone passer widgetene også på låst skjerm.
+
+Nytt: En film for hver widget. En widget kan følge den nyeste filmen din eller bli på en du velger i innstillingene for widgeten.
+
+Inneholder også feilrettinger og bedre stabilitet.
+</no-NO>
+<sv-SE>
+Nytt: Widgetar. Se filmen i kameran och dess bildräknare på hemskärmen, och registrera en bild eller öppna ljusmätaren med ett tryck. På iPhone passar widgetarna även på låsskärmen.
+
+Nytt: En film för varje widget. En widget kan följa din senaste film eller stanna på en du väljer i widgetens inställningar.
+
+Innehåller även buggfixar och stabilitetsförbättringar.
+</sv-SE>
