@@ -1,7 +1,7 @@
 
 import { CreateFrameInput } from "@/types";
 import { router, useNavigation, useLocalSearchParams, Stack } from "expo-router";
-import { Text, View, ScrollView, Animated, Keyboard, Alert, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme, PlatformColor, Platform, type ViewInstance, type ScrollViewInstance, type TextInputInstance } from "react-native";
+import { Text, View, ScrollView, Animated, Keyboard, Alert, LayoutAnimation, TextInput, FlatList, Pressable, ActivityIndicator, useColorScheme, PlatformColor, Platform, type ViewInstance, type ScrollViewInstance, type TextInputInstance } from "react-native";
 import RulerPicker from '@/components/RulerPicker';
 import AdaptiveDatePicker from '@/components/AdaptiveDatePicker';
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
@@ -21,6 +21,8 @@ import { useTranslation } from "react-i18next";
 import { useSideRailInsets } from '@/hooks/useSideRailInsets';
 import { useFrameLocation } from '@/hooks/useFrameLocation';
 import LocationRow from '@/components/LocationRow';
+import SkippedFrameRow from '@/components/SkippedFrameRow';
+import { isSkipped, lastLoggedFrame } from '@/services/skippedFrames';
 
 
 export default function NewFrame() {
@@ -208,6 +210,7 @@ export default function NewFrame() {
                 created_at: frame.created_at,
                 lens: frame.lens,
                 image: frame.image,
+                skipped: isSkipped(frame),
             });
 
             initialDataRef.current = {
@@ -219,6 +222,7 @@ export default function NewFrame() {
                 created_at: frame.created_at,
                 lens: frame.lens,
                 image: frame.image,
+                skipped: isSkipped(frame),
             };
 
             isReady.current = true;
@@ -263,6 +267,26 @@ export default function NewFrame() {
         };
     }, []);
 
+    // A frame logged as skipped opens with only its date and note. Turning the
+    // switch off brings the fields back, filled from the last logged frame
+    // before it, the way a new frame starts.
+    const wasSkipped = mode === 'edit' && isSkipped(frame);
+    const showSkipped = wasSkipped && !!formData.skipped;
+
+    const toggleSkipped = useCallback((next: boolean) => {
+        if (Platform.OS === 'ios') LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setFormData(prev => {
+            if (next) return { ...prev, skipped: true };
+            const source = lastLoggedFrame(frames, prev.frame_no);
+            const untouched = prev.aperture === 'Auto' && prev.shutter_speed === 'Auto' && !prev.lens;
+            return {
+                ...prev,
+                skipped: false,
+                ...(source && untouched && { aperture: source.aperture, shutter_speed: source.shutter_speed, lens: source.lens }),
+            };
+        });
+    }, [frames]);
+
     const selectSuggestion = (suggestion: string, field: 'lens') => {
         setFormData(prev => ({ ...prev, [field]: suggestion }));
         setSuggestions([]);
@@ -277,8 +301,12 @@ export default function NewFrame() {
             // Decide the late fill from what is actually written, not from a
             // fix that may land while the save awaits. An edit that never
             // touched the row leaves the stored location fields alone.
-            const savedLocation = mode === 'edit' && !location.touched ? null : location.fields();
-            const dataToSave = { ...formData, ...savedLocation };
+            // A frame that stays skipped keeps only its date and note.
+            const staysSkipped = mode === 'edit' && !!formData.skipped;
+            const savedLocation = staysSkipped || (mode === 'edit' && !location.touched) ? null : location.fields();
+            const dataToSave = staysSkipped
+                ? { ...formData, aperture: 'Auto', shutter_speed: 'Auto', lens: null, image: frame?.image ?? null }
+                : { ...formData, ...savedLocation };
 
             // Copy a freshly picked image into app storage before touching the database.
             let savedImagePath: string | null = null;
@@ -325,7 +353,7 @@ export default function NewFrame() {
     // Saving while the row is still looking for a fix: say so, offer to wait.
     // "Save Anyway" keeps the late fill running (see useFrameLocation).
     const handleSaveFrame = useCallback(() => {
-        if (location.enabled && (location.status === 'finding' || location.status === 'waiting')) {
+        if (!showSkipped && location.enabled && (location.status === 'finding' || location.status === 'waiting')) {
             Alert.alert(
                 t('newFrame.location.notYet.title'),
                 t('newFrame.location.notYet.message'),
@@ -338,7 +366,7 @@ export default function NewFrame() {
             return;
         }
         saveFrame();
-    }, [location.enabled, location.status, saveFrame, t]);
+    }, [location.enabled, location.status, saveFrame, showSkipped, t]);
 
     useEffect(() => {
         fetchUniqueLensNames();
@@ -457,7 +485,13 @@ export default function NewFrame() {
                         />
                     </View>
 
+                    {wasSkipped && (
+                        <View style={{ paddingHorizontal: 20, paddingTop: 24 }}>
+                            <SkippedFrameRow skipped={showSkipped} onToggle={toggleSkipped} />
+                        </View>
+                    )}
 
+                    {!showSkipped && (<>
                     <View style={{ marginTop: 30, paddingHorizontal: 20, gap: 20 }}>
                         <RulerPicker
                             label={t('shared.aperture')}
@@ -512,8 +546,9 @@ export default function NewFrame() {
                             }}
                         />
                     </View>
+                    </>)}
 
-                    <View>
+                    <View style={showSkipped ? { marginTop: 10 } : undefined}>
                         <TextInput
                             style={{
                                 // borderWidth: 1,
@@ -540,6 +575,7 @@ export default function NewFrame() {
 
                         />
                     </View>
+                    {!showSkipped && (<>
                     <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>
                         <LocationRow
                             enabled={location.enabled}
@@ -573,6 +609,7 @@ export default function NewFrame() {
                             />
                         </View>
                     )}
+                    </>)}
 
                     {isLastFrame && (
                         <Pressable

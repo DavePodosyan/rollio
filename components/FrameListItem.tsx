@@ -7,6 +7,7 @@ import { memo } from 'react';
 import { getAutoValueLabel } from '@/utils/cameraSettingsLabels';
 import { useTranslation } from 'react-i18next';
 import { hasLocation } from '@/services/frameLocation';
+import { isSkipped } from '@/services/skippedFrames';
 
 interface FrameListItemProps {
     frame: Frame;
@@ -18,6 +19,63 @@ function FrameListItem({ frame, iso }: FrameListItemProps) {
     const { t } = useTranslation();
     const colorScheme = useColorScheme();
     const isGlassAvailable = isLiquidGlassAvailable();
+
+    const openFrame = () => router.push({
+        pathname: '/(modal)/new-frame', params: {
+            mode: 'edit',
+            filmId: frame.film_id,
+            iso: iso,
+            frameId: frame.id
+        }
+    });
+
+    // A skipped frame: a slim, dimmed row that keeps its number in the list.
+    if (isSkipped(frame)) {
+        const muted = colorScheme === 'dark' ? '#ffffff8c' : '#1005288c';
+        return (
+            <Pressable
+                onPress={openFrame}
+                accessibilityRole="button"
+                accessibilityLabel={`${frame.frame_no}, ${t('rollDetail.skipFrame.skipped')}`}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+                <View
+                    style={{
+                        paddingVertical: 10,
+                        paddingHorizontal: 20,
+                        borderRadius: 24,
+                        borderWidth: 1,
+                        borderColor: colorScheme === 'dark' ? '#ffffff1f' : '#1005281a',
+                        backgroundColor: colorScheme === 'dark' ? '#a583ef0d' : '#ffffff59',
+                    }}>
+                    <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+                        <View
+                            style={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: 50,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                backgroundColor: colorScheme === 'dark' ? '#09090b6d' : '#e5e0ff4d',
+                            }}>
+                            <Text style={{ fontSize: 14, lineHeight: 22, fontFamily: 'LufgaMedium', color: muted }}>
+                                {frame.frame_no}
+                            </Text>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 14, lineHeight: 20, fontFamily: 'LufgaMedium', color: muted }}>
+                                {t('rollDetail.skipFrame.skipped')}
+                            </Text>
+                            {!!frame.note && (
+                                <Text style={{ fontSize: 13, lineHeight: 18, fontFamily: 'LufgaRegular', color: muted, marginTop: 2 }}>
+                                    {frame.note}
+                                </Text>
+                            )}
+                        </View>
+                    </View>
+                </View>
+            </Pressable>
+        );
+    }
 
     return (
         <Pressable
@@ -198,6 +256,7 @@ export default memo(FrameListItem, (prev, next) => {
         prev.frame.aperture === next.frame.aperture &&
         prev.frame.shutter_speed === next.frame.shutter_speed &&
         prev.frame.note === next.frame.note &&
+        prev.frame.skipped === next.frame.skipped &&
         prev.frame.image === next.frame.image &&
         prev.frame.latitude === next.frame.latitude &&
         prev.frame.longitude === next.frame.longitude

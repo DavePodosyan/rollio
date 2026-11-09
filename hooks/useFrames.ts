@@ -5,11 +5,13 @@ import {
     createFrame as dbCreateFrame,
     updateFrame as dbUpdateFrame,
     deleteFrame as dbDeleteFrame,
+    skipFrame as dbSkipFrame,
     updateFilm, // You'll likely need this to update frame_count later
     type FrameUpdate,
 } from "@/services/database";
 import { useSQLiteContext } from 'expo-sqlite';
 import { CreateFrameInput, Frame } from "@/types";
+import { lastLoggedFrame } from "@/services/skippedFrames";
 
 export const useFrames = (filmId: number) => {
     const db = useSQLiteContext();
@@ -53,6 +55,14 @@ export const useFrames = (filmId: number) => {
         }
     };
 
+    /** Logs the roll's next frame as skipped. Rejects when it could not be written. */
+    const skipNextFrame = useCallback(async (): Promise<Frame> => {
+        if (!db) throw new Error('Database not initialized');
+        const created = await dbSkipFrame(db, filmId, new Date().toISOString());
+        await loadFrames();
+        return created;
+    }, [db, filmId, loadFrames]);
+
     // 3. UPDATE
     const editFrame = async (id: number, input: FrameUpdate) => {
         if (!db) return;
@@ -91,8 +101,9 @@ export const useFrames = (filmId: number) => {
     }, [db]);
 
     const prefillFromPreviousFrame = useCallback((): Partial<CreateFrameInput> => {
-        if (frames.length === 0) return {};
-        const lastFrame = frames[frames.length - 1];
+        // A skipped frame has no settings to copy; go back to the last logged one.
+        const lastFrame = lastLoggedFrame(frames);
+        if (!lastFrame) return {};
         return {
             aperture: lastFrame.aperture,
             shutter_speed: lastFrame.shutter_speed,
@@ -107,6 +118,7 @@ export const useFrames = (filmId: number) => {
         loaded,
         error,
         addFrame,
+        skipNextFrame,
         editFrame,
         removeFrame,
         refresh: loadFrames,

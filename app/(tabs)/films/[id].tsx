@@ -1,6 +1,6 @@
 
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { View, Text, Alert, Pressable, useColorScheme, FlatList, Platform, DeviceEventEmitter } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useLocalSearchParams, router, useFocusEffect, Stack } from 'expo-router';
@@ -13,7 +13,10 @@ import { GlassContainer, GlassView, isLiquidGlassAvailable } from 'expo-glass-ef
 import { useFrames } from '@/hooks/useFrames';
 import FrameListItem from '@/components/FrameListItem';
 import { Frame } from '@/types';
-import { Button, ContextMenu, Divider, Host, Section } from '@expo/ui/swift-ui';
+import { Button, Host, Menu, Image as SwiftImage } from '@expo/ui/swift-ui';
+import { accessibilityLabel as swiftAccessibilityLabel, frame as swiftFrame, tint as swiftTint } from '@expo/ui/swift-ui/modifiers';
+import * as Haptics from 'expo-haptics';
+import SkipFrameMenu from '@/components/SkipFrameMenu';
 import { useTranslation } from 'react-i18next';
 import { DATA_RESTORED_EVENT } from '@/hooks/useBackup';
 import { StackActions } from 'expo-router/react-navigation';
@@ -31,7 +34,7 @@ export default function FilmDetailPage() {
         : ['#EFF0F4', '#E5E0FF', '#EFF0F4'];
 
     const { film, loading, error, destroyFilm, refreshFilm } = useFilm(Number(id));
-    const { frames, loading: framesLoading, error: framesError, refresh: refreshFrames } = useFrames(Number(id));
+    const { frames, loading: framesLoading, error: framesError, refresh: refreshFrames, skipNextFrame } = useFrames(Number(id));
     const { busy: exportBusy, exportPdf, exportCsv } = useFilmExport();
 
     // console.log(frames);
@@ -50,6 +53,27 @@ export default function FilmDetailPage() {
         return () => subscription.remove();
     }, [navigation]);
 
+
+    const listRef = useRef<FlatList<Frame>>(null);
+    // Android: the hold menu under the header "+".
+    const [skipMenuOpen, setSkipMenuOpen] = useState(false);
+
+    const openNewFrame = useCallback(() => {
+        router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } });
+    }, [film?.id, film?.iso, film?.frame_count]);
+
+    // Touch and hold "+": log the next frame as skipped, then show it.
+    const handleSkipFrame = useCallback(async () => {
+        try {
+            await skipNextFrame();
+            await refreshFilm();
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 300);
+        } catch (err) {
+            console.error('Failed to skip frame', err);
+            Alert.alert(t('shared.error'), t('rollDetail.skipFrame.errorMessage'));
+        }
+    }, [skipNextFrame, refreshFilm, t]);
 
     function handleContextMenuSelect(action: string) {
         switch (action) {
@@ -138,17 +162,31 @@ export default function FilmDetailPage() {
             title: film?.title ?? title,
             headerRight: isAndroid ? () => (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                    <Pressable
-                        onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } })}
-                        style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}
-                        hitSlop={8}
-                    >
-                        <MaterialIcons
-                            name="add"
-                            size={24}
-                            color={colorScheme === 'dark' ? '#fff' : '#100528'}
+                    <View>
+                        <Pressable
+                            onPress={openNewFrame}
+                            onLongPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                setSkipMenuOpen(true);
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel={t('newFrame.addTitle')}
+                            style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}
+                            hitSlop={8}
+                        >
+                            <MaterialIcons
+                                name="add"
+                                size={24}
+                                color={colorScheme === 'dark' ? '#fff' : '#100528'}
+                            />
+                        </Pressable>
+                        <SkipFrameMenu
+                            open={skipMenuOpen}
+                            label={t('rollDetail.skipFrame.action')}
+                            onClose={() => setSkipMenuOpen(false)}
+                            onSkip={handleSkipFrame}
                         />
-                    </Pressable>
+                    </View>
                     <Pressable
                         onPress={handleAndroidMenuPress}
                         style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}
@@ -163,7 +201,7 @@ export default function FilmDetailPage() {
                 </View>
             ) : undefined,
         });
-    }, [film, colorScheme, isAndroid, handleAndroidMenuPress, title]);
+    }, [film, colorScheme, isAndroid, handleAndroidMenuPress, title, skipMenuOpen, openNewFrame, handleSkipFrame, t]);
 
     if (loading || error || !film) {
         return null;
@@ -319,8 +357,24 @@ export default function FilmDetailPage() {
         <>
             {!isAndroid && (
                 <Stack.Toolbar placement="right" >
-                    <Stack.Toolbar.Button icon="plus" onPress={() => router.push({ pathname: '/new-frame', params: { mode: 'new', filmId: film?.id, iso: film?.iso, frameCount: film?.frame_count } })} />
-                    <Stack.Toolbar.Menu icon="ellipsis">
+                    {/* A SwiftUI menu rather than a toolbar button: the stock button cannot
+                        both act on a tap and open a menu on touch and hold. "…" takes its
+                        own glass so the two sit in separate circles. */}
+                    <Stack.Toolbar.View>
+                        <Host matchContents>
+                            <Menu
+                                label={<SwiftImage systemName="plus" size={21} modifiers={[swiftFrame({ width: 36, height: 36 })]} />}
+                                onPrimaryAction={openNewFrame}
+                                modifiers={[
+                                    swiftTint(colorScheme === 'dark' ? '#ffffff' : '#100528'),
+                                    swiftAccessibilityLabel(t('newFrame.addTitle')),
+                                ]}
+                            >
+                                <Button label={t('rollDetail.skipFrame.action')} systemImage="forward.frame" onPress={handleSkipFrame} />
+                            </Menu>
+                        </Host>
+                    </Stack.Toolbar.View>
+                    <Stack.Toolbar.Menu icon="ellipsis" separateBackground>
                         <Stack.Toolbar.MenuAction icon="pencil" onPress={() => handleContextMenuSelect('edit')}>{t('shared.edit')}</Stack.Toolbar.MenuAction>
                         <Stack.Toolbar.Menu icon="square.and.arrow.up">
                             <Stack.Toolbar.Label>{t('export.menu')}</Stack.Toolbar.Label>
@@ -358,6 +412,7 @@ export default function FilmDetailPage() {
                     end={{ x: 1, y: 1 }}   // Optional: end at bottom-right
                 >
                     <FlatList
+                        ref={listRef}
                         data={frames}
                         // key={frames.length.toString()}
                         keyExtractor={(item: Frame) => String(item.id)}
