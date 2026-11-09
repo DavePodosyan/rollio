@@ -4,7 +4,7 @@ import { SQLiteProvider } from 'expo-sqlite';
 import { initDatabase } from '@/services/database';
 import { cleanupStaleArchives, recoverInterruptedRestore } from '@/services/backup';
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar, setStatusBarStyle } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
 import { Platform, useColorScheme } from 'react-native';
@@ -13,6 +13,7 @@ import { ThemeProvider, DarkTheme, DefaultTheme } from "expo-router/react-naviga
 import { I18nextProvider } from 'react-i18next';
 import i18n from '@/i18n';
 import WidgetSync from '@/components/WidgetSync';
+import { headerFollowsSystemAppearance } from '@/utils/headerAppearance';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -43,6 +44,16 @@ export default function RootLayout() {
         recoverInterruptedRestore();
     }, []);
 
+    // Android: when the system switches light/dark with the app open, the status bar icons keep
+    // their old colour (dark icons on the dark background) although <StatusBar> below is given the
+    // new style at once; something native resets it during the switch. Applying the style again
+    // just after the switch makes it stick. Found by testing; the delay is a margin, not a measured value.
+    useEffect(() => {
+        if (Platform.OS !== 'android') return;
+        const timer = setTimeout(() => setStatusBarStyle(colorScheme === 'dark' ? 'light' : 'dark'), 400);
+        return () => clearTimeout(timer);
+    }, [colorScheme]);
+
     if (!fontsLoaded) {
         return null; // Or splash component
     }
@@ -58,6 +69,7 @@ export default function RootLayout() {
                                 style={colorScheme === 'dark' ? 'light' : 'dark'}
                             />
                             <Stack screenOptions={{
+            ...headerFollowsSystemAppearance,
                                 headerShown: false,
                             }}>
                                 <Stack.Screen name="(tabs)" />

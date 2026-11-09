@@ -2,6 +2,7 @@ import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Stack } from "expo-router";
 import { Platform, useColorScheme } from "react-native";
 import { useTranslation } from "react-i18next";
+import { headerFollowsSystemAppearance } from '@/utils/headerAppearance';
 
 export default function HomeLayout() {
     const isGlassAvailable = isLiquidGlassAvailable();
@@ -12,6 +13,7 @@ export default function HomeLayout() {
 
     return (
         <Stack screenOptions={{
+            ...headerFollowsSystemAppearance,
             headerShown: true,
             headerBackVisible: true,
             headerLargeTitle: !isAndroid,

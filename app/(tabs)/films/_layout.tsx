@@ -3,6 +3,7 @@ import { router, Stack } from "expo-router";
 import { Platform, useColorScheme, Pressable } from "react-native";
 import { MaterialIcons } from '@react-native-vector-icons/material-icons/static';
 import { useTranslation } from "react-i18next";
+import { headerFollowsSystemAppearance } from '@/utils/headerAppearance';
 
 // A link straight to a roll (the widget's roll area) still gets the film list underneath, so Back works.
 export const unstable_settings = { anchor: 'index' };
@@ -16,6 +17,7 @@ export default function HomeLayout() {
 
     return (
         <Stack screenOptions={{
+            ...headerFollowsSystemAppearance,
             headerShown: true,
             headerBackVisible: true,
             headerBackButtonDisplayMode: 'minimal',

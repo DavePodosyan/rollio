@@ -15,6 +15,9 @@ All notable changes to this project will be documented in this file.
 - A form opened by a link into the app (`rollio:///log-frame`, `/new-film`) while the app was closed now closes to the start screen, or to the saved roll with the film list behind it, instead of having nowhere to go. A link straight to a roll (`/films/<id>`) gets the film list behind it too.
 - Android: a link that arrives after the system ended the app in the background opens the linked screen instead of the start screen.
 
+### 🐞 Bug Fixes
+- When the system switched between light and dark with the app open, the header buttons (back, +, …) on iOS and the status bar icons on Android kept the old look until the app was restarted. Both now follow the switch at once.
+
 ---
 
 ## [2.5.0] – 2026-11-09

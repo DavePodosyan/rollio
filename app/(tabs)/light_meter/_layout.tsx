@@ -2,6 +2,7 @@ import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { router, Stack } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { View, Pressable, Platform, PlatformColor, useColorScheme } from "react-native";
+import { headerFollowsSystemAppearance } from '@/utils/headerAppearance';
 
 const platformColor = (iosName: string, androidName: string) => (
     PlatformColor(Platform.OS === 'ios' ? iosName : androidName)
@@ -19,6 +20,7 @@ export default function HomeLayout() {
     const headerTint = colorScheme === 'dark' ? '#fff' : '#100528';
     return (
         <Stack screenOptions={{
+            ...headerFollowsSystemAppearance,
             headerShown: false,
             contentStyle: { backgroundColor: "transparent" },
 

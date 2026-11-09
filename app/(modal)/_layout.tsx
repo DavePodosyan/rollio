@@ -2,6 +2,7 @@
 import { Stack } from "expo-router";
 import { Platform, useColorScheme } from "react-native";
 import { useTranslation } from "react-i18next";
+import { headerFollowsSystemAppearance } from '@/utils/headerAppearance';
 
 export default function ModalLayout() {
 
@@ -12,6 +13,7 @@ export default function ModalLayout() {
 
     return (
         <Stack screenOptions={{
+            ...headerFollowsSystemAppearance,
             presentation: "modal",
             headerShown: true,
             headerTransparent: !isAndroid,
