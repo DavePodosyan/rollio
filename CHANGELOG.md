@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file.
 
 ### 🔧 Changes
 - Saving a frame opened from a widget lands on that roll's page, to show where the frame went.
-- Links into the app (`rollio:///log-frame`, `/films/<id>`, `/light_meter`, `/new-film`) now open with the tabs underneath, so closing a form opened from a closed app has somewhere to go.
+- A form opened by a link into the app (`rollio:///log-frame`, `/new-film`) while the app was closed now closes to the start screen, or to the saved roll with the film list behind it, instead of having nowhere to go. A link straight to a roll (`/films/<id>`) gets the film list behind it too.
 - Android: a link that arrives after the system ended the app in the background opens the linked screen instead of the start screen.
 
 ---
