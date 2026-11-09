@@ -14,6 +14,7 @@ export default function SettingsLayout() {
         <Stack screenOptions={{
             headerShown: true,
             headerBackVisible: true,
+            headerBackButtonDisplayMode: 'minimal',
             headerLargeTitle: !isAndroid,
             headerTransparent: !isAndroid,
             headerTintColor: colorScheme === 'dark' ? '#fff' : '#100528',
