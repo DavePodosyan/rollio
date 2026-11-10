@@ -1,0 +1,39 @@
+# It rebuilds rollio.davitp.dev whenever the changelog, a privacy policy or the
+# version number changes on main, so a release of the app republishes the site.
+#
+# Setup, once (see the README of the website repo, DavePodosyan/rollio-website):
+#   1. Cloudflare dashboard > Workers & Pages > rollio > Settings >
+#      Builds > Deploy hooks > Add deploy hook. Name it "app-repo", branch "main".
+#   2. Copy the URL it gives you.
+#   3. In the app repo on GitHub: Settings > Secrets and variables > Actions >
+#      New repository secret. Name: CLOUDFLARE_DEPLOY_HOOK_URL. Value: the URL.
+#
+# The URL is a password: anyone who has it can start a build. Keep it in the
+# secret, never in a file.
+
+name: Publish website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - CHANGELOG.md
+      - privacy-policy*.md
+      - app.json
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  deploy-hook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Start a Cloudflare Pages build
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "::error::The secret CLOUDFLARE_DEPLOY_HOOK_URL is not set."
+            exit 1
+          fi
+          curl --fail --silent --show-error --retry 3 -X POST "$DEPLOY_HOOK_URL"
